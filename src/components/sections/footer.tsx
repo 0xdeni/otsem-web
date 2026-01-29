@@ -9,8 +9,6 @@ const Footer = () => {
     produto: [
       { label: "Recursos", href: "#recursos" },
       { label: "Precos", href: "#precos" },
-      { label: "API", href: "#" },
-      { label: "Integracoes", href: "#" },
     ],
 
 
@@ -113,11 +111,6 @@ const Footer = () => {
                     >
                       Cookies
                     </button>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-[13px] sm:text-[14px] font-medium text-slate-500 transition-colors hover:text-primary ios-touch-effect inline-block">
-                      Status
-                    </Link>
                   </li>
                 </ul>
 
