@@ -311,6 +311,7 @@ function RegisterPageInner(): React.JSX.Element {
                 toast.error("Este e-mail já está em uso.");
             } else if (status === 400) {
                 const msg = getHttpMessage(e);
+                console.log("Backend error:", msg, e);
                 if (msg.includes("cpf")) {
                     form.setError("cpf", { message: "CPF inválido ou já cadastrado" });
                     toast.error("CPF inválido ou já cadastrado");
@@ -318,7 +319,7 @@ function RegisterPageInner(): React.JSX.Element {
                     form.setError("cnpj", { message: "CNPJ inválido ou já cadastrado" });
                     toast.error("CNPJ inválido ou já cadastrado");
                 } else {
-                    toast.error("Dados inválidos. Verifique as informações.");
+                    toast.error(`Dados inválidos: ${msg}`);
                 }
             } else {
                 toast.error(getHttpMessage(e, "Falha no cadastro"));
