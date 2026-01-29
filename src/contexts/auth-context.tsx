@@ -32,9 +32,17 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 // Helper para decodificar JWT sem dependências externas
 function decodeJwt(token: string): { sub: string; email: string; role: "ADMIN" | "CUSTOMER"; customerId?: string; exp: number } | null {
     try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload;
-    } catch {
+        const base64Url = token.split('.')[1];
+        if (!base64Url) return null;
+        
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error("Erro ao decodificar JWT:", error);
         return null;
     }
 }
