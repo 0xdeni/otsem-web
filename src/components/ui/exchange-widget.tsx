@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowDownUp, TrendingUp, Shield, Zap, Check, ArrowLeft, LogIn, UserPlus, Repeat, Globe } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 
 const ExchangeWidget = () => {
   const [amount, setAmount] = useState("1000");
@@ -13,6 +15,8 @@ const ExchangeWidget = () => {
   const [showAuthScreen, setShowAuthScreen] = useState(false);
   const prevRateRef = useRef(rate);
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchRate = async () => {
@@ -59,6 +63,22 @@ const ExchangeWidget = () => {
 
   const toggleDirection = () => {
     setDirection(prev => prev === "buy" ? "sell" : "buy");
+  };
+
+  const handleConvert = () => {
+    if (user) {
+      // User is logged in - redirect to dashboard with exchange parameters
+      const params = new URLSearchParams({
+        action: 'convert',
+        direction: direction,
+        amount: numericAmount.toString(),
+        rate: rate.toString(),
+      });
+      router.push(`/customer/dashboard?${params.toString()}`);
+    } else {
+      // User is not logged in - show auth screen
+      setShowAuthScreen(true);
+    }
   };
 
   return (
@@ -214,7 +234,7 @@ const ExchangeWidget = () => {
 
               {/* CTA Button */}
               <button
-                onClick={() => setShowAuthScreen(true)}
+                onClick={handleConvert}
                 className="w-full mt-6 py-4 text-base rounded-2xl bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold flex items-center justify-center gap-2.5 transition-all duration-150 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-yellow-400/30"
               >
                 <span>Converter Agora</span>

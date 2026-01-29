@@ -12,6 +12,7 @@ import { ConvertModal } from "@/components/modals/convert-modal";
 import { useUiModals } from "@/stores/ui-modals";
 import { LimitsCard } from "@/components/kyc/limits-card";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type AccountSummary = {
     accountHolderId: string;
@@ -84,6 +85,8 @@ function formatDate(dateString: string): string {
 export default function Dashboard() {
     const { user } = useAuth();
     const { openModal, refreshTrigger } = useUiModals();
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const [loading, setLoading] = React.useState(true);
     const [account, setAccount] = React.useState<AccountSummary | null>(null);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
@@ -109,6 +112,18 @@ export default function Dashboard() {
         }, 1000);
         return () => clearInterval(interval);
     }, [updatedAt]);
+
+    // Handle exchange widget redirect - auto-open convert modal
+    React.useEffect(() => {
+        if (!searchParams) return;
+        const action = searchParams.get('action');
+        if (action === 'convert' && !loading) {
+            // Open the convert modal automatically
+            setShowConvertModal(true);
+            // Clean up URL parameters
+            router.replace('/customer/dashboard');
+        }
+    }, [searchParams, loading, router]);
 
     React.useEffect(() => {
         let cancelled = false;

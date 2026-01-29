@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpDown, Sparkles, TrendingUp, Shield, Clock, Wallet, Home, History, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 
 const ExchangeWidgetMobile = () => {
   const [amount, setAmount] = useState("1000");
@@ -12,6 +14,8 @@ const ExchangeWidgetMobile = () => {
   const [direction, setDirection] = useState<"buy" | "sell">("buy");
   const [showRateUpdate, setShowRateUpdate] = useState(false);
   const prevRateRef = useRef(rate);
+  const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchRate = async () => {
@@ -63,6 +67,22 @@ const ExchangeWidgetMobile = () => {
   const toggleDirection = () => {
     setDirection(prev => prev === "buy" ? "sell" : "buy");
     setIsAnimating(true);
+  };
+
+  const handleConvert = () => {
+    if (user) {
+      // User is logged in - redirect to dashboard with exchange parameters
+      const params = new URLSearchParams({
+        action: 'convert',
+        direction: direction,
+        amount: numericAmount.toString(),
+        rate: rate.toString(),
+      });
+      router.push(`/customer/dashboard?${params.toString()}`);
+    } else {
+      // User is not logged in - redirect to login page
+      router.push('/login');
+    }
   };
 
   useEffect(() => {
@@ -229,9 +249,10 @@ const ExchangeWidgetMobile = () => {
 
             <motion.button
               whileTap={{ scale: 0.98 }}
+              onClick={handleConvert}
               className="w-full mt-5 py-4 bg-gradient-to-r from-primary via-violet-600 to-primary bg-[length:200%_100%] text-white text-base font-bold rounded-2xl shadow-lg shadow-primary/25 flex items-center justify-center gap-2.5 relative overflow-hidden"
             >
-              <motion.div 
+              <motion.div
                 animate={{ x: ["-100%", "100%"] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
