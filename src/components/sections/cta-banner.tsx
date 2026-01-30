@@ -4,16 +4,18 @@ import React, { useCallback } from "react";
 import { Check, ArrowRight } from "lucide-react";
 import haptic from "@/lib/haptics";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const CTABanner = () => {
+  const t = useTranslations("cta");
   const handleButtonClick = useCallback(() => {
     haptic.medium();
   }, []);
 
   const benefits = [
-    "Cadastro grátis",
-    "Sem mensalidade",
-    "Cancelar quando quiser"
+    t("benefit1"),
+    t("benefit2"),
+    t("benefit3")
   ];
 
   return (
@@ -27,22 +29,22 @@ const CTABanner = () => {
 
           <div className="relative z-10 p-6 sm:p-10 md:p-12 text-center">
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-white/12 border border-white/15">
-                <span className="text-[11px] sm:text-[12px] font-bold tracking-tight text-white">Otsem Pay</span>
+                <span className="text-[11px] sm:text-[12px] font-bold tracking-tight text-white">{t("badge")}</span>
               </div>
 
 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tightest text-white mb-4 leading-tight">
-                Pronto para mover seu<br />capital com liberdade?
+                {t("titleLine1")}<br />{t("titleLine2")}
               </h2>
 
             <p className="max-w-md mx-auto text-[13px] sm:text-[14px] text-white/75 leading-relaxed font-medium mb-6">
-              Crie sua conta e comece a transacionar BRL e USDT em minutos. Pague as despesas da sua empresa direto do saldo em dólar digital. Sem conversões manuais. Sem D+1.
+              {t("description")}
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 mb-6">
               <div className="w-full sm:w-auto">
                 <Link href="/register" onClick={handleButtonClick} className="block">
                     <button className="w-full sm:w-auto h-11 px-6 rounded-xl bg-white text-primary font-semibold text-[13px] flex items-center justify-center gap-2 shadow-lg ios-touch-effect active:scale-[0.97] transition-transform">
-                      Crie sua conta
+                      {t("createAccount")}
                     <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
                   </button>
                 </Link>
@@ -50,7 +52,7 @@ const CTABanner = () => {
               <div className="w-full sm:w-auto">
                 <Link href="/login" onClick={() => haptic.light()} className="block">
                   <button className="w-full sm:w-auto h-11 px-6 rounded-xl border border-white/20 bg-white/8 text-white font-semibold text-[13px] ios-touch-effect active:scale-[0.97] transition-transform">
-                    Já tenho conta
+                    {t("haveAccount")}
                   </button>
                 </Link>
               </div>

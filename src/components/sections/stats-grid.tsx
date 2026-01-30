@@ -2,39 +2,41 @@
 
 import React from "react";
 import { TrendingUp, Globe2, Timer, BadgeCheck } from "lucide-react";
-
-const stats = [
-  {
-    icon: TrendingUp,
-    value: "US$ 415B",
-    label: "Mercado OTC global",
-    color: "bg-primary/8",
-    iconColor: "text-primary",
-  },
-  {
-    icon: Globe2,
-    value: "9.1%",
-    label: "Volume LATAM global",
-    color: "bg-yellow-50",
-    iconColor: "text-yellow-600",
-  },
-  {
-    icon: Timer,
-    value: "Imediato",
-    label: "Liquidação ultra-rápida",
-    color: "bg-primary/8",
-    iconColor: "text-primary",
-  },
-  {
-    icon: BadgeCheck,
-    value: "0% IOF",
-    label: "Sem imposto",
-    color: "bg-emerald-50",
-    iconColor: "text-emerald-600",
-  },
-];
+import { useTranslations } from "next-intl";
 
 const StatsGrid = () => {
+  const t = useTranslations("stats");
+
+  const stats = [
+    {
+      icon: TrendingUp,
+      value: "US$ 415B",
+      label: t("otcMarket"),
+      color: "bg-primary/8",
+      iconColor: "text-primary",
+    },
+    {
+      icon: Globe2,
+      value: "9.1%",
+      label: t("latamVolume"),
+      color: "bg-yellow-50",
+      iconColor: "text-yellow-600",
+    },
+    {
+      icon: Timer,
+      value: t("instantValue"),
+      label: t("instantSettlement"),
+      color: "bg-primary/8",
+      iconColor: "text-primary",
+    },
+    {
+      icon: BadgeCheck,
+      value: "0% IOF",
+      label: t("noTax"),
+      color: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+    },
+  ];
   return (
     <section className="relative z-10 section-padding overflow-hidden">
       {/* Static background - no animation */}
@@ -44,11 +46,11 @@ const StatsGrid = () => {
         <div className="flex flex-col items-center text-center mb-8 sm:mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-400 text-yellow-950 font-semibold text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mb-5 shadow-md">
             <div className="w-1.5 h-1.5 rounded-full bg-yellow-950 animate-pulse" />
-            Plataforma Financeira Global
+            {t("badge")}
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tightest max-w-md leading-[1.1] text-slate-900">
-            Poder financeiro <br />
-            <span className="text-primary">sem fronteiras.</span>
+            {t("titleLine1")} <br />
+            <span className="text-primary">{t("titleLine2")}</span>
           </h2>
         </div>
 

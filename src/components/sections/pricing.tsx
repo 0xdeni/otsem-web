@@ -4,45 +4,47 @@ import React, { useCallback } from "react";
 import { Check, ArrowLeftRight, TrendingUp } from "lucide-react";
 import haptic from "@/lib/haptics";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const Pricing = () => {
+  const t = useTranslations("pricing");
   const handleButtonClick = useCallback(() => {
     haptic.medium();
   }, []);
 
   const plans = [
     {
-      name: "Operação OTC",
-      description: "Spread que diminui com volume",
-      priceLabel: "A partir de",
-      price: "0.98%",
-      priceSuffix: "por transação",
+      name: t("otcName"),
+      description: t("otcDesc"),
+      priceLabel: t("otcPriceLabel"),
+      price: t("otcPrice"),
+      priceSuffix: t("otcPriceSuffix"),
       features: [
-        "Liquidação imediata",
-        "0% IOF (isento)",
-        "Contratos personalizados",
-        "Suporte dedicado"
+        t("otcFeature1"),
+        t("otcFeature2"),
+        t("otcFeature3"),
+        t("otcFeature4")
       ],
-      cta: "Começar agora",
-        icon: ArrowLeftRight,
+      cta: t("otcCta"),
+      icon: ArrowLeftRight,
       popular: false,
     },
-      {
-          name: "Alta Volumetria",
-          description: "Para operações acima de R$ 500k",
-          priceLabel: "Taxa sob",
-          price: "Consulta",
-          priceSuffix: "por transação",
-          features: [
-            "Spreads negociáveis",
-            "Atendimento VIP",
-            "Mesa OTC dedicada",
-            "Condições especiais"
-          ],
-          cta: "Falar com especialista",
-          icon: TrendingUp,
-          popular: true,
-        }
+    {
+      name: t("highVolName"),
+      description: t("highVolDesc"),
+      priceLabel: t("highVolPriceLabel"),
+      price: t("highVolPrice"),
+      priceSuffix: t("highVolPriceSuffix"),
+      features: [
+        t("highVolFeature1"),
+        t("highVolFeature2"),
+        t("highVolFeature3"),
+        t("highVolFeature4")
+      ],
+      cta: t("highVolCta"),
+      icon: TrendingUp,
+      popular: true,
+    }
   ];
 
   return (
@@ -50,13 +52,13 @@ const Pricing = () => {
       <div className="mx-auto max-w-5xl container-mobile">
         <div className="mb-8 sm:mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/12 text-primary font-semibold text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mb-4">
-            Preços Claros
+            {t("badge")}
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tightest text-slate-900">
-            Taxas transparentes
+            {t("title")}
           </h2>
           <p className="mx-auto mt-2 max-w-md text-[13px] sm:text-[14px] text-slate-600 font-medium leading-relaxed">
-            Sem taxas ocultas. Você sabe exatamente quanto vai pagar.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -73,7 +75,7 @@ const Pricing = () => {
               {plan.popular && (
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-20">
                   <span className="px-2.5 py-1 text-[8px] sm:text-[9px] font-semibold uppercase tracking-wider text-white bg-primary rounded-full shadow-md">
-                    Mais Popular
+                    {t("mostPopular")}
                   </span>
                 </div>
               )}

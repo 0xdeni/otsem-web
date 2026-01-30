@@ -2,24 +2,27 @@
 
 import React from "react";
 import { Building2, Zap, X, Check, Crown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const ComparisonSection = () => {
+  const t = useTranslations("comparison");
+
   const traditionalItems = [
-    { label: "Spread bancário", value: "6% a 12%" },
-    { label: "IOF", value: "3.5%" },
-    { label: "Tarifa bancária", value: "0,1% a 2%" },
-    { label: "Swift internacional", value: "R$ 100 a R$ 450" },
-    { label: "Tempo de liquidação", value: "2 a 5 dias úteis" },
-    { label: "Autorização", value: "Do seu banco" },
+    { label: t("bankSpreadLabel"), value: t("bankSpreadValue") },
+    { label: t("bankIofLabel"), value: t("bankIofValue") },
+    { label: t("bankFeeLabel"), value: t("bankFeeValue") },
+    { label: t("bankSwiftLabel"), value: t("bankSwiftValue") },
+    { label: t("bankTimeLabel"), value: t("bankTimeValue") },
+    { label: t("bankAuthLabel"), value: t("bankAuthValue") },
   ];
 
   const otcItems = [
-      { label: "Spread OTC", value: "A partir de 0.98%" },
-    { label: "IOF", value: "0% (isento)" },
-    { label: "Tarifa OTC", value: "Incluso no spread" },
-    { label: "Transferência", value: "Sem custo adicional" },
-    { label: "Tempo de liquidação", value: "Imediatamente" },
-    { label: "Autorização", value: "Nenhuma" },
+    { label: t("otcSpreadLabel"), value: t("otcSpreadValue") },
+    { label: t("otcIofLabel"), value: t("otcIofValue") },
+    { label: t("otcFeeLabel"), value: t("otcFeeValue") },
+    { label: t("otcTransferLabel"), value: t("otcTransferValue") },
+    { label: t("otcTimeLabel"), value: t("otcTimeValue") },
+    { label: t("otcAuthLabel"), value: t("otcAuthValue") },
   ];
 
   return (
@@ -28,11 +31,11 @@ const ComparisonSection = () => {
         <div className="mb-8 sm:mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/12 text-primary font-semibold text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mb-4">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Comparativo
+            {t("badge")}
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tightest text-slate-900 leading-[1.1]">
-            Por que migrar para <br />
-            <span className="text-primary">o ecossistema OTC?</span>
+            {t("titleLine1")} <br />
+            <span className="text-primary">{t("titleLine2")}</span>
           </h2>
         </div>
 
@@ -44,10 +47,10 @@ const ComparisonSection = () => {
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-bold tracking-tight text-slate-900">
-                  Bancos
+                  {t("banksTitle")}
                 </h3>
                 <p className="text-[9px] sm:text-[10px] font-semibold text-red-500 uppercase tracking-wider">
-                  Tradicional
+                  {t("banksSubtitle")}
                 </p>
               </div>
             </div>
@@ -89,7 +92,7 @@ const ComparisonSection = () => {
                   Otsem Pay
                 </h3>
                 <p className="text-[9px] sm:text-[10px] font-semibold text-emerald-600 uppercase tracking-wider">
-                  Futuro Líquido
+                  {t("otsemSubtitle")}
                 </p>
               </div>
             </div>

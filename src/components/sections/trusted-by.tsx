@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 const TrustedBy = () => {
+  const t = useTranslations("trustedBy");
   const logos = [
     { name: "Bitso", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/project-uploads/8dca9fc2-17fe-42a1-b323-5e4a298d9904/Untitled-1769575462967.png" },
     { name: "Kraken", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/project-uploads/8dca9fc2-17fe-42a1-b323-5e4a298d9904/Untitled-1769575462968.png" },
@@ -19,10 +21,10 @@ const TrustedBy = () => {
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center mb-10 sm:mb-14">
           <span className="inline-block px-3 py-1.5 rounded-full bg-white/60 border border-white shadow-sm text-primary font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mb-4">
-            Parceiros do Ecossistema
+            {t("badge")}
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tightest text-slate-900 leading-tight">
-            Confiado por os gigantes do mercado
+            {t("title")}
           </h2>
         </div>
 

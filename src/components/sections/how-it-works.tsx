@@ -2,29 +2,29 @@
 
 import React from "react";
 import { UserPlus, Landmark, ArrowLeftRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const HowItWorks = () => {
+  const t = useTranslations("howItWorks");
+
   const steps = [
     {
       id: "01",
       icon: UserPlus,
-      title: "Crie sua conta",
-      description:
-        "Cadastro rápido com verificação KYC em minutos. Só precisamos de alguns dados básicos.",
+      title: t("step1Title"),
+      description: t("step1Desc"),
     },
     {
       id: "02",
       icon: Landmark,
-      title: "Deposite via PIX",
-      description:
-        "Transfira BRL para sua carteira usando PIX. O saldo é creditado instantaneamente.",
+      title: t("step2Title"),
+      description: t("step2Desc"),
     },
     {
       id: "03",
       icon: ArrowLeftRight,
-      title: "Converta para USDT",
-      description:
-        "Com um clique, converta seu saldo para USDT com a melhor taxa do mercado.",
+      title: t("step3Title"),
+      description: t("step3Desc"),
     },
   ];
 
@@ -34,11 +34,11 @@ const HowItWorks = () => {
         <div className="mb-8 sm:mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/12 text-primary font-semibold text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mb-4">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Fluxo Inteligente
+            {t("badge")}
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tightest text-slate-900 leading-[1.1]">
-            Como funciona <br />
-            <span className="text-primary">o ecossistema.</span>
+            {t("titleLine1")} <br />
+            <span className="text-primary">{t("titleLine2")}</span>
           </h2>
         </div>
 

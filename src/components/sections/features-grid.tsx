@@ -11,51 +11,54 @@ import {
   KeyRound,
   FileCheck2
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const FeaturesGrid = () => {
+  const t = useTranslations("features");
+
   const secondaryFeatures = [
     {
       icon: ArrowLeftRight,
-      title: "Conversão instantânea",
-      description: "BRL ↔ USDT em segundos"
+      title: t("instantConversion"),
+      description: t("instantConversionDesc")
     },
     {
       icon: Scan,
-      title: "PIX integrado",
-      description: "Depósitos e saques rápidos"
+      title: t("pixIntegrated"),
+      description: t("pixIntegratedDesc")
     },
     {
       icon: ShieldCheck,
-      title: "Segurança total",
-      description: "Criptografia de ponta"
+      title: t("totalSecurity"),
+      description: t("totalSecurityDesc")
     },
     {
       icon: Globe2,
-      title: "Sem fronteiras",
-      description: "Opere de qualquer lugar"
+      title: t("noBorders"),
+      description: t("noBordersDesc")
     }
   ];
 
   const mainFeatures = [
     {
       icon: FileCheck2,
-      title: "Flexibilidade Contratual",
-      description: "Contratos ajustados entre as partes. Condições personalizadas.",
+      title: t("flexibility"),
+      description: t("flexibilityDesc"),
     },
     {
       icon: Zap,
-      title: "Maior Agilidade",
-      description: "Negociações rápidas e adaptadas à urgência.",
+      title: t("agility"),
+      description: t("agilityDesc"),
     },
     {
       icon: KeyRound,
-      title: "Confidencialidade",
-      description: "Transações não são públicas como nas bolsas.",
+      title: t("confidentiality"),
+      description: t("confidentialityDesc"),
     },
     {
       icon: ShieldAlert,
-      title: "Segurança e Compliance",
-      description: "KYC rigoroso e monitoramento 24/7.",
+      title: t("compliance"),
+      description: t("complianceDesc"),
     },
   ];
 
@@ -66,14 +69,14 @@ const FeaturesGrid = () => {
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/12 text-primary font-semibold text-[9px] sm:text-[10px] uppercase tracking-[0.15em] mb-4">
-                Recursos Premium
+                {t("badge")}
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tightest text-slate-900 leading-[1.1]">
-                Ecossistema <br />
-                <span className="text-primary">completo.</span>
+                {t("titleLine1")} <br />
+                <span className="text-primary">{t("titleLine2")}</span>
               </h2>
               <p className="mt-4 text-[14px] sm:text-base text-slate-600 leading-relaxed font-medium max-w-sm">
-                Ferramentas de elite para gerenciar suas conversões com privacidade e velocidade.
+                {t("subtitle")}
               </p>
             </div>
 

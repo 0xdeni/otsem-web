@@ -13,6 +13,7 @@ import {
 import haptic from "@/lib/haptics";
 import ExchangeWidget from "@/components/ui/exchange-widget";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 // Animated Wave Component
 const AnimatedWave = () => {
@@ -116,6 +117,7 @@ const AnimatedWave = () => {
 };
 
 const HeroSection = () => {
+  const t = useTranslations("hero");
   const handleButtonClick = useCallback(() => {
     haptic.medium();
   }, []);
@@ -160,7 +162,7 @@ const HeroSection = () => {
           <motion.div variants={itemVariants} className="mb-5 sm:mb-6">
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/12 shadow-sm text-primary font-semibold text-[9px] sm:text-[10px] uppercase tracking-[0.18em]">
               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="whitespace-nowrap">Plataforma Financeira Global</span>
+              <span className="whitespace-nowrap">{t("badge")}</span>
             </div>
           </motion.div>
 
@@ -170,7 +172,7 @@ const HeroSection = () => {
             >
               <div className="relative mb-0.5">
                 <span className="text-[12vw] sm:text-5xl md:text-6xl lg:text-[5rem] text-slate-900 block leading-[1.05]">
-                  Sua Ponte
+                  {t("titleLine1")}
                 </span>
               </div>
 
@@ -179,7 +181,7 @@ const HeroSection = () => {
 
               <div className="relative">
                 <span className="text-[12vw] sm:text-5xl md:text-6xl lg:text-[5rem] text-primary leading-[1.05]">
-                  Líquida <span className="text-slate-900">Global.</span>
+                  {t("titleLine2Highlight")} <span className="text-slate-900">{t("titleLine2")}</span>
                 </span>
               </div>
             </motion.h1>
@@ -188,7 +190,7 @@ const HeroSection = () => {
             variants={itemVariants}
             className="max-w-md text-[15px] sm:text-base lg:text-lg text-slate-600 font-medium leading-relaxed mb-6 sm:mb-8"
           >
-            Converta BRL em USDT instantaneamente com <span className="text-slate-900 font-semibold">segurança institucional</span> e as menores taxas do mercado.
+            {t.rich("description", { bold: (chunks) => <span className="text-slate-900 font-semibold">{chunks}</span> })}
           </motion.p>
 
           <motion.div
@@ -201,7 +203,7 @@ const HeroSection = () => {
               onClick={handleButtonClick}
             >
               <button className="btn-premium w-full sm:w-auto group px-5 sm:px-6 py-3 sm:py-3.5 text-[14px] sm:text-[15px] rounded-[12px] sm:rounded-[14px] font-semibold transition-transform duration-150 active:scale-[0.98]">
-                Crie sua conta
+                {t("cta")}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
             </Link>
@@ -212,7 +214,7 @@ const HeroSection = () => {
             >
               <button className="btn-premium-outline w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-[14px] sm:text-[15px] rounded-[12px] sm:rounded-[14px] font-semibold transition-transform duration-150 active:scale-[0.98]">
                 <BookOpen className="w-4 h-4 text-primary" />
-                Saber mais
+                {t("learnMore")}
               </button>
             </a>
           </motion.div>
@@ -235,8 +237,10 @@ const HeroSection = () => {
               </div>
             </div>
             <div className="text-[12px] sm:text-[13px] font-medium text-slate-500 leading-snug">
-                Mais de <span className="text-slate-900 font-semibold">6 mil</span> clientes <br className="sm:hidden" />
-                confiam na <span className="text-primary font-semibold">Otsem Pay</span>
+                {t.rich("socialProof", {
+                  bold: (chunks) => <span className="text-slate-900 font-semibold">{chunks}</span>,
+                  highlight: (chunks) => <span className="text-primary font-semibold">{chunks}</span>,
+                })}
               </div>
           </motion.div>
         </motion.div>
@@ -250,8 +254,8 @@ const HeroSection = () => {
                 <Zap className="w-4.5 h-4.5" />
               </div>
               <div>
-                <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Liquidez</p>
-                <p className="text-base font-semibold text-slate-800 tracking-tight">Instantânea</p>
+                <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{t("badgeLiquidity")}</p>
+                <p className="text-base font-semibold text-slate-800 tracking-tight">{t("badgeLiquidityValue")}</p>
               </div>
             </div>
           </div>
@@ -262,8 +266,8 @@ const HeroSection = () => {
                 <ShieldCheck className="w-4.5 h-4.5" />
               </div>
               <div>
-                <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Segurança</p>
-                <p className="text-base font-semibold text-slate-800 tracking-tight">Institucional</p>
+                <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{t("badgeSecurity")}</p>
+                <p className="text-base font-semibold text-slate-800 tracking-tight">{t("badgeSecurityValue")}</p>
               </div>
             </div>
           </div>
@@ -274,8 +278,8 @@ const HeroSection = () => {
                 <Globe className="w-4.5 h-4.5" />
               </div>
               <div>
-                <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Cobertura</p>
-                <p className="text-base font-semibold text-slate-800 tracking-tight">Global</p>
+                <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{t("badgeCoverage")}</p>
+                <p className="text-base font-semibold text-slate-800 tracking-tight">{t("badgeCoverageValue")}</p>
               </div>
             </div>
           </div>
@@ -286,8 +290,8 @@ const HeroSection = () => {
                 <Clock className="w-4.5 h-4.5" />
               </div>
               <div>
-                <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Tempo</p>
-                <p className="text-base font-semibold text-slate-800 tracking-tight">~30 seg</p>
+                <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{t("badgeTime")}</p>
+                <p className="text-base font-semibold text-slate-800 tracking-tight">{t("badgeTimeValue")}</p>
               </div>
             </div>
           </div>
