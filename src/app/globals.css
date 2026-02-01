@@ -466,8 +466,8 @@
     /* These MUST be in CSS, not inline styles — Safari ignores env() in style="" */
 
     .pwa-header-content {
-        padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
-        padding-bottom: 12px;
+        padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+        padding-bottom: 8px;
     }
 
     .pwa-header-glass {
@@ -475,11 +475,11 @@
     }
 
     .pwa-header-spacer {
-        height: calc(env(safe-area-inset-top, 0px) + 60px);
+        height: calc(env(safe-area-inset-top, 0px) + 48px);
     }
 
     .pwa-nav-bottom {
-        bottom: 4px;
+        bottom: 0px;
     }
 
     .pwa-scroll-pad-bottom {
