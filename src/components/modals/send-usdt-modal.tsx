@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
+    BottomSheet,
+    BottomSheetContent,
+    BottomSheetHeader,
+    BottomSheetTitle,
+    BottomSheetDescription,
+} from "@/components/ui/bottom-sheet";
 import { useUiModals } from "@/stores/ui-modals";
 
 type WalletType = {
@@ -116,17 +116,17 @@ export default function SendUsdtModal() {
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="bg-card border border-border">
-                <DialogHeader>
-                    <DialogTitle className="text-foreground text-xl flex items-center gap-2">
+        <BottomSheet open={isOpen} onOpenChange={handleClose}>
+            <BottomSheetContent>
+                <BottomSheetHeader>
+                    <BottomSheetTitle className="text-foreground text-xl flex items-center gap-2">
                         <Send className="w-5 h-5 text-[#6F00FF]" />
                         Enviar USDT
-                    </DialogTitle>
-                    <DialogDescription className="text-muted-foreground">
+                    </BottomSheetTitle>
+                    <BottomSheetDescription className="text-muted-foreground">
                         Envie USDT de uma carteira custodial para qualquer endereço
-                    </DialogDescription>
-                </DialogHeader>
+                    </BottomSheetDescription>
+                </BottomSheetHeader>
 
                 {txResult ? (
                     <div className="space-y-4">
@@ -273,7 +273,7 @@ export default function SendUsdtModal() {
                         </div>
                     </div>
                 )}
-            </DialogContent>
-        </Dialog>
+            </BottomSheetContent>
+        </BottomSheet>
     );
 }

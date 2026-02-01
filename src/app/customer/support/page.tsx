@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     HelpCircle,
     MessageCircle,
     Mail,
     Phone,
     ChevronDown,
-    ChevronUp,
     CheckCircle2,
     AlertCircle,
     Send,
@@ -28,11 +28,13 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
+// ─── Types ───────────────────────────────────────────────
 type FAQItem = {
     question: string;
     answer: string;
 };
 
+// ─── Data ────────────────────────────────────────────────
 const faqItems: FAQItem[] = [
     {
         question: "Como fazer um depósito PIX?",
@@ -91,38 +93,68 @@ const tutorials = [
     },
 ];
 
+// ─── Animations ──────────────────────────────────────────
+const stagger = {
+    hidden: {},
+    show: {
+        transition: { staggerChildren: 0.06 },
+    },
+};
+
+const fadeUp = {
+    hidden: { opacity: 0, y: 16 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] } },
+};
+
+// ─── FAQ Accordion ───────────────────────────────────────
 function FAQAccordion({ items }: { items: FAQItem[] }) {
     const [openIndex, setOpenIndex] = React.useState<number | null>(null);
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-2">
             {items.map((item, index) => (
-                <div
+                <motion.div
                     key={index}
-                    className="bg-card border border-border rounded-xl overflow-hidden"
+                    variants={fadeUp}
+                    className="premium-card !rounded-[18px] !p-0 overflow-hidden"
                 >
                     <button
                         onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                        className="w-full flex items-center justify-between p-4 text-left hover:bg-accent/50 transition"
+                        className="w-full flex items-center justify-between p-4 text-left active:scale-[0.98] transition-transform"
                     >
-                        <span className="font-medium text-foreground pr-4">{item.question}</span>
-                        {openIndex === index ? (
-                            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                        ) : (
-                            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                        )}
+                        <span className="text-[14px] font-medium text-foreground pr-4 leading-snug">
+                            {item.question}
+                        </span>
+                        <motion.div
+                            animate={{ rotate: openIndex === index ? 180 : 0 }}
+                            transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+                            className="flex-shrink-0"
+                        >
+                            <ChevronDown className="w-[18px] h-[18px] text-muted-foreground" />
+                        </motion.div>
                     </button>
-                    {openIndex === index && (
-                        <div className="px-4 pb-4 text-muted-foreground text-sm leading-relaxed">
-                            {item.answer}
-                        </div>
-                    )}
-                </div>
+                    <AnimatePresence initial={false}>
+                        {openIndex === index && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                                className="overflow-hidden"
+                            >
+                                <div className="px-4 pb-4 text-[13px] text-muted-foreground leading-relaxed">
+                                    {item.answer}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
             ))}
         </div>
     );
 }
 
+// ─── Page ────────────────────────────────────────────────
 export default function SupportPage() {
     const [ticketSubject, setTicketSubject] = React.useState("");
     const [ticketCategory, setTicketCategory] = React.useState("");
@@ -131,16 +163,16 @@ export default function SupportPage() {
 
     async function handleSubmitTicket(e: React.FormEvent) {
         e.preventDefault();
-        
+
         if (!ticketSubject.trim() || !ticketCategory || !ticketMessage.trim()) {
             toast.error("Preencha todos os campos");
             return;
         }
 
         setSubmitting(true);
-        
+
         await new Promise((resolve) => setTimeout(resolve, 1500));
-        
+
         toast.success("Chamado enviado com sucesso! Responderemos em até 24h.");
         setTicketSubject("");
         setTicketCategory("");
@@ -149,182 +181,251 @@ export default function SupportPage() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
-            <div>
-                <h1 className="text-2xl font-bold text-foreground">Central de Ajuda</h1>
-                <p className="text-muted-foreground text-sm mt-1">
-                    Encontre respostas para suas dúvidas ou entre em contato conosco
+        <motion.div
+            className="space-y-6 pb-8"
+            variants={stagger}
+            initial="hidden"
+            animate="show"
+        >
+            {/* ── Header ──────────────────────────────────── */}
+            <motion.div variants={fadeUp}>
+                <h1 className="text-[22px] font-bold text-foreground">Ajuda</h1>
+                <p className="text-[13px] text-muted-foreground mt-0.5">
+                    Encontre respostas ou fale conosco
                 </p>
-            </div>
+            </motion.div>
 
-            <div className="bg-gradient-to-br from-[#6F00FF] to-purple-700 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-300" />
-                    <span className="text-white font-medium">Sistema Operacional</span>
+            {/* ── System Status ────────────────────────────── */}
+            <motion.div variants={fadeUp}>
+                <div className="premium-card !rounded-[20px] !p-4 bg-gradient-to-br from-[#6F00FF]/10 to-[#6F00FF]/5 dark:from-[#6F00FF]/20 dark:to-[#6F00FF]/5">
+                    <div className="flex items-center gap-3">
+                        <div className="relative flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                                <CheckCircle2 className="w-[18px] h-[18px] text-emerald-500" />
+                            </div>
+                            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background animate-pulse" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[14px] font-semibold text-foreground">
+                                Sistema Operacional
+                            </p>
+                            <p className="text-[12px] text-muted-foreground">
+                                Todos os serviços funcionando normalmente
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <p className="text-white/80 text-sm">
-                    Todos os serviços estão funcionando normalmente
+            </motion.div>
+
+            {/* ── Contact Methods (horizontal scroll on mobile) ── */}
+            <motion.div variants={fadeUp}>
+                <p className="text-[15px] font-semibold text-foreground mb-3 px-0.5">
+                    Fale conosco
                 </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4">
-                <a
-                    href="https://wa.me/5511999999999"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-card border border-border rounded-xl p-5 hover:border-green-500/50 hover:bg-green-500/5 transition group"
-                >
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 rounded-lg bg-green-500/20">
-                            <MessageCircle className="w-5 h-5 text-green-500" />
+                <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory">
+                    {/* WhatsApp */}
+                    <a
+                        href="https://wa.me/5511999999999"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="premium-card !rounded-[20px] !p-4 min-w-[160px] flex-1 snap-start active:scale-95 transition-transform group"
+                    >
+                        <div className="w-10 h-10 rounded-2xl bg-[#25D366]/15 flex items-center justify-center mb-3">
+                            <MessageCircle className="w-5 h-5 text-[#25D366]" />
                         </div>
-                        <span className="font-semibold text-foreground">WhatsApp</span>
-                        <ExternalLink className="w-4 h-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                        Atendimento rápido pelo WhatsApp
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                        Seg-Sex: 9h às 18h
-                    </p>
-                </a>
-
-                <a
-                    href="mailto:suporte@otsempay.com"
-                    className="bg-card border border-border rounded-xl p-5 hover:border-[#6F00FF]/50/50 hover:bg-[#6F00FF]/50/5 transition group"
-                >
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 rounded-lg bg-[#6F00FF]/50/20">
-                            <Mail className="w-5 h-5 text-[#6F00FF]/50" />
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-[14px] font-semibold text-foreground">
+                                WhatsApp
+                            </span>
+                            <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
-                        <span className="font-semibold text-foreground">Email</span>
-                        <ExternalLink className="w-4 h-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                        suporte@otsempay.com
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                        Resposta em até 24h
-                    </p>
-                </a>
+                        <p className="text-[12px] text-muted-foreground leading-snug">
+                            Atendimento rápido
+                        </p>
+                        <p className="text-[11px] text-muted-foreground/60 mt-1.5">
+                            Seg-Sex 9h-18h
+                        </p>
+                    </a>
 
-                <div className="bg-card border border-border rounded-xl p-5">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 rounded-lg bg-blue-500/20">
+                    {/* Email */}
+                    <a
+                        href="mailto:suporte@otsempay.com"
+                        className="premium-card !rounded-[20px] !p-4 min-w-[160px] flex-1 snap-start active:scale-95 transition-transform group"
+                    >
+                        <div className="w-10 h-10 rounded-2xl bg-[#6F00FF]/12 flex items-center justify-center mb-3">
+                            <Mail className="w-5 h-5 text-[#6F00FF]" />
+                        </div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-[14px] font-semibold text-foreground">
+                                Email
+                            </span>
+                            <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <p className="text-[12px] text-muted-foreground leading-snug">
+                            suporte@otsempay.com
+                        </p>
+                        <p className="text-[11px] text-muted-foreground/60 mt-1.5">
+                            Resposta em até 24h
+                        </p>
+                    </a>
+
+                    {/* Phone */}
+                    <div className="premium-card !rounded-[20px] !p-4 min-w-[160px] flex-1 snap-start">
+                        <div className="w-10 h-10 rounded-2xl bg-blue-500/12 flex items-center justify-center mb-3">
                             <Phone className="w-5 h-5 text-blue-500" />
                         </div>
-                        <span className="font-semibold text-foreground">Telefone</span>
+                        <span className="text-[14px] font-semibold text-foreground block mb-1">
+                            Telefone
+                        </span>
+                        <p className="text-[12px] text-muted-foreground leading-snug">
+                            (11) 3000-0000
+                        </p>
+                        <p className="text-[11px] text-muted-foreground/60 mt-1.5">
+                            Seg-Sex 9h-18h
+                        </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                        (11) 3000-0000
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                        Seg-Sex: 9h às 18h
-                    </p>
                 </div>
-            </div>
+            </motion.div>
 
-            <div>
-                <div className="flex items-center gap-2 mb-4">
-                    <BookOpen className="w-5 h-5 text-[#6F00FF]/50" />
-                    <h2 className="text-lg font-semibold text-foreground">Tutoriais Rápidos</h2>
+            {/* ── Tutorials ───────────────────────────────── */}
+            <motion.div variants={fadeUp}>
+                <div className="flex items-center gap-2 mb-3 px-0.5">
+                    <BookOpen className="w-[18px] h-[18px] text-[#6F00FF]" />
+                    <p className="text-[15px] font-semibold text-foreground">
+                        Tutoriais Rápidos
+                    </p>
                 </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory">
                     {tutorials.map((tutorial, index) => (
                         <button
                             key={index}
                             onClick={() => toast.info("Tutorial em desenvolvimento")}
-                            className="bg-card border border-border rounded-xl p-4 text-left hover:border-[#6F00FF]/50/50 hover:bg-accent/50 transition group"
+                            className="premium-card !rounded-[20px] !p-4 min-w-[148px] flex-1 text-left snap-start active:scale-95 transition-transform group"
                         >
-                            <div className="text-3xl mb-3">{tutorial.icon}</div>
-                            <h3 className="font-medium text-foreground mb-1">{tutorial.title}</h3>
-                            <p className="text-xs text-muted-foreground">{tutorial.description}</p>
-                            <div className="flex items-center gap-1 text-[#6F00FF]/50 text-xs mt-3 opacity-0 group-hover:opacity-100 transition">
+                            <div className="text-[28px] mb-2.5">{tutorial.icon}</div>
+                            <h3 className="text-[13px] font-semibold text-foreground mb-0.5 leading-snug">
+                                {tutorial.title}
+                            </h3>
+                            <p className="text-[11px] text-muted-foreground leading-snug">
+                                {tutorial.description}
+                            </p>
+                            <div className="flex items-center gap-1 text-[#6F00FF] text-[11px] font-medium mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                 Ver tutorial
                                 <ArrowRight className="w-3 h-3" />
                             </div>
                         </button>
                     ))}
                 </div>
-            </div>
+            </motion.div>
 
-            <div>
-                <div className="flex items-center gap-2 mb-4">
-                    <HelpCircle className="w-5 h-5 text-[#6F00FF]/50" />
-                    <h2 className="text-lg font-semibold text-foreground">Perguntas Frequentes</h2>
+            {/* ── FAQ ─────────────────────────────────────── */}
+            <motion.div variants={fadeUp}>
+                <div className="flex items-center gap-2 mb-3 px-0.5">
+                    <HelpCircle className="w-[18px] h-[18px] text-[#6F00FF]" />
+                    <p className="text-[15px] font-semibold text-foreground">
+                        Perguntas Frequentes
+                    </p>
                 </div>
                 <FAQAccordion items={faqItems} />
-            </div>
+            </motion.div>
 
-            <div className="bg-card border border-border rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <AlertCircle className="w-5 h-5 text-[#6F00FF]/50" />
-                    <h2 className="text-lg font-semibold text-foreground">Abrir Chamado</h2>
-                </div>
-                <p className="text-sm text-muted-foreground mb-6">
-                    Não encontrou o que procurava? Envie sua dúvida ou reporte um problema.
-                </p>
+            {/* ── Support Ticket Form ─────────────────────── */}
+            <motion.div variants={fadeUp}>
+                <div className="premium-card !rounded-[22px]">
+                    <div className="flex items-center gap-2 mb-1">
+                        <AlertCircle className="w-[18px] h-[18px] text-[#6F00FF]" />
+                        <h2 className="text-[15px] font-semibold text-foreground">
+                            Abrir Chamado
+                        </h2>
+                    </div>
+                    <p className="text-[13px] text-muted-foreground mb-5">
+                        Não encontrou o que procurava? Envie sua dúvida ou reporte um problema.
+                    </p>
 
-                <form onSubmit={handleSubmitTicket} className="space-y-4">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="subject">Assunto</Label>
-                            <Input
-                                id="subject"
-                                value={ticketSubject}
-                                onChange={(e) => setTicketSubject(e.target.value)}
-                                placeholder="Ex: Problema com depósito"
-                                className="bg-background"
+                    <form onSubmit={handleSubmitTicket} className="space-y-4">
+                        <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label
+                                    htmlFor="subject"
+                                    className="text-[13px] font-medium text-foreground/80"
+                                >
+                                    Assunto
+                                </Label>
+                                <Input
+                                    id="subject"
+                                    value={ticketSubject}
+                                    onChange={(e) => setTicketSubject(e.target.value)}
+                                    placeholder="Ex: Problema com depósito"
+                                    className="h-11 rounded-xl bg-background/60 border-white/20 dark:border-white/10 text-[14px] placeholder:text-muted-foreground/50"
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label
+                                    htmlFor="category"
+                                    className="text-[13px] font-medium text-foreground/80"
+                                >
+                                    Categoria
+                                </Label>
+                                <Select value={ticketCategory} onValueChange={setTicketCategory}>
+                                    <SelectTrigger className="h-11 rounded-xl bg-background/60 border-white/20 dark:border-white/10 text-[14px]">
+                                        <SelectValue placeholder="Selecione uma categoria" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="deposit">Depósito</SelectItem>
+                                        <SelectItem value="withdraw">Transferência</SelectItem>
+                                        <SelectItem value="conversion">Conversão USDT</SelectItem>
+                                        <SelectItem value="kyc">Verificação (KYC)</SelectItem>
+                                        <SelectItem value="account">Minha Conta</SelectItem>
+                                        <SelectItem value="other">Outro</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label
+                                htmlFor="message"
+                                className="text-[13px] font-medium text-foreground/80"
+                            >
+                                Mensagem
+                            </Label>
+                            <Textarea
+                                id="message"
+                                value={ticketMessage}
+                                onChange={(e) => setTicketMessage(e.target.value)}
+                                placeholder="Descreva sua dúvida ou problema com o máximo de detalhes possível..."
+                                rows={5}
+                                className="rounded-xl bg-background/60 border-white/20 dark:border-white/10 text-[14px] placeholder:text-muted-foreground/50 resize-none"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="category">Categoria</Label>
-                            <Select value={ticketCategory} onValueChange={setTicketCategory}>
-                                <SelectTrigger className="bg-background">
-                                    <SelectValue placeholder="Selecione uma categoria" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="deposit">Depósito</SelectItem>
-                                    <SelectItem value="withdraw">Transferência</SelectItem>
-                                    <SelectItem value="conversion">Conversão USDT</SelectItem>
-                                    <SelectItem value="kyc">Verificação (KYC)</SelectItem>
-                                    <SelectItem value="account">Minha Conta</SelectItem>
-                                    <SelectItem value="other">Outro</SelectItem>
-                                </SelectContent>
-                            </Select>
+
+                        <div className="flex justify-end pt-1">
+                            <Button
+                                type="submit"
+                                disabled={submitting}
+                                className="h-11 px-6 rounded-xl bg-[#6F00FF] hover:bg-[#5C00D6] text-white text-[14px] font-semibold gap-2 active:scale-95 transition-transform shadow-lg shadow-[#6F00FF]/25"
+                            >
+                                {submitting ? (
+                                    <span className="flex items-center gap-2">
+                                        <motion.div
+                                            animate={{ rotate: 360 }}
+                                            transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                                        >
+                                            <Send className="w-4 h-4" />
+                                        </motion.div>
+                                        Enviando...
+                                    </span>
+                                ) : (
+                                    <>
+                                        <Send className="w-4 h-4" />
+                                        Enviar Chamado
+                                    </>
+                                )}
+                            </Button>
                         </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="message">Mensagem</Label>
-                        <Textarea
-                            id="message"
-                            value={ticketMessage}
-                            onChange={(e) => setTicketMessage(e.target.value)}
-                            placeholder="Descreva sua dúvida ou problema com o máximo de detalhes possível..."
-                            rows={5}
-                            className="bg-background resize-none"
-                        />
-                    </div>
-
-                    <div className="flex justify-end">
-                        <Button
-                            type="submit"
-                            disabled={submitting}
-                            className="bg-gradient-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#6F00FF]/50 hover:to-[#6F00FF] gap-2"
-                        >
-                            {submitting ? (
-                                "Enviando..."
-                            ) : (
-                                <>
-                                    <Send className="w-4 h-4" />
-                                    Enviar Chamado
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                    </form>
+                </div>
+            </motion.div>
+        </motion.div>
     );
 }

@@ -1,19 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Wallet, ArrowDownLeft, ArrowRightLeft, ArrowUpRight, TrendingUp, RefreshCw } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+    ArrowDownLeft,
+    ArrowUpRight,
+    ArrowRightLeft,
+    TrendingUp,
+    ChevronRight,
+    Eye,
+    EyeOff,
+    Loader2,
+} from "lucide-react";
 import http from "@/lib/http";
 import { useAuth } from "@/contexts/auth-context";
-import { Button } from "@/components/ui/button";
 import { useUsdtRate } from "@/lib/useUsdtRate";
-import { DepositModal } from "@/components/modals/deposit-modal";
-import { WithdrawModal } from "@/components/modals/withdraw-modal";
-import { ConvertModal } from "@/components/modals/convert-modal";
 import { useUiModals } from "@/stores/ui-modals";
-import { LimitsCard } from "@/components/kyc/limits-card";
+import { ConvertModal } from "@/components/modals/convert-modal";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
+// ─── Types ───────────────────────────────────────────────
 type AccountSummary = {
     id: string;
     balance: number;
@@ -62,10 +69,9 @@ type Transaction = {
     recipientCpf?: string | null;
     recipientCnpj?: string | null;
     createdAt: string;
-    // Campos legados ou de conversão que podem vir da API ou serem calculados
     usdtAmount?: string | number | null;
     subType?: "BUY" | "SELL" | null;
-    externalData?: any;
+    externalData?: Record<string, unknown>;
 };
 
 type WalletType = {
@@ -78,6 +84,7 @@ type WalletType = {
     updatedAt: string;
 };
 
+// ─── Helpers ─────────────────────────────────────────────
 function formatCurrency(value: number, decimals = 2): string {
     return value.toLocaleString("pt-BR", {
         style: "currency",
@@ -97,7 +104,6 @@ function formatDate(dateString: string): string {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-
     const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
     if (dateOnly.getTime() === today.getTime()) {
@@ -109,11 +115,190 @@ function formatDate(dateString: string): string {
     }
 }
 
+// ─── Stagger animation ──────────────────────────────────
+const stagger = {
+    hidden: {},
+    show: {
+        transition: { staggerChildren: 0.06 },
+    },
+};
+
+const fadeUp = {
+    hidden: { opacity: 0, y: 16 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] } },
+};
+
+// ─── Quick action button ─────────────────────────────────
+function QuickAction({
+    icon: Icon,
+    label,
+    color,
+    bgColor,
+    onClick,
+}: {
+    icon: typeof ArrowDownLeft;
+    label: string;
+    color: string;
+    bgColor: string;
+    onClick: () => void;
+}) {
+    return (
+        <motion.button
+            className="flex flex-col items-center gap-1.5 min-w-[68px]"
+            onClick={onClick}
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        >
+            <div className={`flex items-center justify-center w-14 h-14 rounded-2xl ${bgColor}`}>
+                <Icon className={`w-5 h-5 ${color}`} strokeWidth={2} />
+            </div>
+            <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+        </motion.button>
+    );
+}
+
+// ─── Asset Row ───────────────────────────────────────────
+function AssetRow({
+    flag,
+    symbol,
+    name,
+    balance,
+    equivalent,
+    delay,
+}: {
+    flag: string;
+    symbol: string;
+    name: string;
+    balance: string;
+    equivalent?: string;
+    delay: number;
+}) {
+    return (
+        <motion.div
+            className="flex items-center justify-between py-3.5 active:bg-white/5 dark:active:bg-white/[0.02] -mx-1 px-1 rounded-xl transition-colors"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay, duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+        >
+            <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/60 dark:bg-white/[0.06] border border-white/80 dark:border-white/[0.08] text-lg">
+                    {flag}
+                </div>
+                <div>
+                    <p className="text-[15px] font-semibold text-foreground">{symbol}</p>
+                    <p className="text-[12px] text-muted-foreground">{name}</p>
+                </div>
+            </div>
+            <div className="text-right">
+                <p className="text-[15px] font-semibold text-foreground">{balance}</p>
+                {equivalent && (
+                    <p className="text-[12px] text-muted-foreground">{equivalent}</p>
+                )}
+            </div>
+        </motion.div>
+    );
+}
+
+// ─── Transaction Row ─────────────────────────────────────
+function TransactionRow({ tx }: { tx: Transaction }) {
+    const amount = Number(tx.amount);
+    const isIncoming = tx.type === "PIX_IN";
+    const isPending = tx.status === "PENDING" || tx.status === "PROCESSING";
+
+    const descLower = (tx.description || "").toLowerCase();
+    const isConversionByDesc =
+        descLower.includes("usdt") ||
+        descLower.includes("conversão") ||
+        descLower.includes("conversao") ||
+        descLower.includes("buy") ||
+        descLower.includes("sell");
+    const isConversionTx = tx.type === "CONVERSION" || isConversionByDesc;
+    const isSellConversion =
+        tx.subType === "SELL" || (!tx.subType && (descLower.includes("venda") || descLower.includes("sell")));
+
+    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+    let displayName = "";
+    let usdtAmountValue: number | null = null;
+
+    if (isConversionTx) {
+        displayName = isSellConversion ? "Venda de USDT" : "Compra de USDT";
+        const usdtRaw = tx.usdtAmount || (tx.externalData?.usdtAmount as string | number | undefined);
+        if (usdtRaw) usdtAmountValue = typeof usdtRaw === "number" ? usdtRaw : parseFloat(String(usdtRaw));
+    } else if (tx.description && !isUUID(tx.description)) {
+        displayName = tx.description;
+    } else if (isIncoming && tx.senderName) {
+        displayName = tx.senderName;
+    } else if (isIncoming && (tx.externalData?.pagador as Record<string, unknown>)?.nome) {
+        displayName = String((tx.externalData?.pagador as Record<string, unknown>).nome);
+    } else if (!isIncoming && tx.recipientName) {
+        displayName = tx.recipientName;
+    } else {
+        displayName = isIncoming ? "Depósito PIX" : "Transferência PIX";
+    }
+
+    if (tx.status === "COMPLETED" && displayName.toLowerCase().includes("aguardando")) {
+        displayName = displayName.replace(/aguardando\s*/gi, "").replace(/depósito pix de\s*/gi, "").trim();
+    }
+
+    const iconConfig = isPending
+        ? { bg: "bg-amber-500/12", color: "text-amber-500", Icon: ArrowRightLeft }
+        : isConversionTx
+          ? isSellConversion
+              ? { bg: "bg-orange-500/12", color: "text-orange-500", Icon: ArrowRightLeft }
+              : { bg: "bg-blue-500/12", color: "text-blue-500", Icon: ArrowRightLeft }
+          : isIncoming
+            ? { bg: "bg-green-500/12", color: "text-green-500", Icon: ArrowDownLeft }
+            : { bg: "bg-red-500/12", color: "text-red-500", Icon: ArrowUpRight };
+
+    return (
+        <motion.div
+            className="flex items-center gap-3 py-3 active:bg-white/5 dark:active:bg-white/[0.02] -mx-1 px-1 rounded-xl transition-colors"
+            whileTap={{ scale: 0.98 }}
+        >
+            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${iconConfig.bg}`}>
+                <iconConfig.Icon className={`w-4.5 h-4.5 ${iconConfig.color}`} strokeWidth={2} />
+            </div>
+
+            <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-medium text-foreground truncate">{displayName}</p>
+                <p className="text-[12px] text-muted-foreground">{formatDate(tx.createdAt)}</p>
+            </div>
+
+            <div className="text-right">
+                {isConversionTx ? (
+                    <>
+                        <p className={`text-[14px] font-semibold ${isSellConversion ? "text-green-500" : "text-foreground"}`}>
+                            {isSellConversion ? "+" : "-"}
+                            {formatCurrency(amount)}
+                        </p>
+                        {usdtAmountValue !== null && (
+                            <p className={`text-[11px] font-medium ${isSellConversion ? "text-red-400" : "text-emerald-500"}`}>
+                                {isSellConversion ? "-" : "+"}
+                                {formatUSD(usdtAmountValue)}
+                            </p>
+                        )}
+                    </>
+                ) : (
+                    <p className={`text-[14px] font-semibold ${
+                        isPending ? "text-amber-500" : isIncoming ? "text-green-500" : "text-foreground"
+                    }`}>
+                        {isIncoming ? "+" : "-"}
+                        {formatCurrency(Math.abs(amount))}
+                    </p>
+                )}
+            </div>
+        </motion.div>
+    );
+}
+
+// ─── Main Dashboard ──────────────────────────────────────
 export default function Dashboard() {
     const { user } = useAuth();
     const { openModal, refreshTrigger } = useUiModals();
     const searchParams = useSearchParams();
     const router = useRouter();
+
     const [loading, setLoading] = React.useState(true);
     const [account, setAccount] = React.useState<AccountSummary | null>(null);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
@@ -121,53 +306,36 @@ export default function Dashboard() {
     const [usdtBalance, setUsdtBalance] = React.useState<number | null>(null);
     const [usdtBalanceLoading, setUsdtBalanceLoading] = React.useState(true);
     const [refreshCounter, setRefreshCounter] = React.useState(0);
+    const [balanceHidden, setBalanceHidden] = React.useState(false);
+    const [showConvertModal, setShowConvertModal] = React.useState(false);
 
-    const refreshData = React.useCallback(() => {
-        setRefreshCounter((c) => c + 1);
-    }, []);
+    const refreshData = React.useCallback(() => setRefreshCounter((c) => c + 1), []);
 
-    const { rate: usdtRate, loading: usdtLoading, updatedAt } = useUsdtRate();
-    const [timer, setTimer] = React.useState(15);
-
+    const { rate: usdtRate, loading: usdtLoading } = useUsdtRate();
     const customerSpread = user?.spreadValue ?? 0.95;
     const usdtRateWithSpread = usdtRate ? usdtRate * (1 + customerSpread / 100) : 0;
 
-    React.useEffect(() => {
-        setTimer(15);
-        const interval = setInterval(() => {
-            setTimer((prev) => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [updatedAt]);
-
-    // Handle exchange widget redirect - auto-open convert modal
+    // Handle exchange widget redirect
     React.useEffect(() => {
         if (!searchParams) return;
-        const action = searchParams.get('action');
-        if (action === 'convert' && !loading) {
-            // Open the convert modal automatically
+        const action = searchParams.get("action");
+        if (action === "convert" && !loading) {
             setShowConvertModal(true);
-            // Clean up URL parameters
-            router.replace('/customer/dashboard');
+            router.replace("/customer/dashboard");
         }
     }, [searchParams, loading, router]);
 
+    // Load account data
     React.useEffect(() => {
         let cancelled = false;
-
         async function load() {
             try {
                 setLoading(true);
-
                 const customerId = user?.customerId;
-                if (!customerId) {
-                    return;
-                }
+                if (!customerId) return;
 
                 const accountRes = await http.get<AccountSummary & { payments: Payment[] }>(`/accounts/${customerId}/summary`);
-
                 if (!cancelled) {
-                    // Garantir que os valores sejam números
                     const accountData = accountRes.data;
                     if (accountData) {
                         setAccount({
@@ -175,42 +343,33 @@ export default function Dashboard() {
                             balance: Number(accountData.balance ?? 0),
                             blockedAmount: Number(accountData.blockedAmount ?? 0),
                         });
-
-                        // Converter payments para transactions
                         const payments = accountData.payments || [];
-
                         const convertedTransactions: Transaction[] = payments.map((payment) => ({
                             transactionId: payment.id,
                             type: "PIX_IN" as const,
                             status: "COMPLETED" as const,
-                            amount: payment.paymentValue / 100, // Converter centavos para reais
+                            amount: payment.paymentValue / 100,
                             description: payment.bankPayload.descricao,
                             senderName: payment.bankPayload.detalhes.nomePagador,
                             senderCpf: payment.bankPayload.detalhes.cpfCnpjPagador,
                             createdAt: payment.paymentDate,
                         }));
-
                         setTransactions(convertedTransactions);
                     } else {
                         setTransactions([]);
                     }
                 }
-
             } catch (error: unknown) {
-                if (!cancelled) {
-                    console.error('Error loading dashboard:', error);
-                }
+                if (!cancelled) console.error("Error loading dashboard:", error);
             } finally {
                 if (!cancelled) setLoading(false);
             }
         }
-
         load();
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [user?.id, user?.customerId, refreshTrigger, refreshCounter]);
 
+    // Load wallets
     React.useEffect(() => {
         async function fetchWallets() {
             try {
@@ -223,41 +382,59 @@ export default function Dashboard() {
         fetchWallets();
     }, [refreshCounter]);
 
+    // Calculate USDT balance
     React.useEffect(() => {
-        if (wallets.length > 0) {
-            const totalUsdt = wallets.reduce((sum, wallet) => {
-                return sum + (parseFloat(wallet.balance) || 0);
-            }, 0);
-            setUsdtBalance(totalUsdt);
-            setUsdtBalanceLoading(false);
-        } else {
-            setUsdtBalance(0);
-            setUsdtBalanceLoading(false);
-        }
+        const totalUsdt = wallets.reduce((sum, w) => sum + (parseFloat(w.balance) || 0), 0);
+        setUsdtBalance(totalUsdt);
+        setUsdtBalanceLoading(false);
     }, [wallets]);
 
     const saldoBRL = Number(account?.balance ?? 0);
     const saldoUSDT = Number(usdtBalance ?? 0);
-    const saldoTotal = saldoBRL + (saldoUSDT * usdtRateWithSpread);
+    const saldoTotal = saldoBRL + saldoUSDT * usdtRateWithSpread;
 
-    const [showConvertModal, setShowConvertModal] = React.useState(false);
+    // Deduplication filter
+    const filteredTransactions = React.useMemo(() => {
+        const seenConversions: Array<{ time: number; amount: number; usdtAmt: number; subType: string; txHash?: string }> = [];
+        return transactions.filter((tx, _index, allTx) => {
+            if (tx.type === "CONVERSION") {
+                const txHash = (tx.externalData?.txHash as string) || undefined;
+                const txTime = new Date(tx.createdAt).getTime();
+                const txAmount = Number(tx.amount);
+                const usdtRaw = (tx.externalData?.usdtAmount as string | number) || tx.usdtAmount;
+                const usdtAmt = typeof usdtRaw === "number" ? usdtRaw : parseFloat(String(usdtRaw)) || 0;
+                const subType = tx.subType || (tx.description?.toLowerCase().includes("venda") ? "SELL" : "BUY");
+                if (txHash) {
+                    if (seenConversions.some((s) => s.txHash === txHash)) return false;
+                    seenConversions.push({ time: txTime, amount: txAmount, usdtAmt, subType, txHash });
+                    return true;
+                }
+                if (seenConversions.some((s) => s.subType === subType && Math.abs(s.time - txTime) < 300000 && Math.abs(s.amount - txAmount) < 1 && Math.abs(s.usdtAmt - usdtAmt) < 0.5)) return false;
+                seenConversions.push({ time: txTime, amount: txAmount, usdtAmt, subType });
+                return true;
+            }
+            if (tx.type !== "PIX_OUT" && tx.type !== "PIX_IN") return true;
+            const txTime = new Date(tx.createdAt).getTime();
+            const txAmount = Number(tx.amount);
+            return !allTx.some((other) => other.transactionId !== tx.transactionId && other.type === "CONVERSION" && Math.abs(txAmount - Number(other.amount)) < 1 && Math.abs(txTime - new Date(other.createdAt).getTime()) < 300000);
+        });
+    }, [transactions]);
 
+    // ─── Loading state ───────────────────────────────────
     if (loading) {
         return (
-            <div className="flex h-[80vh] flex-col items-center justify-center">
+            <div className="flex h-[60vh] flex-col items-center justify-center">
                 <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#6F00FF] to-[#6F00FF] rounded-full blur-xl opacity-50 animate-pulse"></div>
-                    <Loader2 className="relative h-10 w-10 animate-spin text-[#6F00FF]/50 dark:text-[#6F00FF]" />
+                    <div className="absolute inset-0 bg-[#6F00FF]/30 rounded-full blur-xl animate-pulse" />
+                    <Loader2 className="relative h-8 w-8 animate-spin text-[#6F00FF]" />
                 </div>
-                <p className="text-sm text-muted-foreground mt-4">Carregando...</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-            <DepositModal />
-            <WithdrawModal />
+        <motion.div className="space-y-6 pb-4" variants={stagger} initial="hidden" animate="show">
+            {/* Convert Modal */}
             <ConvertModal
                 open={showConvertModal}
                 onClose={() => setShowConvertModal(false)}
@@ -265,310 +442,169 @@ export default function Dashboard() {
                 brlBalance={saldoBRL}
                 usdtBalance={saldoUSDT}
             />
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-                    <p className="text-muted-foreground text-sm mt-1">Gerencie seu saldo e transações</p>
-                </div>
-                <Button
-                    variant="ghost"
-                    onClick={() => window.location.reload()}
-                    className="text-muted-foreground hover:text-foreground hover:bg-accent"
-                >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Atualizar
-                </Button>
-            </div>
 
-            <div className="bg-gradient-to-br from-[#6F00FF] to-purple-700 rounded-2xl p-6 shadow-xl shadow-[#6F00FF]/50/20">
-                <div className="flex items-center justify-between mb-4">
-                    <p className="text-white/80 text-sm">Saldo total estimado</p>
-                    <Wallet className="w-5 h-5 text-white/60" />
-                </div>
-                <p className="text-4xl font-bold text-white mb-6">
-                    {formatCurrency(saldoTotal)}
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-                        <p className="text-white/60 text-xs mb-1">BRL</p>
-                        <p className="text-white font-bold text-xl">
-                            {loading ? "..." : formatCurrency(saldoBRL)}
-                        </p>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-                        <p className="text-white/60 text-xs mb-1">USDT</p>
-                        <p className="text-white font-bold text-xl">
-                            {usdtBalanceLoading ? "..." : formatUSD(saldoUSDT)}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            {/* ── Balance Card (Glassmorphism) ── */}
+            <motion.div variants={fadeUp}>
+                <div className="relative overflow-hidden rounded-[24px] p-6">
+                    {/* Gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#6F00FF]/90 via-[#8B2FFF]/80 to-[#6F00FF]/90" />
+                    {/* Decorative orbs */}
+                    <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+                    <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/5 blur-xl" />
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Button
-                    onClick={() => openModal("deposit")}
-                    className="bg-green-600 hover:bg-green-500 text-white font-semibold rounded-xl py-6 text-sm"
-                >
-                    <ArrowDownLeft className="w-5 h-5 mr-1.5" />
-                    Depositar
-                </Button>
-                <Button
-                    onClick={() => openModal("withdraw")}
-                    className="bg-card border border-border hover:bg-accent text-foreground font-semibold rounded-xl py-6 text-sm"
-                >
-                    <ArrowUpRight className="w-5 h-5 mr-1.5" />
-                    Transferir
-                </Button>
-                <Button
-                    onClick={() => setShowConvertModal(true)}
-                    className="bg-[#6F00FF] hover:bg-[#6F00FF]/50 text-white font-semibold rounded-xl py-6 text-sm"
-                >
-                    <ArrowRightLeft className="w-5 h-5 mr-1.5" />
-                    Comprar USDT
-                </Button>
-                <Button
-                    onClick={() => openModal("sellUsdt")}
-                    className="bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl py-6 text-sm"
-                >
-                    <ArrowRightLeft className="w-5 h-5 mr-1.5" />
-                    Vender USDT
-                </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-card border border-border rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-[#6F00FF]/50 dark:text-[#6F00FF]" />
-                            <span className="text-muted-foreground text-sm">Cotação USDT</span>
+                    <div className="relative">
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-white/70 text-[13px] font-medium">Saldo total</p>
+                            <button
+                                onClick={() => setBalanceHidden(!balanceHidden)}
+                                className="p-1.5 -m-1.5 rounded-full active:bg-white/10 transition-colors"
+                            >
+                                {balanceHidden ? (
+                                    <EyeOff className="w-4 h-4 text-white/50" />
+                                ) : (
+                                    <Eye className="w-4 h-4 text-white/50" />
+                                )}
+                            </button>
                         </div>
-                        <span className="text-xs text-muted-foreground">Atualiza em {timer}s</span>
-                    </div>
-                    <p className="text-2xl font-bold text-foreground">
-                        {usdtLoading ? "..." : formatCurrency(usdtRateWithSpread, 4)}
-                    </p>
-                </div>
-                <LimitsCard compact />
-            </div>
 
-            <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                <div className="p-4 border-b border-border flex items-center justify-between">
-                    <h2 className="text-foreground font-semibold">Últimas transações</h2>
-                    <Link href="/customer/transactions" className="text-sm text-[#6F00FF]/50 hover:text-[#6F00FF] font-medium">
-                        Ver todas
-                    </Link>
-                </div>
-                <div className="divide-y divide-border">
-                    {transactions.length > 0 ? (
-                        (() => {
-                            const seenConversions: Array<{ time: number; amount: number; usdtAmt: number; subType: string; txHash?: string }> = [];
+                        <motion.p
+                            className="text-[36px] font-bold text-white tracking-tight leading-none mb-5"
+                            key={balanceHidden ? "hidden" : "visible"}
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {balanceHidden ? "R$ ••••••" : formatCurrency(saldoTotal)}
+                        </motion.p>
 
-                            const filteredTransactions = transactions.filter((tx, _index, allTx) => {
-                                if (tx.type === "CONVERSION") {
-                                    const txHash = tx.externalData?.txHash;
-                                    const txTime = new Date(tx.createdAt).getTime();
-                                    const txAmount = Number(tx.amount);
-                                    const usdtRaw = tx.externalData?.usdtAmount || tx.usdtAmount;
-                                    const usdtAmt = typeof usdtRaw === 'number' ? usdtRaw : parseFloat(String(usdtRaw)) || 0;
-                                    const subType = tx.subType || (tx.description?.toLowerCase().includes('venda') ? 'SELL' : 'BUY');
-                                    
-                                    if (txHash) {
-                                        const hasDupe = seenConversions.some(s => s.txHash === txHash);
-                                        if (hasDupe) return false;
-                                        seenConversions.push({ time: txTime, amount: txAmount, usdtAmt, subType, txHash });
-                                        return true;
-                                    }
-                                    
-                                    const hasDupe = seenConversions.some(s => {
-                                        const timeDiff = Math.abs(s.time - txTime);
-                                        const amountDiff = Math.abs(s.amount - txAmount);
-                                        const usdtDiff = Math.abs(s.usdtAmt - usdtAmt);
-                                        return s.subType === subType && timeDiff < 300000 && amountDiff < 1 && usdtDiff < 0.5;
-                                    });
-                                    
-                                    if (hasDupe) return false;
-                                    seenConversions.push({ time: txTime, amount: txAmount, usdtAmt, subType });
-                                    return true;
-                                }
-                                
-                                if (tx.type !== "PIX_OUT" && tx.type !== "PIX_IN") return true;
-                                
-                                const txTime = new Date(tx.createdAt).getTime();
-                                const txAmount = Number(tx.amount);
-                                
-                                const hasMatchingConversion = allTx.some((other) => {
-                                    if (other.transactionId === tx.transactionId) return false;
-                                    if (other.type !== "CONVERSION") return false;
-                                    
-                                    const otherTime = new Date(other.createdAt).getTime();
-                                    const otherAmount = Number(other.amount);
-                                    const timeDiff = Math.abs(txTime - otherTime);
-                                    
-                                    return Math.abs(txAmount - otherAmount) < 1 && timeDiff < 300000;
-                                });
-
-                                return !hasMatchingConversion;
-                            });
-
-                            return filteredTransactions
-                                .slice(0, 5)
-                                .map((tx) => {
-                            const amount = Number(tx.amount);
-                            const isIncoming = tx.type === "PIX_IN";
-                            const isPending = tx.status === "PENDING" || tx.status === "PROCESSING";
-                            const isCompleted = tx.status === "COMPLETED";
-                            const isConversion = tx.type === "CONVERSION";
-                            
-                            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-                            
-                            let displayName = "";
-                            let isConversionTx = false;
-                            let usdtAmountValue: number | null = null;
-                            
-                            const descLower = (tx.description || "").toLowerCase();
-                            const isConversionByDesc = descLower.includes("usdt") || 
-                                descLower.includes("conversão") || 
-                                descLower.includes("conversao") ||
-                                descLower.includes("buy") ||
-                                descLower.includes("sell");
-                            
-                            const isSellConversion = tx.subType === "SELL" || 
-                                (!tx.subType && (descLower.includes("venda") || descLower.includes("sell")));
-                            
-                            if (isConversion || isConversionByDesc) {
-                                isConversionTx = true;
-                                
-                                const walletAddr = tx.externalData?.walletAddress;
-                                const network = tx.externalData?.network;
-                                
-                                if (isSellConversion) {
-                                    if (walletAddr && network) {
-                                        const truncated = `${walletAddr.slice(0, 8)}...${walletAddr.slice(-8)}`;
-                                        displayName = `Venda de USDT carteira ${truncated} ${network}`;
-                                    } else {
-                                        displayName = "Venda de USDT";
-                                    }
-                                } else {
-                                    if (walletAddr && network) {
-                                        const truncated = `${walletAddr.slice(0, 8)}...${walletAddr.slice(-8)}`;
-                                        displayName = `Compra de USDT carteira ${truncated} ${network}`;
-                                    } else {
-                                        displayName = "Compra de USDT";
-                                    }
-                                }
-                                
-                                const usdtRaw = tx.usdtAmount || tx.externalData?.usdtAmount;
-                                if (usdtRaw) {
-                                    usdtAmountValue = typeof usdtRaw === 'number' ? usdtRaw : parseFloat(usdtRaw);
-                                }
-                            } else if (tx.description && !isUUID(tx.description)) {
-                                displayName = tx.description;
-                            } else if (isIncoming && tx.senderName) {
-                                displayName = `Depósito de ${tx.senderName}`;
-                            } else if (isIncoming && tx.externalData?.pagador?.nome) {
-                                displayName = `Depósito de ${tx.externalData.pagador.nome}`;
-                            } else if (!isIncoming && tx.recipientName) {
-                                displayName = `Transferência para ${tx.recipientName}`;
-                            } else {
-                                displayName = isIncoming ? "Depósito PIX" : "Transferência PIX";
-                            }
-                            
-                            if (isCompleted && displayName.toLowerCase().includes("aguardando")) {
-                                displayName = displayName
-                                    .replace(/aguardando\s*/gi, "")
-                                    .replace(/depósito pix de\s*/gi, "Depósito de ")
-                                    .trim();
-                            }
-
-                            const iconBgColor = isPending 
-                                ? "bg-amber-500/20" 
-                                : isConversionTx
-                                    ? isSellConversion ? "bg-orange-500/20" : "bg-blue-500/20"
-                                    : isIncoming 
-                                        ? "bg-green-500/20" 
-                                        : "bg-red-500/20";
-                            
-                            const iconColor = isPending 
-                                ? "text-amber-500 dark:text-amber-400" 
-                                : isConversionTx
-                                    ? isSellConversion ? "text-orange-500 dark:text-orange-400" : "text-blue-500 dark:text-blue-400"
-                                    : isIncoming 
-                                        ? "text-green-500 dark:text-green-400" 
-                                        : "text-red-500 dark:text-red-400";
-                            
-                            const amountColor = isPending 
-                                ? "text-amber-500 dark:text-amber-400" 
-                                : isConversionTx
-                                    ? isSellConversion ? "text-orange-500 dark:text-orange-400" : "text-blue-500 dark:text-blue-400"
-                                    : isIncoming 
-                                        ? "text-green-500 dark:text-green-400" 
-                                        : "text-red-500 dark:text-red-400";
-
-                            return (
-                                <div key={tx.transactionId} className="flex items-center gap-4 p-4 hover:bg-accent/50 transition">
-                                    <div className={`p-2.5 rounded-full ${iconBgColor}`}>
-                                        {isConversionTx ? (
-                                            <ArrowRightLeft className={`w-4 h-4 ${iconColor}`} />
-                                        ) : isIncoming ? (
-                                            <ArrowDownLeft className={`w-4 h-4 ${iconColor}`} />
-                                        ) : (
-                                            <ArrowUpRight className={`w-4 h-4 ${iconColor}`} />
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-foreground font-medium truncate">
-                                            {displayName}
-                                        </p>
-                                        <p className="text-muted-foreground text-sm">
-                                            {formatDate(tx.createdAt)}
-                                        </p>
-                                    </div>
-                                    {isConversionTx ? (
-                                        <div className="text-right">
-                                            {isSellConversion ? (
-                                                <>
-                                                    <span className="text-green-500 dark:text-green-400 font-bold text-sm">
-                                                        +{formatCurrency(amount)}
-                                                    </span>
-                                                    {usdtAmountValue !== null && (
-                                                        <p className="text-red-500 dark:text-red-400 text-xs font-medium">
-                                                            -{formatUSD(usdtAmountValue)}
-                                                        </p>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span className="text-foreground font-bold text-sm">
-                                                        -{formatCurrency(amount)}
-                                                    </span>
-                                                    {usdtAmountValue !== null && (
-                                                        <p className="text-emerald-500 dark:text-emerald-400 text-xs font-medium">
-                                                            +{formatUSD(usdtAmountValue)}
-                                                        </p>
-                                                    )}
-                                                </>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <span className={`font-bold ${amountColor}`}>
-                                            {isIncoming ? "+" : "-"}{formatCurrency(Math.abs(amount))}
-                                        </span>
-                                    )}
-                                </div>
-                            );
-                        });
-                        })()
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="p-4 rounded-full bg-muted inline-block mb-3">
-                                <ArrowDownLeft className="w-6 h-6 text-muted-foreground" />
+                        {/* Currency breakdown */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div
+                                className="rounded-2xl bg-white/[0.12] p-3.5"
+                                style={{ WebkitBackdropFilter: "blur(20px)", backdropFilter: "blur(20px)" }}
+                            >
+                                <p className="text-white/50 text-[11px] font-medium mb-0.5">BRL</p>
+                                <p className="text-white font-bold text-[18px] leading-tight">
+                                    {balanceHidden ? "••••" : formatCurrency(saldoBRL)}
+                                </p>
                             </div>
-                            <p className="text-muted-foreground">Nenhuma transação encontrada</p>
+                            <div
+                                className="rounded-2xl bg-white/[0.12] p-3.5"
+                                style={{ WebkitBackdropFilter: "blur(20px)", backdropFilter: "blur(20px)" }}
+                            >
+                                <p className="text-white/50 text-[11px] font-medium mb-0.5">USDT</p>
+                                <p className="text-white font-bold text-[18px] leading-tight">
+                                    {balanceHidden ? "••••" : usdtBalanceLoading ? "..." : formatUSD(saldoUSDT)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* ── Quick Actions ── */}
+            <motion.div variants={fadeUp} className="flex justify-between px-2">
+                <QuickAction
+                    icon={ArrowDownLeft}
+                    label="Depositar"
+                    color="text-green-500"
+                    bgColor="bg-green-500/12 dark:bg-green-500/15"
+                    onClick={() => openModal("deposit")}
+                />
+                <QuickAction
+                    icon={ArrowUpRight}
+                    label="Transferir"
+                    color="text-blue-500"
+                    bgColor="bg-blue-500/12 dark:bg-blue-500/15"
+                    onClick={() => openModal("withdraw")}
+                />
+                <QuickAction
+                    icon={ArrowRightLeft}
+                    label="Comprar"
+                    color="text-[#6F00FF] dark:text-[#8B2FFF]"
+                    bgColor="bg-[#6F00FF]/12 dark:bg-[#6F00FF]/15"
+                    onClick={() => setShowConvertModal(true)}
+                />
+                <QuickAction
+                    icon={TrendingUp}
+                    label="Vender"
+                    color="text-orange-500"
+                    bgColor="bg-orange-500/12 dark:bg-orange-500/15"
+                    onClick={() => openModal("sellUsdt")}
+                />
+            </motion.div>
+
+            {/* ── USDT Rate Pill ── */}
+            <motion.div variants={fadeUp}>
+                <div className="flex items-center justify-center">
+                    <div
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/[0.05] border border-white/80 dark:border-white/[0.08]"
+                        style={{ WebkitBackdropFilter: "blur(20px) saturate(180%)", backdropFilter: "blur(20px) saturate(180%)" }}
+                    >
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[13px] font-medium text-foreground">
+                            1 USDT = {usdtLoading ? "..." : formatCurrency(usdtRateWithSpread, 4)}
+                        </span>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* ── Assets Section ── */}
+            <motion.div variants={fadeUp}>
+                <div className="premium-card !p-5">
+                    <h3 className="text-[15px] font-bold text-foreground mb-1">Ativos</h3>
+                    <div className="divide-y divide-border/50">
+                        <AssetRow
+                            flag="🇧🇷"
+                            symbol="BRL"
+                            name="Real Brasileiro"
+                            balance={balanceHidden ? "••••" : formatCurrency(saldoBRL)}
+                            delay={0.1}
+                        />
+                        <AssetRow
+                            flag="💲"
+                            symbol="USDT"
+                            name="Tether"
+                            balance={balanceHidden ? "••••" : formatUSD(saldoUSDT)}
+                            equivalent={
+                                balanceHidden ? undefined : usdtRateWithSpread ? `≈ ${formatCurrency(saldoUSDT * usdtRateWithSpread)}` : undefined
+                            }
+                            delay={0.15}
+                        />
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* ── Recent Transactions ── */}
+            <motion.div variants={fadeUp}>
+                <div className="premium-card !p-5">
+                    <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-[15px] font-bold text-foreground">Atividade recente</h3>
+                        <Link
+                            href="/customer/transactions"
+                            className="flex items-center gap-0.5 text-[13px] font-medium text-[#6F00FF] dark:text-[#8B2FFF] active:opacity-70"
+                        >
+                            Ver tudo
+                            <ChevronRight className="w-3.5 h-3.5" />
+                        </Link>
+                    </div>
+
+                    {filteredTransactions.length > 0 ? (
+                        <div className="divide-y divide-border/50">
+                            {filteredTransactions.slice(0, 5).map((tx) => (
+                                <TransactionRow key={tx.transactionId} tx={tx} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center py-10">
+                            <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                                <ArrowDownLeft className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <p className="text-sm text-muted-foreground">Nenhuma transação ainda</p>
                         </div>
                     )}
                 </div>
-            </div>
-
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }
