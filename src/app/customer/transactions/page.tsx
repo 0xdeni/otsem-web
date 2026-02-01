@@ -666,10 +666,10 @@ export default function TransactionsPage() {
             initial="hidden"
             animate="show"
             variants={staggerContainer}
-            className="min-h-screen pb-8"
+            className="pb-8"
         >
             {/* ── Header ─────────────────────────────── */}
-            <motion.div variants={fadeUp} className="px-4 pt-2 pb-4">
+            <motion.div variants={fadeUp} className="pt-1 pb-4">
                 <h1 className="text-[22px] font-bold text-foreground tracking-tight">
                     Atividade
                 </h1>
@@ -681,7 +681,7 @@ export default function TransactionsPage() {
             {/* ── Filter pills ───────────────────────── */}
             <motion.div
                 variants={fadeUp}
-                className="px-4 pb-4 flex gap-2 overflow-x-auto scrollbar-none"
+                className="pb-4 flex gap-2 overflow-x-auto scrollbar-none"
             >
                 {FILTERS.map((f) => {
                     const isActive = filter === f.key;
@@ -707,7 +707,7 @@ export default function TransactionsPage() {
             </motion.div>
 
             {/* ── Count label ────────────────────────── */}
-            <motion.div variants={fadeUp} className="px-4 pb-2">
+            <motion.div variants={fadeUp} className="pb-2">
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                     {filtered.length}{" "}
                     {filtered.length === 1 ? "transação" : "transações"}
@@ -723,7 +723,7 @@ export default function TransactionsPage() {
                     animate="show"
                     exit="hidden"
                     variants={staggerContainer}
-                    className="px-4 space-y-3"
+                    className="space-y-3"
                 >
                     {paginated.length === 0 ? (
                         <motion.div
@@ -815,7 +815,7 @@ export default function TransactionsPage() {
             {totalPages > 1 && (
                 <motion.div
                     variants={fadeUp}
-                    className="flex items-center justify-center gap-2 px-4 pt-6 pb-4"
+                    className="flex items-center justify-center gap-2 pt-6 pb-4"
                 >
                     {/* Previous */}
                     <motion.button

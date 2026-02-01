@@ -327,7 +327,7 @@ export default function CustomerKycPage(): React.JSX.Element {
       variants={stagger}
       initial="hidden"
       animate="show"
-      className="mx-auto max-w-lg space-y-5 px-4 pb-24 pt-2 sm:px-0"
+      className="mx-auto max-w-lg space-y-5 pb-8 pt-2"
     >
       {/* ---- Page header ---- */}
       <motion.div variants={fadeUp}>
