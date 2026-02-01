@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X, FileText, CheckCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -108,13 +108,13 @@ export function KycUpgradeModal({
     }
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="bg-white dark:bg-[#1a1025] border border-white/70 dark:border-white/10 rounded-3xl max-w-md">
-                <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-foreground">
+        <BottomSheet open={open} onOpenChange={handleClose}>
+            <BottomSheetContent>
+                <BottomSheetHeader>
+                    <BottomSheetTitle className="text-xl font-bold text-foreground">
                         Solicitar Upgrade para {targetLevelName}
-                    </DialogTitle>
-                </DialogHeader>
+                    </BottomSheetTitle>
+                </BottomSheetHeader>
 
                 {step === "upload" && (
                     <div className="space-y-5">
@@ -242,7 +242,7 @@ export function KycUpgradeModal({
                         </Button>
                     </div>
                 )}
-            </DialogContent>
-        </Dialog>
+            </BottomSheetContent>
+        </BottomSheet>
     );
 }

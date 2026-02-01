@@ -3,463 +3,727 @@
 import * as React from "react";
 import { isAxiosError } from "axios";
 import http from "@/lib/http";
-import { Button } from "@/components/ui/button";
-import { Loader2, KeyRound, Plus, Copy, RefreshCw, Trash2, CheckCircle2, Clock, AlertCircle, ShieldCheck, XCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { motion } from "framer-motion";
+import {
+  Loader2,
+  KeyRound,
+  Plus,
+  Copy,
+  Trash2,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  ShieldCheck,
+  XCircle,
+  MoreVertical,
+  Mail,
+  Smartphone,
+  Hash,
+  Shuffle,
+  CreditCard,
+} from "lucide-react";
+import {
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetHeader,
+  BottomSheetTitle,
+} from "@/components/ui/bottom-sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 
+/* --- Types --- */
+
 type PixKey = {
-    id: string;
-    keyType: string;
-    keyValue: string;
-    status: string;
-    validated?: boolean;
-    validatedAt?: string | null;
-    validationAttempted?: boolean;
-    validationError?: string | null;
-    createdAt: string;
+  id: string;
+  keyType: string;
+  keyValue: string;
+  status: string;
+  validated?: boolean;
+  validatedAt?: string | null;
+  validationAttempted?: boolean;
+  validationError?: string | null;
+  createdAt: string;
 };
 
+/* --- Animation variants --- */
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] },
+  },
+};
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+
+/* --- Helpers --- */
+
 function getErrorMessage(err: unknown, fallback: string): string {
-    if (isAxiosError(err)) return err.response?.data?.message || fallback;
-    if (err instanceof Error) return err.message || fallback;
-    return fallback;
+  if (isAxiosError(err)) return err.response?.data?.message || fallback;
+  if (err instanceof Error) return err.message || fallback;
+  return fallback;
 }
 
 function formatDate(dateStr: string) {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("pt-BR");
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("pt-BR");
 }
 
 function getKeyTypeLabel(type: string) {
-    switch (type) {
-        case "RANDOM":
-            return "Aleatória";
-        case "CPF":
-            return "CPF";
-        case "CNPJ":
-            return "CNPJ";
-        case "EMAIL":
-            return "E-mail";
-        case "PHONE":
-            return "Telefone";
-        default:
-            return type;
-    }
+  switch (type) {
+    case "RANDOM":
+      return "Aleatória";
+    case "CPF":
+      return "CPF";
+    case "CNPJ":
+      return "CNPJ";
+    case "EMAIL":
+      return "E-mail";
+    case "PHONE":
+      return "Telefone";
+    default:
+      return type;
+  }
 }
 
-function getKeyTypeIcon(type: string) {
-    switch (type) {
-        case "CPF":
-        case "CNPJ":
-            return "🆔";
-        case "EMAIL":
-            return "📧";
-        case "PHONE":
-            return "📱";
-        case "RANDOM":
-            return "🔑";
-        default:
-            return "🔑";
-    }
+function KeyTypeIconComponent({ type, size = "md" }: { type: string; size?: "sm" | "md" }) {
+  const cls = size === "sm" ? "w-4 h-4" : "w-[18px] h-[18px]";
+  switch (type) {
+    case "CPF":
+      return <CreditCard className={cls} />;
+    case "CNPJ":
+      return <Hash className={cls} />;
+    case "EMAIL":
+      return <Mail className={cls} />;
+    case "PHONE":
+      return <Smartphone className={cls} />;
+    case "RANDOM":
+      return <Shuffle className={cls} />;
+    default:
+      return <KeyRound className={cls} />;
+  }
 }
+
+function getKeyIconColor(type: string) {
+  switch (type) {
+    case "CPF":
+      return "bg-blue-500/15 text-blue-600 dark:text-blue-400";
+    case "CNPJ":
+      return "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400";
+    case "EMAIL":
+      return "bg-purple-500/15 text-purple-600 dark:text-purple-400";
+    case "PHONE":
+      return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
+    case "RANDOM":
+      return "bg-amber-500/15 text-amber-600 dark:text-amber-400";
+    default:
+      return "bg-gray-500/15 text-gray-600 dark:text-gray-400";
+  }
+}
+
+const KEY_TYPES = [
+  { value: "CPF", label: "CPF" },
+  { value: "CNPJ", label: "CNPJ" },
+  { value: "EMAIL", label: "E-mail" },
+  { value: "PHONE", label: "Telefone" },
+  { value: "RANDOM", label: "Aleatória" },
+];
+
+/* --- Status Badge --- */
+
+function StatusBadge({ pix }: { pix: PixKey }) {
+  if (pix.validated) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+        <CheckCircle2 className="w-3 h-3" />
+        Validada
+      </span>
+    );
+  }
+  if (pix.validationAttempted && pix.validationError) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-full bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20">
+        <XCircle className="w-3 h-3" />
+        Falhou
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+      <Clock className="w-3 h-3" />
+      Pendente
+    </span>
+  );
+}
+
+/* --- Main Component --- */
 
 export default function CustomerPixPage() {
-    const { user } = useAuth();
-    const customerId = user?.customerId;
-    const [loading, setLoading] = React.useState(true);
-    const [pixKeys, setPixKeys] = React.useState<PixKey[]>([]);
-    const [showModal, setShowModal] = React.useState(false);
-    const [showDeleteModal, setShowDeleteModal] = React.useState(false);
-    const [keyToDelete, setKeyToDelete] = React.useState<PixKey | null>(null);
-    const [newType, setNewType] = React.useState("CPF");
-    const [newValue, setNewValue] = React.useState("");
-    const [submitting, setSubmitting] = React.useState(false);
-    const [deleting, setDeleting] = React.useState(false);
-    const [validating, setValidating] = React.useState<string | null>(null);
+  const { user } = useAuth();
+  const customerId = user?.customerId;
+  const [loading, setLoading] = React.useState(true);
+  const [pixKeys, setPixKeys] = React.useState<PixKey[]>([]);
+  const [showModal, setShowModal] = React.useState(false);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [keyToDelete, setKeyToDelete] = React.useState<PixKey | null>(null);
+  const [newType, setNewType] = React.useState("CPF");
+  const [newValue, setNewValue] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
+  const [validating, setValidating] = React.useState<string | null>(null);
 
-    async function loadPixKeys() {
-        if (!customerId) return;
-        try {
-            setLoading(true);
-            const res = await http.get<PixKey[]>(`/pix-keys`);
-            setPixKeys(res.data || []);
-        } catch {
-            setPixKeys([]);
-        } finally {
-            setLoading(false);
-        }
+  async function loadPixKeys() {
+    if (!customerId) return;
+    try {
+      setLoading(true);
+      const res = await http.get<PixKey[]>("/pix-keys");
+      setPixKeys(res.data || []);
+    } catch {
+      setPixKeys([]);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    React.useEffect(() => {
-        loadPixKeys();
-    }, [customerId]);
+  React.useEffect(() => {
+    loadPixKeys();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerId]);
 
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        if (!customerId) return;
-        setSubmitting(true);
-        try {
-            await http.post(`/pix-keys`, {
-                keyType: newType,
-                keyValue: newType === "RANDOM" ? crypto.randomUUID() : newValue,
-            });
-            toast.success("Chave Pix cadastrada com sucesso!");
-            setShowModal(false);
-            setNewType("CPF");
-            setNewValue("");
-            loadPixKeys();
-        } catch (err: unknown) {
-            toast.error(getErrorMessage(err, "Erro ao cadastrar chave Pix"));
-        } finally {
-            setSubmitting(false);
-        }
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!customerId) return;
+    setSubmitting(true);
+    try {
+      await http.post("/pix-keys", {
+        keyType: newType,
+        keyValue: newType === "RANDOM" ? crypto.randomUUID() : newValue,
+      });
+      toast.success("Chave Pix cadastrada com sucesso!");
+      setShowModal(false);
+      setNewType("CPF");
+      setNewValue("");
+      loadPixKeys();
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Erro ao cadastrar chave Pix"));
+    } finally {
+      setSubmitting(false);
     }
+  }
 
-    async function handleDelete() {
-        if (!keyToDelete) return;
-        setDeleting(true);
-        try {
-            await http.delete(`/pix-keys/${keyToDelete.id}`);
-            toast.success("Chave Pix removida com sucesso!");
-            setShowDeleteModal(false);
-            setKeyToDelete(null);
-            loadPixKeys();
-        } catch (err: unknown) {
-            toast.error(getErrorMessage(err, "Erro ao remover chave Pix"));
-        } finally {
-            setDeleting(false);
-        }
+  async function handleDelete() {
+    if (!keyToDelete) return;
+    setDeleting(true);
+    try {
+      await http.delete("/pix-keys/" + keyToDelete.id);
+      toast.success("Chave Pix removida com sucesso!");
+      setShowDeleteModal(false);
+      setKeyToDelete(null);
+      loadPixKeys();
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Erro ao remover chave Pix"));
+    } finally {
+      setDeleting(false);
     }
+  }
 
-    async function onCopy(text: string) {
-        await navigator.clipboard.writeText(text);
-        toast.success("Chave copiada!");
+  async function onCopy(text: string) {
+    await navigator.clipboard.writeText(text);
+    toast.success("Chave copiada!");
+  }
+
+  async function handleValidate(pixKeyId: string) {
+    setValidating(pixKeyId);
+    try {
+      await http.post("/inter/pix/validar-chave/" + pixKeyId);
+      toast.success("Chave validada com sucesso!");
+      loadPixKeys();
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Erro ao validar chave"));
+    } finally {
+      setValidating(null);
     }
+  }
 
-    async function handleValidate(pixKeyId: string) {
-        setValidating(pixKeyId);
-        try {
-            await http.post(`/inter/pix/validar-chave/${pixKeyId}`);
-            toast.success("Chave validada com sucesso!");
-            loadPixKeys();
-        } catch (err: unknown) {
-            toast.error(getErrorMessage(err, "Erro ao validar chave"));
-        } finally {
-            setValidating(null);
-        }
-    }
+  function openDeleteModal(key: PixKey) {
+    setKeyToDelete(key);
+    setShowDeleteModal(true);
+  }
 
-    function openDeleteModal(key: PixKey) {
-        setKeyToDelete(key);
-        setShowDeleteModal(true);
-    }
+  /* --- Loading State --- */
 
-    if (loading) {
-        return (
-            <div className="flex h-[80vh] flex-col items-center justify-center">
-                <Loader2 className="h-10 w-10 animate-spin text-[#6F00FF]/50 dark:text-[#6F00FF]" />
-                <p className="text-sm text-muted-foreground mt-4">Carregando chaves Pix...</p>
-            </div>
-        );
-    }
-
+  if (loading) {
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">Chaves Pix</h1>
-                    <p className="text-muted-foreground text-sm mt-1">
-                        Gerencie suas chaves Pix para receber e enviar pagamentos
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Button
-                        variant="ghost"
-                        onClick={loadPixKeys}
-                        className="text-muted-foreground hover:text-foreground hover:bg-accent"
-                    >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Atualizar
-                    </Button>
-                    <Button
-                        onClick={() => setShowModal(true)}
-                        className="bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#6F00FF]/50 hover:to-[#6F00FF] text-white font-semibold"
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Nova Chave Pix
-                    </Button>
-                </div>
-            </div>
-
-            <div className="bg-card border border-[#6F00FF]/50/20 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-[#6F00FF]/50/20">
-                        <ShieldCheck className="w-5 h-5 text-[#6F00FF]/50 dark:text-[#6F00FF]" />
-                    </div>
-                    <div>
-                        <p className="text-foreground font-medium text-sm">Validação de Chaves</p>
-                        <p className="text-muted-foreground text-xs mt-0.5">
-                            Chaves CPF, CNPJ, E-mail e Telefone são validadas automaticamente se corresponderem aos seus dados.
-                            Para chaves aleatórias, clique em &quot;Validar&quot; para confirmar via micro-transferência de R$ 0,01.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {pixKeys.length === 0 ? (
-                <div className="bg-card border border-border rounded-2xl p-12 text-center">
-                    <div className="p-4 rounded-full bg-[#6F00FF]/50/20 inline-block mb-4">
-                        <KeyRound className="w-8 h-8 text-[#6F00FF]/50 dark:text-[#6F00FF]" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-foreground mb-2">
-                        Nenhuma chave Pix encontrada
-                    </h2>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                        Cadastre sua primeira chave Pix para começar a receber pagamentos instantâneos.
-                    </p>
-                    <Button
-                        onClick={() => setShowModal(true)}
-                        className="bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#6F00FF]/50 hover:to-[#6F00FF] text-white font-semibold px-8"
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Cadastrar Chave Pix
-                    </Button>
-                </div>
-            ) : (
-                <div className="grid gap-4">
-                    {pixKeys.map((pix) => (
-                        <div
-                            key={pix.id}
-                            className="bg-card border border-border rounded-2xl p-5 hover:border-[#6F00FF]/50/30 transition"
-                        >
-                            <div className="flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 rounded-xl bg-linear-to-br from-[#6F00FF]/50/20 to-[#6F00FF]/20 text-2xl">
-                                        {getKeyTypeIcon(pix.keyType)}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-foreground font-semibold">
-                                                {getKeyTypeLabel(pix.keyType)}
-                                            </span>
-                                            {pix.validated ? (
-                                                <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30">
-                                                    <CheckCircle2 className="w-3 h-3" />
-                                                    Validada
-                                                </span>
-                                            ) : pix.validationAttempted && pix.validationError ? (
-                                                <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30">
-                                                    <XCircle className="w-3 h-3" />
-                                                    Falhou
-                                                </span>
-                                            ) : (
-                                                <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                                                    <Clock className="w-3 h-3" />
-                                                    Pendente
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <code className="text-muted-foreground text-sm font-mono">
-                                                {pix.keyValue}
-                                            </code>
-                                            <button
-                                                onClick={() => onCopy(pix.keyValue)}
-                                                className="p-1 hover:bg-accent rounded transition"
-                                                title="Copiar chave"
-                                            >
-                                                <Copy className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-3">
-                                    <div className="text-right">
-                                        <p className="text-muted-foreground text-sm">
-                                            Criada em {formatDate(pix.createdAt)}
-                                        </p>
-                                        {pix.validated && pix.validatedAt && (
-                                            <p className="text-green-600/60 dark:text-green-400/60 text-xs">
-                                                Validada em {formatDate(pix.validatedAt)}
-                                            </p>
-                                        )}
-                                        {pix.validationAttempted && pix.validationError && (
-                                            <p className="text-red-600/60 dark:text-red-400/60 text-xs">
-                                                {pix.validationError}
-                                            </p>
-                                        )}
-                                    </div>
-                                    {!pix.validated && !pix.validationAttempted && (
-                                        <button
-                                            onClick={() => handleValidate(pix.id)}
-                                            disabled={validating === pix.id}
-                                            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#6F00FF]/50/20 text-[#6F00FF] dark:text-[#6F00FF]/30 hover:bg-[#6F00FF]/50/30 border border-[#6F00FF]/50/30 transition flex items-center gap-1.5 disabled:opacity-50"
-                                            title="Validar chave (R$ 0,01)"
-                                        >
-                                            {validating === pix.id ? (
-                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                            ) : (
-                                                <ShieldCheck className="w-3.5 h-3.5" />
-                                            )}
-                                            Validar
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={() => openDeleteModal(pix)}
-                                        className="p-2 hover:bg-red-500/10 rounded-lg transition text-muted-foreground hover:text-red-500"
-                                        title="Remover chave"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogContent className="bg-card border border-[#6F00FF]/50/20">
-                    <DialogHeader>
-                        <DialogTitle className="text-foreground text-xl">Nova Chave Pix</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium mb-2 text-muted-foreground">
-                                Tipo de chave
-                            </label>
-                            <Select value={newType} onValueChange={setNewType}>
-                                <SelectTrigger className="w-full border-border bg-background text-foreground">
-                                    <SelectValue placeholder="Selecione o tipo" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-card border-border">
-                                    <SelectItem value="CPF" className="text-foreground hover:bg-accent">CPF</SelectItem>
-                                    <SelectItem value="CNPJ" className="text-foreground hover:bg-accent">CNPJ</SelectItem>
-                                    <SelectItem value="EMAIL" className="text-foreground hover:bg-accent">E-mail</SelectItem>
-                                    <SelectItem value="PHONE" className="text-foreground hover:bg-accent">Telefone</SelectItem>
-                                    <SelectItem value="RANDOM" className="text-foreground hover:bg-accent">Aleatória</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {newType !== "RANDOM" && (
-                            <div>
-                                <label className="block text-sm font-medium mb-2 text-muted-foreground">
-                                    Valor da chave
-                                </label>
-                                <Input
-                                    type="text"
-                                    value={newValue}
-                                    onChange={e => setNewValue(e.target.value)}
-                                    placeholder={
-                                        newType === "CPF" ? "000.000.000-00" :
-                                            newType === "CNPJ" ? "000.000.000/0000-00" :
-                                                newType === "EMAIL" ? "seu@email.com" :
-                                                    "+55 11 99999-9999"
-                                    }
-                                    required
-                                    className="border-border bg-background text-foreground placeholder:text-muted-foreground/50"
-                                />
-                                <p className="text-muted-foreground text-xs mt-2">
-                                    {newType === "CPF" || newType === "CNPJ" || newType === "EMAIL" || newType === "PHONE"
-                                        ? "Se corresponder aos seus dados cadastrados, será validada automaticamente."
-                                        : ""}
-                                </p>
-                            </div>
-                        )}
-
-                        {newType === "RANDOM" && (
-                            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                                <div className="flex items-start gap-3">
-                                    <AlertCircle className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-foreground text-sm font-medium">Chave Aleatória</p>
-                                        <p className="text-muted-foreground text-xs mt-1">
-                                            Uma chave será gerada automaticamente. Chaves aleatórias requerem validação manual.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="flex gap-3 pt-2">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => setShowModal(false)}
-                                className="flex-1 bg-muted border border-border text-foreground hover:bg-accent"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={submitting || (newType !== "RANDOM" && !newValue)}
-                                className="flex-1 bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#6F00FF]/50 hover:to-[#6F00FF] text-white font-semibold disabled:opacity-50"
-                            >
-                                {submitting ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Cadastrando...
-                                    </>
-                                ) : (
-                                    "Cadastrar Chave"
-                                )}
-                            </Button>
-                        </div>
-                    </form>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-                <DialogContent className="bg-card border border-red-500/20 max-w-sm">
-                    <DialogHeader>
-                        <DialogTitle className="text-foreground text-xl">Remover Chave Pix</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <p className="text-muted-foreground">
-                            Tem certeza que deseja remover esta chave Pix?
-                        </p>
-                        {keyToDelete && (
-                            <div className="bg-muted border border-border rounded-xl p-4">
-                                <p className="text-foreground font-medium">{getKeyTypeLabel(keyToDelete.keyType)}</p>
-                                <code className="text-muted-foreground text-sm">{keyToDelete.keyValue}</code>
-                            </div>
-                        )}
-                        <div className="flex gap-3 pt-2">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => setShowDeleteModal(false)}
-                                className="flex-1 bg-muted border border-border text-foreground hover:bg-accent"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                onClick={handleDelete}
-                                disabled={deleting}
-                                className="flex-1 bg-red-600 hover:bg-red-500 text-white font-semibold"
-                            >
-                                {deleting ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Removendo...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Trash2 className="w-4 h-4 mr-2" />
-                                        Remover
-                                    </>
-                                )}
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+      <div className="flex h-[80vh] flex-col items-center justify-center gap-3">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-[#6F00FF]/20 blur-xl animate-pulse" />
+          <div className="relative p-4 rounded-full bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08]">
+            <Loader2 className="h-7 w-7 animate-spin text-[#6F00FF]" />
+          </div>
         </div>
+        <p className="text-[13px] text-muted-foreground">
+          Carregando chaves Pix...
+        </p>
+      </div>
     );
+  }
+
+  /* --- Empty State --- */
+
+  if (pixKeys.length === 0) {
+    return (
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+        className="px-4 pt-6 pb-10 max-w-lg mx-auto"
+      >
+        <motion.div
+          variants={fadeUp}
+          className="flex items-center justify-between mb-8"
+        >
+          <div>
+            <h1 className="text-[22px] font-bold text-foreground leading-tight">
+              Chaves PIX
+            </h1>
+            <p className="text-[13px] text-muted-foreground mt-0.5">
+              Gerencie suas chaves Pix
+            </p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          variants={fadeUp}
+          className="premium-card flex flex-col items-center text-center py-14 px-6"
+        >
+          <div className="relative mb-5">
+            <div className="absolute inset-0 rounded-full bg-[#6F00FF]/15 blur-2xl scale-150" />
+            <div className="relative w-16 h-16 rounded-full bg-[#6F00FF]/10 flex items-center justify-center">
+              <KeyRound className="w-7 h-7 text-[#6F00FF]" />
+            </div>
+          </div>
+
+          <h2 className="text-[17px] font-bold text-foreground mb-1.5">
+            Nenhuma chave Pix
+          </h2>
+          <p className="text-[13px] text-muted-foreground max-w-[260px] leading-relaxed mb-7">
+            Cadastre sua primeira chave Pix para come&ccedil;ar a receber pagamentos
+            instant&acirc;neos.
+          </p>
+
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#6F00FF] hover:bg-[#8B2FFF] text-white text-[15px] font-semibold active:scale-95 transition-transform"
+          >
+            <Plus className="w-4 h-4" />
+            Cadastrar Chave Pix
+          </button>
+        </motion.div>
+
+        <AddKeyModal
+          open={showModal}
+          onOpenChange={setShowModal}
+          newType={newType}
+          setNewType={setNewType}
+          newValue={newValue}
+          setNewValue={setNewValue}
+          submitting={submitting}
+          onSubmit={handleSubmit}
+        />
+      </motion.div>
+    );
+  }
+
+  /* --- Key List --- */
+
+  return (
+    <motion.div
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+      className="px-4 pt-6 pb-10 max-w-lg mx-auto"
+    >
+      {/* Header */}
+      <motion.div
+        variants={fadeUp}
+        className="flex items-center justify-between mb-6"
+      >
+        <div>
+          <h1 className="text-[22px] font-bold text-foreground leading-tight">
+            Chaves PIX
+          </h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
+            {pixKeys.length} chave{pixKeys.length !== 1 ? "s" : ""} cadastrada
+            {pixKeys.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="w-10 h-10 rounded-full bg-[#6F00FF] hover:bg-[#8B2FFF] text-white flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-[#6F00FF]/25"
+        >
+          <Plus className="w-5 h-5" />
+        </button>
+      </motion.div>
+
+      {/* Info banner */}
+      <motion.div
+        variants={fadeUp}
+        className="premium-card !p-3.5 mb-4 flex items-start gap-3"
+      >
+        <div className="w-8 h-8 rounded-xl bg-[#6F00FF]/10 flex items-center justify-center shrink-0">
+          <ShieldCheck className="w-4 h-4 text-[#6F00FF]" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[13px] font-semibold text-foreground leading-tight">
+            Valida&ccedil;&atilde;o de Chaves
+          </p>
+          <p className="text-[12px] text-muted-foreground mt-0.5 leading-relaxed">
+            Chaves CPF, CNPJ, E-mail e Telefone s&atilde;o validadas automaticamente.
+            Para chaves aleat&oacute;rias, clique em &quot;Validar&quot; (R$ 0,01).
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Keys */}
+      <div className="space-y-3">
+        {pixKeys.map((pix) => (
+          <motion.div
+            key={pix.id}
+            variants={fadeUp}
+            className="premium-card !p-4"
+          >
+            <div className="flex items-start gap-3">
+              {/* Icon */}
+              <div
+                className={"w-10 h-10 rounded-full flex items-center justify-center shrink-0 " + getKeyIconColor(pix.keyType)}
+              >
+                <KeyTypeIconComponent type={pix.keyType} />
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[15px] font-semibold text-foreground">
+                    {getKeyTypeLabel(pix.keyType)}
+                  </span>
+                  <StatusBadge pix={pix} />
+                </div>
+
+                {/* Copyable value */}
+                <button
+                  onClick={() => onCopy(pix.keyValue)}
+                  className="group flex items-center gap-1.5 mb-1.5 active:scale-95 transition-transform"
+                >
+                  <code className="text-[13px] text-muted-foreground font-mono truncate max-w-[200px] sm:max-w-none">
+                    {pix.keyValue}
+                  </code>
+                  <Copy className="w-3 h-3 text-muted-foreground/50 group-hover:text-[#6F00FF] transition-colors shrink-0" />
+                </button>
+
+                {/* Date & error info */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] text-muted-foreground/70">
+                    Criada em {formatDate(pix.createdAt)}
+                  </span>
+                  {pix.validated && pix.validatedAt && (
+                    <span className="text-[11px] text-emerald-500/70">
+                      &middot; Validada {formatDate(pix.validatedAt)}
+                    </span>
+                  )}
+                  {pix.validationAttempted && pix.validationError && (
+                    <span className="text-[11px] text-red-500/70">
+                      &middot; {pix.validationError}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-8 h-8 rounded-xl bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] flex items-center justify-center hover:bg-white/80 dark:hover:bg-white/[0.08] active:scale-95 transition-transform shrink-0">
+                    <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 rounded-xl bg-white/90 dark:bg-[#1a1025]/95 backdrop-blur-xl border border-white/60 dark:border-white/[0.08] shadow-xl"
+                >
+                  <DropdownMenuItem
+                    onClick={() => onCopy(pix.keyValue)}
+                    className="gap-2 text-[13px] rounded-lg cursor-pointer"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    Copiar chave
+                  </DropdownMenuItem>
+                  {!pix.validated && !pix.validationAttempted && (
+                    <DropdownMenuItem
+                      onClick={() => handleValidate(pix.id)}
+                      disabled={validating === pix.id}
+                      className="gap-2 text-[13px] rounded-lg cursor-pointer text-[#6F00FF]"
+                    >
+                      {validating === pix.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                      )}
+                      Validar (R$ 0,01)
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={() => openDeleteModal(pix)}
+                    className="gap-2 text-[13px] rounded-lg cursor-pointer text-red-500 focus:text-red-500"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Remover chave
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Modals */}
+      <AddKeyModal
+        open={showModal}
+        onOpenChange={setShowModal}
+        newType={newType}
+        setNewType={setNewType}
+        newValue={newValue}
+        setNewValue={setNewValue}
+        submitting={submitting}
+        onSubmit={handleSubmit}
+      />
+
+      <DeleteKeyModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        keyToDelete={keyToDelete}
+        deleting={deleting}
+        onDelete={handleDelete}
+      />
+    </motion.div>
+  );
+}
+
+/* --- Add Key Modal --- */
+
+function AddKeyModal({
+  open,
+  onOpenChange,
+  newType,
+  setNewType,
+  newValue,
+  setNewValue,
+  submitting,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  newType: string;
+  setNewType: (v: string) => void;
+  newValue: string;
+  setNewValue: (v: string) => void;
+  submitting: boolean;
+  onSubmit: (e: React.FormEvent) => void;
+}) {
+  return (
+    <BottomSheet open={open} onOpenChange={onOpenChange}>
+      <BottomSheetContent>
+        <BottomSheetHeader className="p-5 pb-0">
+          <BottomSheetTitle className="text-[18px] font-bold text-foreground">
+            Nova Chave Pix
+          </BottomSheetTitle>
+        </BottomSheetHeader>
+
+        <form onSubmit={onSubmit} className="p-5 pt-4 space-y-5">
+          {/* Key type grid */}
+          <div>
+            <label className="block text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+              Tipo de chave
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {KEY_TYPES.map((kt) => (
+                <button
+                  key={kt.value}
+                  type="button"
+                  onClick={() => setNewType(kt.value)}
+                  className={
+                    "flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-[12px] font-medium active:scale-95 transition-all " +
+                    (newType === kt.value
+                      ? "bg-[#6F00FF]/10 text-[#6F00FF] border-2 border-[#6F00FF]/40 shadow-sm"
+                      : "bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] text-muted-foreground hover:border-[#6F00FF]/20")
+                  }
+                >
+                  <KeyTypeIconComponent type={kt.value} size="sm" />
+                  {kt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Key value input */}
+          {newType !== "RANDOM" && (
+            <div>
+              <label className="block text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Valor da chave
+              </label>
+              <Input
+                type="text"
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                placeholder={
+                  newType === "CPF"
+                    ? "000.000.000-00"
+                    : newType === "CNPJ"
+                      ? "000.000.000/0000-00"
+                      : newType === "EMAIL"
+                        ? "seu@email.com"
+                        : "+55 11 99999-9999"
+                }
+                required
+                className="h-11 rounded-xl bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] text-foreground placeholder:text-muted-foreground/40 text-[14px]"
+              />
+              <p className="text-[11px] text-muted-foreground/70 mt-1.5">
+                Se corresponder aos seus dados, ser&aacute; validada automaticamente.
+              </p>
+            </div>
+          )}
+
+          {/* Random key notice */}
+          {newType === "RANDOM" && (
+            <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/15">
+              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[13px] font-semibold text-foreground">
+                  Chave Aleat&oacute;ria
+                </p>
+                <p className="text-[12px] text-muted-foreground mt-0.5 leading-relaxed">
+                  Ser&aacute; gerada automaticamente. Requer valida&ccedil;&atilde;o manual via
+                  micro-transfer&ecirc;ncia.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Buttons */}
+          <div className="flex gap-2.5 pt-1">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-foreground bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] hover:bg-white/80 dark:hover:bg-white/[0.08] active:scale-95 transition-transform"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={submitting || (newType !== "RANDOM" && !newValue)}
+              className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white bg-[#6F00FF] hover:bg-[#8B2FFF] disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-transform flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Cadastrando...
+                </>
+              ) : (
+                "Cadastrar"
+              )}
+            </button>
+          </div>
+        </form>
+      </BottomSheetContent>
+    </BottomSheet>
+  );
+}
+
+/* --- Delete Key Modal --- */
+
+function DeleteKeyModal({
+  open,
+  onOpenChange,
+  keyToDelete,
+  deleting,
+  onDelete,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  keyToDelete: PixKey | null;
+  deleting: boolean;
+  onDelete: () => void;
+}) {
+  return (
+    <BottomSheet open={open} onOpenChange={onOpenChange}>
+      <BottomSheetContent>
+        <BottomSheetHeader className="p-5 pb-0">
+          <BottomSheetTitle className="text-[18px] font-bold text-foreground">
+            Remover Chave Pix
+          </BottomSheetTitle>
+        </BottomSheetHeader>
+
+        <div className="p-5 pt-3 space-y-4">
+          <p className="text-[14px] text-muted-foreground">
+            Tem certeza que deseja remover esta chave?
+          </p>
+
+          {keyToDelete && (
+            <div className={"flex items-center gap-3 p-3.5 rounded-xl bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08]"}>
+              <div
+                className={"w-9 h-9 rounded-full flex items-center justify-center shrink-0 " + getKeyIconColor(keyToDelete.keyType)}
+              >
+                <KeyTypeIconComponent type={keyToDelete.keyType} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[14px] font-semibold text-foreground">
+                  {getKeyTypeLabel(keyToDelete.keyType)}
+                </p>
+                <code className="text-[12px] text-muted-foreground font-mono truncate block">
+                  {keyToDelete.keyValue}
+                </code>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2.5 pt-1">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-foreground bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] hover:bg-white/80 dark:hover:bg-white/[0.08] active:scale-95 transition-transform"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={onDelete}
+              disabled={deleting}
+              className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-transform flex items-center justify-center gap-2"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Removendo...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Remover
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </BottomSheetContent>
+    </BottomSheet>
+  );
 }

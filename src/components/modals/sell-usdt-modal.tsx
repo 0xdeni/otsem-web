@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { isAxiosError } from "axios";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetDescription } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, TrendingDown, Wallet, Key, AlertTriangle, Check, Shield } from "lucide-react";
+import { Loader2, ArrowRight, TrendingDown, Wallet, Key, Check, Shield } from "lucide-react";
 import { toast } from "sonner";
 import http from "@/lib/http";
 import { useUsdtRate } from "@/lib/useUsdtRate";
@@ -93,7 +93,7 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
     const [txHash, setTxHash] = React.useState<string | null>(null);
     const [walletsLoading, setWalletsLoading] = React.useState(false);
     const [signingStatus, setSigningStatus] = React.useState<string>("");
-    const [conversionId, setConversionId] = React.useState<string | null>(null);
+    const [_conversionId, setConversionId] = React.useState<string | null>(null);
     const [conversionStatus, setConversionStatus] = React.useState<ConversionStatus>("PENDING");
     const [conversionDetail, setConversionDetail] = React.useState<ConversionDetail | null>(null);
     const pollingRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -414,24 +414,24 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
     const filteredWallets = wallets.filter(w => w.network === network);
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="bg-card border border-orange-500/20 max-w-sm shadow-2xl">
-                <DialogHeader>
-                    <DialogTitle className="text-foreground text-xl text-center">
+        <BottomSheet open={open} onOpenChange={handleClose}>
+            <BottomSheetContent>
+                <BottomSheetHeader>
+                    <BottomSheetTitle className="text-foreground text-xl text-center">
                         {step === "wallet" && "Vender USDT"}
                         {step === "amount" && "Valor da Venda"}
                         {step === "sign" && "Assinar Transação"}
                         {step === "processing" && "Processando Venda"}
                         {step === "success" && "Venda Concluída!"}
-                    </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-center text-sm">
+                    </BottomSheetTitle>
+                    <BottomSheetDescription className="text-muted-foreground text-center text-sm">
                         {step === "wallet" && "Escolha a rede e a carteira de origem"}
                         {step === "amount" && "Informe quanto USDT deseja vender"}
                         {step === "sign" && "Revise e assine a transação"}
                         {step === "processing" && "Acompanhe o progresso da sua venda"}
                         {step === "success" && "Sua venda foi processada com sucesso"}
-                    </DialogDescription>
-                </DialogHeader>
+                    </BottomSheetDescription>
+                </BottomSheetHeader>
 
                 <div className="flex flex-col items-center space-y-5 py-4">
                     {step === "wallet" && (
@@ -894,7 +894,7 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
                         </div>
                     )}
                 </div>
-            </DialogContent>
-        </Dialog>
+            </BottomSheetContent>
+        </BottomSheet>
     );
 }

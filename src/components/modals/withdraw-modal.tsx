@@ -3,7 +3,7 @@
 import * as React from "react";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetDescription } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { useUiModals } from "@/stores/ui-modals";
 import { Loader2, ArrowLeft, Send, AlertCircle, CheckCircle2, KeyRound, Plus, AlertTriangle } from "lucide-react";
@@ -61,6 +61,7 @@ export function WithdrawModal() {
         if (open.withdraw && customerId) {
             loadPixKeys();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open.withdraw, customerId]);
 
     async function loadPixKeys() {
@@ -210,10 +211,10 @@ export function WithdrawModal() {
     const displayAmount = formatCurrency(cents);
 
     return (
-        <Dialog open={open.withdraw} onOpenChange={handleClose}>
-            <DialogContent className="bg-card border border-[#6F00FF]/50/20 max-w-sm shadow-2xl">
-                <DialogHeader>
-                    <DialogTitle className="text-foreground text-xl text-center flex items-center justify-center gap-2">
+        <BottomSheet open={open.withdraw} onOpenChange={handleClose}>
+            <BottomSheetContent>
+                <BottomSheetHeader>
+                    <BottomSheetTitle className="text-foreground text-xl text-center flex items-center justify-center gap-2">
                         {(step === "amount" || step === "confirm") && (
                             <Button
                                 onClick={handleBack}
@@ -230,16 +231,16 @@ export function WithdrawModal() {
                         {step === "amount" && "Valor da Transferência"}
                         {step === "confirm" && "Confirmar Transferência"}
                         {step === "success" && "PIX Enviado!"}
-                    </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-center text-sm">
+                    </BottomSheetTitle>
+                    <BottomSheetDescription className="text-muted-foreground text-center text-sm">
                         {step === "loading" && "Buscando suas chaves PIX..."}
                         {step === "nokeys" && "Cadastre uma chave para transferir"}
                         {step === "select" && "Selecione a chave PIX de destino"}
                         {step === "amount" && "Escolha ou digite o valor"}
                         {step === "confirm" && "Revise os dados antes de enviar"}
                         {step === "success" && "Sua transferência foi realizada"}
-                    </DialogDescription>
-                </DialogHeader>
+                    </BottomSheetDescription>
+                </BottomSheetHeader>
 
                 <div className="flex flex-col items-center space-y-5 py-4">
                     {step === "loading" && (
@@ -485,7 +486,7 @@ export function WithdrawModal() {
                         </div>
                     )}
                 </div>
-            </DialogContent>
-        </Dialog>
+            </BottomSheetContent>
+        </BottomSheet>
     );
 }

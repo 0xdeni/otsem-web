@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { motion } from "framer-motion";
 import { Copy, Users, DollarSign, Clock, Check, Share2, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import http from "@/lib/http";
+
+// ─── Types ───────────────────────────────────────────────
 
 type Referral = {
     id: string;
@@ -39,6 +39,8 @@ type Commission = {
     paidAt?: string;
 };
 
+// ─── Helpers ─────────────────────────────────────────────
+
 function formatCurrency(value: number): string {
     return value.toLocaleString("pt-BR", {
         style: "currency",
@@ -55,6 +57,15 @@ function formatDate(dateString: string): string {
         year: "numeric",
     });
 }
+
+// ─── Animations ──────────────────────────────────────────
+
+const fadeUp = {
+    hidden: { opacity: 0, y: 16 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] } },
+};
+
+// ─── Page ────────────────────────────────────────────────
 
 export default function AffiliatesPage() {
     const [loading, setLoading] = React.useState(true);
@@ -109,266 +120,291 @@ export default function AffiliatesPage() {
         }
     };
 
+    const handleShare = () => {
+        if (navigator.share) {
+            navigator.share({
+                title: "OtsemPay",
+                text: "Use meu código de indicação e ganhe benefícios!",
+                url: referralLink,
+            });
+        } else {
+            copyLink();
+        }
+    };
+
+    // ─── Loading ─────────────────────────────────────────
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-[50vh]">
-                <div className="text-muted-foreground">Carregando...</div>
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 rounded-full border-2 border-[#6F00FF]/30 border-t-[#6F00FF] animate-spin" />
+                    <span className="text-[13px] text-muted-foreground">Carregando...</span>
+                </div>
             </div>
         );
     }
+
+    // ─── Not available ───────────────────────────────────
 
     if (!stats) {
         return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold">Programa de Indicações</h1>
-                    <p className="text-muted-foreground mt-1">Indique amigos e ganhe comissões</p>
-                </div>
+            <motion.div
+                className="px-1 space-y-6"
+                initial="hidden"
+                animate="show"
+                variants={{ show: { transition: { staggerChildren: 0.06 } } }}
+            >
+                <motion.div variants={fadeUp}>
+                    <h1 className="text-[22px] font-bold text-foreground">Afiliados</h1>
+                    <p className="text-[13px] text-muted-foreground mt-0.5">Indique amigos e ganhe comissões</p>
+                </motion.div>
 
-                <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                        <Users className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Recurso não disponível</h3>
-                        <p className="text-muted-foreground text-center max-w-md">
-                            O programa de afiliados não está habilitado para a sua conta.
-                            Entre em contato com o suporte para solicitar acesso.
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
+                <motion.div variants={fadeUp} className="premium-card !p-8 text-center">
+                    <div className="w-16 h-16 rounded-full bg-[#6F00FF]/10 dark:bg-[#6F00FF]/20 flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-7 h-7 text-[#6F00FF]" strokeWidth={1.8} />
+                    </div>
+                    <h3 className="text-[15px] font-semibold text-foreground mb-1">Recurso não disponível</h3>
+                    <p className="text-[13px] text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
+                        O programa de afiliados não está habilitado para a sua conta. Entre em contato com o suporte para solicitar acesso.
+                    </p>
+                </motion.div>
+            </motion.div>
         );
     }
 
-    return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold">Programa de Afiliados</h1>
-                <p className="text-muted-foreground mt-1">Indique amigos e ganhe comissões em cada transação</p>
-            </div>
+    // ─── Main ────────────────────────────────────────────
 
-            <Card className="bg-gradient-to-r from-[#6F00FF] to-[#6F00FF] text-white border-0">
-                <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    return (
+        <motion.div
+            className="px-1 space-y-5 pb-8"
+            initial="hidden"
+            animate="show"
+            variants={{ show: { transition: { staggerChildren: 0.06 } } }}
+        >
+            {/* Header */}
+            <motion.div variants={fadeUp}>
+                <h1 className="text-[22px] font-bold text-foreground">Afiliados</h1>
+                <p className="text-[13px] text-muted-foreground mt-0.5">
+                    Indique amigos e ganhe comissões em cada transação
+                </p>
+            </motion.div>
+
+            {/* Referral link card */}
+            <motion.div variants={fadeUp}>
+                <div className="relative overflow-hidden rounded-[20px] p-5">
+                    {/* Glass gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#6F00FF] via-[#8B2FFF] to-[#6F00FF]" />
+                    <div className="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-white/10 blur-2xl" />
+                    <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-white/10 blur-2xl" />
+
+                    <div className="relative space-y-4">
+                        {/* Top: link */}
                         <div>
-                            <p className="text-white/80 text-sm mb-1">Seu link de indicação</p>
+                            <p className="text-white/60 text-[12px] font-medium mb-1.5">Seu link de indicação</p>
                             <div className="flex items-center gap-2">
-                                <code className="bg-white/20 px-3 py-1.5 rounded-lg text-sm font-mono truncate max-w-[300px]">
-                                    {referralLink}
-                                </code>
-                                <Button
-                                    size="sm"
-                                    variant="secondary"
+                                <div className="flex-1 min-w-0 bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2.5 border border-white/10">
+                                    <p className="text-white text-[13px] font-mono truncate">{referralLink}</p>
+                                </div>
+                                <button
                                     onClick={copyLink}
-                                    className="shrink-0"
+                                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/10 active:scale-95 transition-transform"
                                 >
-                                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                </Button>
+                                    {copied ? (
+                                        <Check className="w-4 h-4 text-white" strokeWidth={2.5} />
+                                    ) : (
+                                        <Copy className="w-4 h-4 text-white" strokeWidth={2} />
+                                    )}
+                                </button>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <div className="text-center">
-                                <p className="text-white/80 text-xs">Seu código</p>
+
+                        {/* Bottom: code + share */}
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-white/50 text-[11px] font-medium mb-0.5">Seu código</p>
                                 <button
                                     onClick={copyCode}
-                                    className="text-xl font-bold hover:underline cursor-pointer"
+                                    className="text-white text-[18px] font-bold tracking-wide active:opacity-70 transition-opacity"
                                 >
                                     {stats.referralCode}
                                 </button>
                             </div>
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                className="gap-2"
-                                onClick={() => {
-                                    if (navigator.share) {
-                                        navigator.share({
-                                            title: "OtsemPay",
-                                            text: "Use meu código de indicação e ganhe benefícios!",
-                                            url: referralLink,
-                                        });
-                                    } else {
-                                        copyLink();
-                                    }
-                                }}
+                            <button
+                                onClick={handleShare}
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-[#6F00FF] text-[13px] font-semibold active:scale-95 transition-transform"
                             >
-                                <Share2 className="h-4 w-4" />
+                                <Share2 className="w-4 h-4" strokeWidth={2} />
                                 Compartilhar
-                            </Button>
+                            </button>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </motion.div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total de Indicados</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalReferrals}</div>
-                        <p className="text-xs text-muted-foreground">
-                            {stats.activeReferrals} ativos
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Ganho</CardTitle>
-                        <DollarSign className="h-4 w-4 text-green-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-600">
-                            {formatCurrency(stats.totalEarnings)}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            Comissão de {stats.commissionRate}%
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pendente</CardTitle>
-                        <Clock className="h-4 w-4 text-amber-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-amber-600">
-                            {formatCurrency(stats.pendingEarnings)}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            Aguardando pagamento
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Já Recebido</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-[#6F00FF]" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-[#6F00FF]">
-                            {formatCurrency(stats.paidEarnings)}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            Total pago
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle>Suas Indicações</CardTitle>
-                            <CardDescription>Acompanhe seus indicados e comissões</CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={activeTab === "referrals" ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setActiveTab("referrals")}
-                            >
-                                Indicados
-                            </Button>
-                            <Button
-                                variant={activeTab === "commissions" ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setActiveTab("commissions")}
-                            >
-                                Comissões
-                            </Button>
+            {/* Stats grid (2x2) */}
+            <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
+                {/* Total referrals */}
+                <div className="premium-card !p-4 !rounded-[20px]">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 rounded-full bg-[#6F00FF]/10 dark:bg-[#6F00FF]/20 flex items-center justify-center">
+                            <Users className="w-4 h-4 text-[#6F00FF]" strokeWidth={2} />
                         </div>
                     </div>
-                </CardHeader>
-                <CardContent>
-                    {activeTab === "referrals" ? (
-                        referrals.length === 0 ? (
-                            <div className="text-center py-8">
-                                <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-                                <p className="text-muted-foreground">
-                                    Você ainda não tem indicados. Compartilhe seu link!
-                                </p>
+                    <p className="text-[20px] font-bold text-foreground">{stats.totalReferrals}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Total indicados</p>
+                    <p className="text-[11px] text-[#6F00FF] dark:text-[#8B2FFF] font-medium mt-0.5">
+                        {stats.activeReferrals} ativos
+                    </p>
+                </div>
+
+                {/* Total earnings */}
+                <div className="premium-card !p-4 !rounded-[20px]">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
+                            <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
+                        </div>
+                    </div>
+                    <p className="text-[20px] font-bold text-emerald-600 dark:text-emerald-400">
+                        {formatCurrency(stats.totalEarnings)}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Total ganho</p>
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
+                        {stats.commissionRate}% comissão
+                    </p>
+                </div>
+
+                {/* Pending */}
+                <div className="premium-card !p-4 !rounded-[20px]">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 rounded-full bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
+                            <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" strokeWidth={2} />
+                        </div>
+                    </div>
+                    <p className="text-[20px] font-bold text-amber-600 dark:text-amber-400">
+                        {formatCurrency(stats.pendingEarnings)}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Pendente</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Aguardando pgto</p>
+                </div>
+
+                {/* Paid */}
+                <div className="premium-card !p-4 !rounded-[20px]">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 rounded-full bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center">
+                            <TrendingUp className="w-4 h-4 text-purple-600 dark:text-purple-400" strokeWidth={2} />
+                        </div>
+                    </div>
+                    <p className="text-[20px] font-bold text-purple-600 dark:text-purple-400">
+                        {formatCurrency(stats.paidEarnings)}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Já recebido</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Total pago</p>
+                </div>
+            </motion.div>
+
+            {/* Tab pills */}
+            <motion.div variants={fadeUp} className="flex gap-2">
+                <button
+                    onClick={() => setActiveTab("referrals")}
+                    className={`px-4 py-2 rounded-full text-[13px] font-semibold active:scale-95 transition-all ${
+                        activeTab === "referrals"
+                            ? "bg-[#6F00FF] text-white shadow-lg shadow-[#6F00FF]/25"
+                            : "bg-white/60 dark:bg-white/[0.06] text-muted-foreground border border-white/60 dark:border-white/[0.08]"
+                    }`}
+                >
+                    Indicações
+                </button>
+                <button
+                    onClick={() => setActiveTab("commissions")}
+                    className={`px-4 py-2 rounded-full text-[13px] font-semibold active:scale-95 transition-all ${
+                        activeTab === "commissions"
+                            ? "bg-[#6F00FF] text-white shadow-lg shadow-[#6F00FF]/25"
+                            : "bg-white/60 dark:bg-white/[0.06] text-muted-foreground border border-white/60 dark:border-white/[0.08]"
+                    }`}
+                >
+                    Comissões
+                </button>
+            </motion.div>
+
+            {/* List content */}
+            <motion.div variants={fadeUp} className="premium-card !p-5 !rounded-[20px]">
+                {activeTab === "referrals" ? (
+                    referrals.length === 0 ? (
+                        <div className="py-10 text-center">
+                            <div className="w-14 h-14 rounded-full bg-[#6F00FF]/10 dark:bg-[#6F00FF]/20 flex items-center justify-center mx-auto mb-3">
+                                <Users className="w-6 h-6 text-[#6F00FF]" strokeWidth={1.8} />
                             </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {referrals.map((referral) => (
-                                    <div
-                                        key={referral.id}
-                                        className="flex items-center justify-between p-4 rounded-lg border"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 rounded-full bg-[#6F00FF]/10 dark:bg-[#330080]/30 flex items-center justify-center">
-                                                <span className="text-[#6F00FF] font-semibold">
-                                                    {referral.name.charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <p className="font-medium">{referral.name}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Desde {formatDate(referral.registeredAt)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-semibold text-green-600">
-                                                {formatCurrency(referral.commissionEarned)}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">
-                                                Volume: {formatCurrency(referral.totalVolume)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )
-                    ) : commissions.length === 0 ? (
-                        <div className="text-center py-8">
-                            <DollarSign className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-                            <p className="text-muted-foreground">
-                                Nenhuma comissão registrada ainda.
-                            </p>
+                            <p className="text-[14px] font-medium text-foreground mb-1">Nenhum indicado ainda</p>
+                            <p className="text-[13px] text-muted-foreground">Compartilhe seu link para começar!</p>
                         </div>
                     ) : (
-                        <div className="space-y-4">
-                            {commissions.map((commission) => (
-                                <div
-                                    key={commission.id}
-                                    className="flex items-center justify-between p-4 rounded-lg border"
-                                >
-                                    <div>
-                                        <p className="font-medium">{commission.referralName}</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            Transação de {formatCurrency(commission.transactionAmount)}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {formatDate(commission.createdAt)}
-                                        </p>
+                        <div className="divide-y divide-border/50">
+                            {referrals.map((referral) => (
+                                <div key={referral.id} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-10 h-10 rounded-full bg-[#6F00FF]/10 dark:bg-[#6F00FF]/20 flex items-center justify-center shrink-0">
+                                            <span className="text-[14px] font-bold text-[#6F00FF] dark:text-[#8B2FFF]">
+                                                {referral.name.charAt(0).toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-[14px] font-semibold text-foreground truncate">{referral.name}</p>
+                                            <p className="text-[12px] text-muted-foreground">
+                                                Desde {formatDate(referral.registeredAt)}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="text-right flex items-center gap-3">
-                                        <Badge
-                                            variant={commission.status === "paid" ? "default" : "secondary"}
-                                            className={
-                                                commission.status === "paid"
-                                                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                    : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                            }
-                                        >
-                                            {commission.status === "paid" ? "Pago" : "Pendente"}
-                                        </Badge>
-                                        <span className="font-semibold text-green-600">
-                                            {formatCurrency(commission.amount)}
-                                        </span>
+                                    <div className="text-right shrink-0 pl-3">
+                                        <p className="text-[14px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                            {formatCurrency(referral.commissionEarned)}
+                                        </p>
+                                        <p className="text-[11px] text-muted-foreground">
+                                            Vol: {formatCurrency(referral.totalVolume)}
+                                        </p>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+                    )
+                ) : commissions.length === 0 ? (
+                    <div className="py-10 text-center">
+                        <div className="w-14 h-14 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+                            <DollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" strokeWidth={1.8} />
+                        </div>
+                        <p className="text-[14px] font-medium text-foreground mb-1">Nenhuma comissão ainda</p>
+                        <p className="text-[13px] text-muted-foreground">Suas comissões aparecerão aqui.</p>
+                    </div>
+                ) : (
+                    <div className="divide-y divide-border/50">
+                        {commissions.map((commission) => (
+                            <div key={commission.id} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+                                <div className="min-w-0">
+                                    <p className="text-[14px] font-semibold text-foreground truncate">{commission.referralName}</p>
+                                    <p className="text-[12px] text-muted-foreground">
+                                        Transação {formatCurrency(commission.transactionAmount)}
+                                    </p>
+                                    <p className="text-[11px] text-muted-foreground">{formatDate(commission.createdAt)}</p>
+                                </div>
+                                <div className="flex items-center gap-2.5 shrink-0 pl-3">
+                                    <span
+                                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                            commission.status === "paid"
+                                                ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                                                : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
+                                        }`}
+                                    >
+                                        {commission.status === "paid" ? "Pago" : "Pendente"}
+                                    </span>
+                                    <span className="text-[14px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                        {formatCurrency(commission.amount)}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </motion.div>
+        </motion.div>
     );
 }

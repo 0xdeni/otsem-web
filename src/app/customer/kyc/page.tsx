@@ -5,539 +5,636 @@ import { useAuth } from "@/contexts/auth-context";
 import http from "@/lib/http";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { LimitsCard } from "@/components/kyc/limits-card";
 import {
-    Loader2,
-    CheckCircle2,
-    Crown,
-    Star,
-    ArrowRight,
-    Building2,
-    User,
-    Clock,
-    XCircle,
-    Sparkles,
-    TrendingUp,
-    ShieldCheck,
+  Loader2,
+  CheckCircle2,
+  Crown,
+  Star,
+  Building2,
+  User,
+  Clock,
+  XCircle,
+  TrendingUp,
+  Lock,
+  ChevronRight,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { KycUpgradeModal } from "@/components/modals/kyc-upgrade-modal";
 
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+
 interface CustomerResponse {
-    id: string;
-    type: "PF" | "PJ";
-    accountStatus: string;
-    name?: string;
-    email: string;
-    createdAt: string;
+  id: string;
+  type: "PF" | "PJ";
+  accountStatus: string;
+  name?: string;
+  email: string;
+  createdAt: string;
 }
 
 interface LimitsResponse {
-    kycLevel: "LEVEL_1" | "LEVEL_2" | "LEVEL_3";
-    customerType: "PF" | "PJ";
-    monthlyLimit: number;
-    usedThisMonth: number;
-    remainingLimit: number;
-    resetDate: string;
+  kycLevel: "LEVEL_1" | "LEVEL_2" | "LEVEL_3";
+  customerType: "PF" | "PJ";
+  monthlyLimit: number;
+  usedThisMonth: number;
+  remainingLimit: number;
+  resetDate: string;
 }
 
 interface UpgradeRequest {
-    id: string;
-    targetLevel: string;
-    status: "PENDING" | "APPROVED" | "REJECTED";
-    adminNotes?: string;
-    createdAt: string;
-    updatedAt: string;
+  id: string;
+  targetLevel: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  adminNotes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
+/* ------------------------------------------------------------------ */
+/*  KYC level config – colour progression: amber → blue → emerald    */
+/* ------------------------------------------------------------------ */
+
 const KYC_LEVELS = {
-    PF: [
-        {
-            level: "LEVEL_1",
-            name: "Nível 1",
-            limit: "R$ 30.000",
-            icon: User,
-            color: "from-blue-500 to-blue-600",
-            bgColor: "bg-blue-50",
-            borderColor: "border-blue-200",
-            textColor: "text-blue-700",
-            iconColor: "text-blue-600",
-            requirements: ["CPF válido", "Cadastro completo", "Aprovação automática"],
-        },
-        {
-            level: "LEVEL_2",
-            name: "Nível 2",
-            limit: "R$ 100.000",
-            icon: Star,
-            color: "from-violet-500 to-purple-600",
-            bgColor: "bg-violet-50",
-            borderColor: "border-violet-200",
-            textColor: "text-violet-700",
-            iconColor: "text-violet-600",
-            requirements: ["Comprovante de residência", "Comprovante de renda", "Análise em até 24h"],
-        },
-        {
-            level: "LEVEL_3",
-            name: "Nível 3",
-            limit: "Ilimitado",
-            icon: Crown,
-            color: "from-amber-500 to-orange-600",
-            bgColor: "bg-amber-50",
-            borderColor: "border-amber-200",
-            textColor: "text-amber-700",
-            iconColor: "text-amber-600",
-            requirements: ["Declaração de IR", "Análise patrimonial", "Aprovação especial"],
-        },
-    ],
-    PJ: [
-        {
-            level: "LEVEL_1",
-            name: "Nível 1",
-            limit: "R$ 50.000",
-            icon: Building2,
-            color: "from-blue-500 to-blue-600",
-            bgColor: "bg-blue-50",
-            borderColor: "border-blue-200",
-            textColor: "text-blue-700",
-            iconColor: "text-blue-600",
-            requirements: ["CNPJ válido", "Cadastro completo", "Aprovação automática"],
-        },
-        {
-            level: "LEVEL_2",
-            name: "Nível 2",
-            limit: "R$ 200.000",
-            icon: Star,
-            color: "from-violet-500 to-purple-600",
-            bgColor: "bg-violet-50",
-            borderColor: "border-violet-200",
-            textColor: "text-violet-700",
-            iconColor: "text-violet-600",
-            requirements: ["Balanço patrimonial", "DRE dos últimos 12 meses", "Análise em até 24h"],
-        },
-        {
-            level: "LEVEL_3",
-            name: "Nível 3",
-            limit: "Ilimitado",
-            icon: Crown,
-            color: "from-amber-500 to-orange-600",
-            bgColor: "bg-amber-50",
-            borderColor: "border-amber-200",
-            textColor: "text-amber-700",
-            iconColor: "text-amber-600",
-            requirements: ["Auditoria financeira", "Faturamento comprovado", "Aprovação especial"],
-        },
-    ],
+  PF: [
+    {
+      level: "LEVEL_1",
+      name: "Nível 1",
+      subtitle: "Básico",
+      limit: "R$ 30.000",
+      icon: User,
+      accent: "amber",
+      ring: "ring-amber-400/40",
+      badge: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+      iconBg: "bg-gradient-to-br from-amber-400 to-amber-600",
+      barColor: "bg-amber-500",
+      requirements: [
+        "CPF válido",
+        "Cadastro completo",
+        "Aprovação automática",
+      ],
+    },
+    {
+      level: "LEVEL_2",
+      name: "Nível 2",
+      subtitle: "Intermediário",
+      limit: "R$ 100.000",
+      icon: Star,
+      accent: "blue",
+      ring: "ring-blue-400/40",
+      badge: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+      iconBg: "bg-gradient-to-br from-blue-400 to-blue-600",
+      barColor: "bg-blue-500",
+      requirements: [
+        "Comprovante de residência",
+        "Comprovante de renda",
+        "Análise em até 24h",
+      ],
+    },
+    {
+      level: "LEVEL_3",
+      name: "Nível 3",
+      subtitle: "Premium",
+      limit: "Ilimitado",
+      icon: Crown,
+      accent: "emerald",
+      ring: "ring-emerald-400/40",
+      badge: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+      iconBg: "bg-gradient-to-br from-emerald-400 to-emerald-600",
+      barColor: "bg-emerald-500",
+      requirements: [
+        "Declaração de IR",
+        "Análise patrimonial",
+        "Aprovação especial",
+      ],
+    },
+  ],
+  PJ: [
+    {
+      level: "LEVEL_1",
+      name: "Nível 1",
+      subtitle: "Básico",
+      limit: "R$ 50.000",
+      icon: Building2,
+      accent: "amber",
+      ring: "ring-amber-400/40",
+      badge: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+      iconBg: "bg-gradient-to-br from-amber-400 to-amber-600",
+      barColor: "bg-amber-500",
+      requirements: [
+        "CNPJ válido",
+        "Cadastro completo",
+        "Aprovação automática",
+      ],
+    },
+    {
+      level: "LEVEL_2",
+      name: "Nível 2",
+      subtitle: "Intermediário",
+      limit: "R$ 200.000",
+      icon: Star,
+      accent: "blue",
+      ring: "ring-blue-400/40",
+      badge: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+      iconBg: "bg-gradient-to-br from-blue-400 to-blue-600",
+      barColor: "bg-blue-500",
+      requirements: [
+        "Balanço patrimonial",
+        "DRE dos últimos 12 meses",
+        "Análise em até 24h",
+      ],
+    },
+    {
+      level: "LEVEL_3",
+      name: "Nível 3",
+      subtitle: "Premium",
+      limit: "Ilimitado",
+      icon: Crown,
+      accent: "emerald",
+      ring: "ring-emerald-400/40",
+      badge: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+      iconBg: "bg-gradient-to-br from-emerald-400 to-emerald-600",
+      barColor: "bg-emerald-500",
+      requirements: [
+        "Auditoria financeira",
+        "Faturamento comprovado",
+        "Aprovação especial",
+      ],
+    },
+  ],
 };
 
+/* ------------------------------------------------------------------ */
+/*  Framer-Motion variants                                             */
+/* ------------------------------------------------------------------ */
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] },
+  },
+};
+
+const stagger: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
 export default function CustomerKycPage(): React.JSX.Element {
-    const { user } = useAuth();
+  const { user } = useAuth();
 
-    const [loading, setLoading] = React.useState(true);
-    const [customerType, setCustomerType] = React.useState<"PF" | "PJ">("PF");
-    const [kycLevel, setKycLevel] = React.useState<"LEVEL_1" | "LEVEL_2" | "LEVEL_3">("LEVEL_1");
-    const [upgradeModalOpen, setUpgradeModalOpen] = React.useState(false);
-    const [upgradeTarget, setUpgradeTarget] = React.useState<{
-        level: string;
-        name: string;
-        limit: string;
-        requirements: string[];
-    } | null>(null);
-    const [upgradeRequests, setUpgradeRequests] = React.useState<UpgradeRequest[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [customerType, setCustomerType] = React.useState<"PF" | "PJ">("PF");
+  const [kycLevel, setKycLevel] = React.useState<
+    "LEVEL_1" | "LEVEL_2" | "LEVEL_3"
+  >("LEVEL_1");
+  const [upgradeModalOpen, setUpgradeModalOpen] = React.useState(false);
+  const [upgradeTarget, setUpgradeTarget] = React.useState<{
+    level: string;
+    name: string;
+    limit: string;
+    requirements: string[];
+  } | null>(null);
+  const [upgradeRequests, setUpgradeRequests] = React.useState<
+    UpgradeRequest[]
+  >([]);
 
-    React.useEffect(() => {
-        async function loadCustomer() {
-            try {
-                setLoading(true);
-                const [customerRes, limitsRes, upgradeRes] = await Promise.all([
-                    http.get<{ data: CustomerResponse } | CustomerResponse>("/customers/me"),
-                    http.get<LimitsResponse>("/customers/me/limits").catch(() => null),
-                    http.get<{ data: UpgradeRequest[] } | UpgradeRequest[]>("/customers/me/kyc-upgrade-requests").catch(() => null),
-                ]);
+  /* ---- data fetching (preserved) ---- */
+  React.useEffect(() => {
+    async function loadCustomer() {
+      try {
+        setLoading(true);
+        const [customerRes, limitsRes, upgradeRes] = await Promise.all([
+          http.get<{ data: CustomerResponse } | CustomerResponse>(
+            "/customers/me",
+          ),
+          http.get<LimitsResponse>("/customers/me/limits").catch(() => null),
+          http
+            .get<{ data: UpgradeRequest[] } | UpgradeRequest[]>(
+              "/customers/me/kyc-upgrade-requests",
+            )
+            .catch(() => null),
+        ]);
 
-                const data = "data" in customerRes.data ? customerRes.data.data : customerRes.data;
-                setCustomerType(data.type || "PF");
+        const data =
+          "data" in customerRes.data
+            ? customerRes.data.data
+            : customerRes.data;
+        setCustomerType(data.type || "PF");
 
-                if (limitsRes?.data) {
-                    const level = limitsRes.data.kycLevel || "LEVEL_1";
-                    setKycLevel(level);
-                    if (limitsRes.data.customerType) {
-                        setCustomerType(limitsRes.data.customerType);
-                    }
-                }
-
-                if (upgradeRes?.data) {
-                    let requests: UpgradeRequest[] = [];
-                    const resData = upgradeRes.data as { data?: UpgradeRequest[] } | UpgradeRequest[];
-
-                    if (Array.isArray(resData)) {
-                        requests = resData;
-                    } else if (resData && typeof resData === 'object' && 'data' in resData && Array.isArray(resData.data)) {
-                        requests = resData.data;
-                    }
-
-                    setUpgradeRequests(requests);
-                }
-            } catch (err) {
-                console.error(err);
-                toast.error("Não foi possível carregar os dados.");
-            } finally {
-                setLoading(false);
-            }
+        if (limitsRes?.data) {
+          const level = limitsRes.data.kycLevel || "LEVEL_1";
+          setKycLevel(level);
+          if (limitsRes.data.customerType) {
+            setCustomerType(limitsRes.data.customerType);
+          }
         }
 
-        if (user) void loadCustomer();
-    }, [user]);
+        if (upgradeRes?.data) {
+          let requests: UpgradeRequest[] = [];
+          const resData = upgradeRes.data as
+            | { data?: UpgradeRequest[] }
+            | UpgradeRequest[];
 
-    function openUpgradeModal(level: typeof KYC_LEVELS["PF"][0]) {
-        setUpgradeTarget({
-            level: level.level,
-            name: level.name,
-            limit: level.limit,
-            requirements: level.requirements,
-        });
-        setUpgradeModalOpen(true);
+          if (Array.isArray(resData)) {
+            requests = resData;
+          } else if (
+            resData &&
+            typeof resData === "object" &&
+            "data" in resData &&
+            Array.isArray(resData.data)
+          ) {
+            requests = resData.data;
+          }
+
+          setUpgradeRequests(requests);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Não foi possível carregar os dados.");
+      } finally {
+        setLoading(false);
+      }
     }
 
-    if (loading) {
-        return (
-            <div className="flex h-[80vh] flex-col items-center justify-center">
-                <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground mt-4">Carregando...</p>
-            </div>
-        );
-    }
+    if (user) void loadCustomer();
+  }, [user]);
 
-    const currentLevelIndex = KYC_LEVELS[customerType].findIndex(l => l.level === kycLevel);
-    const currentLevelData = KYC_LEVELS[customerType][currentLevelIndex];
-    const nextLevelData = KYC_LEVELS[customerType][currentLevelIndex + 1];
+  /* ---- helpers ---- */
+  function openUpgradeModal(level: (typeof KYC_LEVELS)["PF"][0]) {
+    setUpgradeTarget({
+      level: level.level,
+      name: level.name,
+      limit: level.limit,
+      requirements: level.requirements,
+    });
+    setUpgradeModalOpen(true);
+  }
 
+  /* ---- loading state ---- */
+  if (loading) {
     return (
-        <div className="max-w-4xl mx-auto space-y-6 pb-8">
-            {/* Header */}
-            <div className="text-center space-y-2">
-                <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20"
-                >
-                    <ShieldCheck className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-bold text-primary">Verificação de Identidade</span>
-                </motion.div>
-                <h1 className="text-3xl font-black text-foreground">
-                    Seus Limites e Níveis
-                </h1>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                    Complete a verificação e desbloqueie limites maiores para suas transações
-                </p>
-            </div>
-
-            {/* Limits Overview Card */}
-            <LimitsCard showUpgradeLink={false} />
-
-            {/* Pending/Rejected Requests */}
-            <AnimatePresence>
-                {upgradeRequests.filter(r => r.status === "PENDING").length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="rounded-2xl p-5 border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 dark:border-amber-800"
-                    >
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/30">
-                                <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="text-lg font-black text-amber-900 dark:text-amber-300">
-                                    Solicitação em Análise
-                                </h3>
-                                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                                    Sua solicitação de upgrade está sendo analisada por nossa equipe.
-                                    Você receberá uma resposta em até 24 horas úteis.
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-
-                {(() => {
-                    // Mostra apenas a solicitação rejeitada mais recente, e apenas se ainda não foi superada
-                    const rejectedRequests = upgradeRequests
-                        .filter(r => r.status === "REJECTED")
-                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-                    // Pega apenas a mais recente
-                    const latestRejected = rejectedRequests[0];
-
-                    // Verifica se há uma solicitação aprovada posterior para o mesmo nível ou superior
-                    if (latestRejected) {
-                        const hasLaterApproval = upgradeRequests.some(r => {
-                            if (r.status !== "APPROVED") return false;
-                            const rejectedDate = new Date(latestRejected.createdAt).getTime();
-                            const approvedDate = new Date(r.createdAt).getTime();
-                            return approvedDate > rejectedDate;
-                        });
-
-                        // Se não há aprovação posterior, mostra a rejeição
-                        if (!hasLaterApproval) {
-                            const targetLevelData = KYC_LEVELS[customerType].find(l => l.level === latestRejected.targetLevel);
-                            return (
-                                <motion.div
-                                    key={latestRejected.id}
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="rounded-2xl p-5 border-2 border-red-300 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 dark:border-red-800"
-                                >
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-3 rounded-xl bg-red-500/20 border border-red-500/30">
-                                            <XCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="text-lg font-black text-red-900 dark:text-red-300">
-                                                Solicitação Rejeitada - {targetLevelData?.name || latestRejected.targetLevel}
-                                            </h3>
-                                            {latestRejected.adminNotes && (
-                                                <div className="mt-3 p-4 rounded-xl bg-white/60 dark:bg-red-900/30 border border-red-200 dark:border-red-800">
-                                                    <p className="text-xs text-red-600 dark:text-red-400 font-bold mb-1">
-                                                        Motivo da rejeição:
-                                                    </p>
-                                                    <p className="text-sm text-red-900 dark:text-red-300">{latestRejected.adminNotes}</p>
-                                                </div>
-                                            )}
-                                            <p className="text-sm text-red-700 dark:text-red-400 mt-2">
-                                                Você pode enviar uma nova solicitação com os documentos corretos.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            );
-                        }
-                    }
-                    return null;
-                })()}
-            </AnimatePresence>
-
-            {/* KYC Levels Visualization */}
-            <div className="premium-card p-8">
-                {/* Progress Bar */}
-                <div className="mb-8">
-                    <div className="flex items-center justify-between relative">
-                        {/* Background line */}
-                        <div className="absolute top-6 left-0 right-0 h-1.5 bg-muted-foreground/10 rounded-full mx-12" />
-
-                        {/* Active progress line */}
-                        <motion.div
-                            className="absolute top-6 left-0 h-1.5 rounded-full mx-12 bg-gradient-to-r from-blue-500 via-violet-500 to-amber-500"
-                            initial={{ width: "0%" }}
-                            animate={{
-                                width: currentLevelIndex === 0 ? "0%" :
-                                       currentLevelIndex === 1 ? "calc(50% - 48px)" :
-                                       "calc(100% - 96px)"
-                            }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                        />
-
-                        {KYC_LEVELS[customerType].map((level, index) => {
-                            const LevelIcon = level.icon;
-                            const isCompleted = index < currentLevelIndex;
-                            const isCurrent = index === currentLevelIndex;
-                            const isLocked = index > currentLevelIndex;
-
-                            return (
-                                <div key={level.level} className="relative z-10 flex flex-col items-center gap-3">
-                                    <motion.div
-                                        initial={{ scale: 0.8, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 transition-all shadow-lg ${
-                                            isCompleted
-                                                ? "bg-gradient-to-br from-green-500 to-emerald-600 border-green-400"
-                                                : isCurrent
-                                                ? `bg-gradient-to-br ${level.color} border-white shadow-xl scale-110`
-                                                : "bg-muted border-muted-foreground/20 opacity-40"
-                                        }`}
-                                    >
-                                        {isCompleted ? (
-                                            <CheckCircle2 className="w-6 h-6 text-white" />
-                                        ) : (
-                                            <LevelIcon className={`w-6 h-6 ${isCurrent ? "text-white" : "text-muted-foreground"}`} />
-                                        )}
-                                    </motion.div>
-                                    <div className="text-center">
-                                        <p className={`text-xs font-black ${
-                                            isCurrent ? level.textColor :
-                                            isCompleted ? "text-green-600" :
-                                            "text-muted-foreground"
-                                        }`}>
-                                            {level.name}
-                                        </p>
-                                        <p className={`text-[10px] mt-0.5 ${
-                                            isCurrent || isCompleted ? "text-foreground font-bold" : "text-muted-foreground/60"
-                                        }`}>
-                                            {level.limit}/mês
-                                        </p>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Current Level Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`rounded-2xl p-6 border-2 ${currentLevelData.borderColor} bg-gradient-to-br ${currentLevelData.bgColor} to-white dark:to-slate-900/50 mb-6`}
-                >
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className={`p-4 rounded-2xl bg-gradient-to-br ${currentLevelData.color} shadow-lg`}>
-                                <currentLevelData.icon className="h-8 w-8 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground font-medium">Seu nível atual</p>
-                                <p className={`text-2xl font-black ${currentLevelData.textColor}`}>
-                                    {currentLevelData.name}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-sm text-muted-foreground font-medium">Limite mensal</p>
-                            <p className="text-2xl font-black text-foreground">{currentLevelData.limit}</p>
-                        </div>
-                    </div>
-
-                    <div className="mt-5 pt-5 border-t border-black/5 dark:border-white/5">
-                        <p className="text-xs font-bold text-muted-foreground mb-3">Recursos inclusos:</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            {currentLevelData.requirements.map((req, i) => (
-                                <div key={i} className="flex items-center gap-2 text-sm">
-                                    <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${currentLevelData.iconColor}`} />
-                                    <span className="text-foreground/80">{req}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* Next Level Upgrade Section */}
-                {nextLevelData && (() => {
-                    const hasPendingRequest = upgradeRequests.some(
-                        r => r.status === "PENDING" && r.targetLevel === nextLevelData.level
-                    );
-
-                    return (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="rounded-2xl p-6 border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 to-transparent"
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className={`p-4 rounded-2xl bg-gradient-to-br ${nextLevelData.color} shadow-lg`}>
-                                    <nextLevelData.icon className="h-8 w-8 text-white" />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <h3 className="text-xl font-black text-foreground">
-                                            Próximo Nível: {nextLevelData.name}
-                                        </h3>
-                                        <Sparkles className={`w-5 h-5 ${nextLevelData.iconColor}`} />
-                                    </div>
-                                    <p className={`text-3xl font-black ${nextLevelData.textColor} mb-1`}>
-                                        {nextLevelData.limit}
-                                        <span className="text-lg text-muted-foreground font-medium">/mês</span>
-                                    </p>
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        {nextLevelData.level === "LEVEL_2"
-                                            ? "Aumente seus limites para movimentar mais"
-                                            : "Acesso ilimitado à plataforma com limites sem restrições"}
-                                    </p>
-
-                                    <div className="space-y-2 mb-5">
-                                        <p className="text-xs text-muted-foreground font-bold">Documentos necessários:</p>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            {nextLevelData.requirements.map((req, i) => (
-                                                <div key={i} className="flex items-center gap-2 text-sm">
-                                                    <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${nextLevelData.color}`} />
-                                                    <span className="text-foreground/70">{req}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {hasPendingRequest ? (
-                                        <div className="p-4 rounded-xl bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-300 dark:border-amber-700">
-                                            <div className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
-                                                <Clock className="w-5 h-5" />
-                                                <div>
-                                                    <p className="text-sm font-bold">Solicitação em análise</p>
-                                                    <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
-                                                        A análise leva até 24 horas úteis. Você será notificado.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <Button
-                                            onClick={() => openUpgradeModal(nextLevelData)}
-                                            className={`w-full h-12 bg-gradient-to-r ${nextLevelData.color} hover:opacity-90 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all`}
-                                        >
-                                            <TrendingUp className="w-5 h-5 mr-2" />
-                                            Solicitar Upgrade para {nextLevelData.name}
-                                            <ArrowRight className="w-5 h-5 ml-2" />
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-                        </motion.div>
-                    );
-                })()}
-
-                {/* Max Level Reached */}
-                {!nextLevelData && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="rounded-2xl p-8 border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 text-center"
-                    >
-                        <Crown className="w-16 h-16 text-amber-600 mx-auto mb-4" />
-                        <p className="text-2xl font-black text-amber-900 dark:text-amber-300 mb-2">
-                            Nível Máximo Atingido!
-                        </p>
-                        <p className="text-sm text-amber-700 dark:text-amber-400">
-                            Você tem acesso ilimitado à plataforma. Não há restrições em suas transações.
-                        </p>
-                    </motion.div>
-                )}
-            </div>
-
-            {/* Upgrade Modal */}
-            {upgradeTarget && (
-                <KycUpgradeModal
-                    open={upgradeModalOpen}
-                    onClose={() => setUpgradeModalOpen(false)}
-                    targetLevel={upgradeTarget.level}
-                    targetLevelName={upgradeTarget.name}
-                    targetLimit={upgradeTarget.limit}
-                    requirements={upgradeTarget.requirements}
-                    onSuccess={() => {
-                        setUpgradeModalOpen(false);
-                        setUpgradeRequests(prev => [
-                            ...prev,
-                            {
-                                id: `local-${Date.now()}`,
-                                targetLevel: upgradeTarget.level,
-                                status: "PENDING",
-                                createdAt: new Date().toISOString(),
-                                updatedAt: new Date().toISOString(),
-                            }
-                        ]);
-                    }}
-                />
-            )}
-        </div>
+      <div className="flex h-[80vh] flex-col items-center justify-center gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-[#6F00FF]" />
+        <p className="text-[13px] text-muted-foreground">Carregando...</p>
+      </div>
     );
+  }
+
+  /* ---- derived data ---- */
+  const levels = KYC_LEVELS[customerType];
+  const currentLevelIndex = levels.findIndex((l) => l.level === kycLevel);
+  const currentLevelData = levels[currentLevelIndex];
+  const nextLevelData = levels[currentLevelIndex + 1];
+  const progressPercent =
+    currentLevelIndex === 0 ? 0 : currentLevelIndex === 1 ? 50 : 100;
+
+  /* ---- pending / rejected helpers ---- */
+  const hasPending = upgradeRequests.some((r) => r.status === "PENDING");
+
+  const latestRejected = (() => {
+    const sorted = upgradeRequests
+      .filter((r) => r.status === "REJECTED")
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    const latest = sorted[0];
+    if (!latest) return null;
+    const hasLaterApproval = upgradeRequests.some(
+      (r) =>
+        r.status === "APPROVED" &&
+        new Date(r.createdAt).getTime() >
+          new Date(latest.createdAt).getTime(),
+    );
+    return hasLaterApproval ? null : latest;
+  })();
+
+  /* ================================================================ */
+  /*  RENDER                                                           */
+  /* ================================================================ */
+
+  return (
+    <motion.div
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+      className="mx-auto max-w-lg space-y-5 px-4 pb-24 pt-2 sm:px-0"
+    >
+      {/* ---- Page header ---- */}
+      <motion.div variants={fadeUp}>
+        <h1 className="text-[22px] font-bold text-foreground">Verificação</h1>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">
+          Complete etapas e desbloqueie limites maiores
+        </p>
+      </motion.div>
+
+      {/* ---- Current level badge + progress ---- */}
+      <motion.div variants={fadeUp} className="premium-card space-y-5">
+        {/* top row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl ${currentLevelData.iconBg} shadow-lg`}
+            >
+              <currentLevelData.icon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Seu nível
+              </p>
+              <p className="text-[15px] font-bold text-foreground">
+                {currentLevelData.name}
+              </p>
+            </div>
+          </div>
+
+          <span
+            className={`rounded-full px-3 py-1 text-[11px] font-semibold ${currentLevelData.badge}`}
+          >
+            {currentLevelData.limit}/mês
+          </span>
+        </div>
+
+        {/* animated progress bar */}
+        <div>
+          <div className="mb-2 flex justify-between">
+            {levels.map((l, i) => (
+              <span
+                key={l.level}
+                className={`text-[11px] font-medium ${
+                  i <= currentLevelIndex
+                    ? "text-foreground"
+                    : "text-muted-foreground/50"
+                }`}
+              >
+                {l.name}
+              </span>
+            ))}
+          </div>
+          <div className="relative h-[6px] w-full overflow-hidden rounded-full bg-muted-foreground/10">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full bg-[#6F00FF]"
+              initial={{ width: "0%" }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: 0.9, ease: [0.32, 0.72, 0, 1] }}
+            />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ---- Limits overview ---- */}
+      <motion.div variants={fadeUp}>
+        <LimitsCard showUpgradeLink={false} />
+      </motion.div>
+
+      {/* ---- Status alerts (pending / rejected) ---- */}
+      <AnimatePresence>
+        {hasPending && (
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            exit={{ opacity: 0, y: -8 }}
+            className="premium-card flex items-start gap-3 border-amber-300/60 bg-amber-50/80 dark:border-amber-700/40 dark:bg-amber-950/30"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15">
+              <Clock className="h-[18px] w-[18px] text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[14px] font-bold text-amber-900 dark:text-amber-300">
+                Solicitação em Análise
+              </p>
+              <p className="mt-0.5 text-[12px] leading-relaxed text-amber-700 dark:text-amber-400/80">
+                Sua solicitação de upgrade está sendo analisada. Resposta em até
+                24h úteis.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {latestRejected && (
+          <motion.div
+            key={latestRejected.id}
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            exit={{ opacity: 0, y: -8 }}
+            className="premium-card space-y-3 border-red-300/60 bg-red-50/80 dark:border-red-700/40 dark:bg-red-950/30"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/15">
+                <XCircle className="h-[18px] w-[18px] text-red-600 dark:text-red-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[14px] font-bold text-red-900 dark:text-red-300">
+                  Solicitação Rejeitada –{" "}
+                  {levels.find((l) => l.level === latestRejected.targetLevel)
+                    ?.name || latestRejected.targetLevel}
+                </p>
+                <p className="mt-0.5 text-[12px] text-red-700 dark:text-red-400/80">
+                  Você pode enviar uma nova solicitação com os documentos
+                  corretos.
+                </p>
+              </div>
+            </div>
+            {latestRejected.adminNotes && (
+              <div className="rounded-2xl border border-red-200/60 bg-white/60 px-4 py-3 dark:border-red-800/40 dark:bg-red-900/20">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-red-500 dark:text-red-400">
+                  Motivo
+                </p>
+                <p className="mt-1 text-[13px] leading-relaxed text-red-900 dark:text-red-300">
+                  {latestRejected.adminNotes}
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ---- KYC Level Cards ---- */}
+      <motion.div variants={fadeUp}>
+        <p className="mb-3 text-[15px] font-bold text-foreground">
+          Níveis de Verificação
+        </p>
+      </motion.div>
+
+      {levels.map((level, index) => {
+        const LevelIcon = level.icon;
+        const isCurrent = index === currentLevelIndex;
+        const isCompleted = index < currentLevelIndex;
+        const isLocked = index > currentLevelIndex;
+        const isNext = index === currentLevelIndex + 1;
+        const hasPendingForThis = upgradeRequests.some(
+          (r) => r.status === "PENDING" && r.targetLevel === level.level,
+        );
+
+        return (
+          <motion.div
+            key={level.level}
+            variants={fadeUp}
+            className={`premium-card mb-4 space-y-4 transition-all ${
+              isCurrent ? `ring-2 ${level.ring}` : ""
+            } ${isLocked ? "opacity-60" : ""}`}
+          >
+            {/* Card header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-[14px] shadow ${
+                    isLocked
+                      ? "bg-muted-foreground/10"
+                      : level.iconBg
+                  }`}
+                >
+                  {isCompleted ? (
+                    <CheckCircle2 className="h-5 w-5 text-white" />
+                  ) : isLocked ? (
+                    <Lock className="h-4 w-4 text-muted-foreground/50" />
+                  ) : (
+                    <LevelIcon className="h-5 w-5 text-white" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-[15px] font-bold text-foreground">
+                    {level.name}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {level.subtitle}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status pill */}
+              {isCurrent && (
+                <span className="rounded-full bg-[#6F00FF]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#6F00FF]">
+                  Atual
+                </span>
+              )}
+              {isCompleted && (
+                <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  Concluído
+                </span>
+              )}
+              {isLocked && (
+                <span className="rounded-full bg-muted-foreground/8 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground/60">
+                  Bloqueado
+                </span>
+              )}
+            </div>
+
+            {/* Limit */}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[22px] font-bold text-foreground">
+                {level.limit}
+              </span>
+              <span className="text-[12px] text-muted-foreground">/mês</span>
+            </div>
+
+            {/* Requirements */}
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Requisitos
+              </p>
+              <ul className="space-y-1.5">
+                {level.requirements.map((req, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-2 text-[13px] text-foreground/80"
+                  >
+                    {isCompleted || isCurrent ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                    ) : (
+                      <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/30" />
+                    )}
+                    {req}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Action area (only for the next level) */}
+            {isNext && (
+              <div className="pt-1">
+                {hasPendingForThis ? (
+                  <div className="flex items-center gap-2 rounded-2xl bg-amber-500/10 px-4 py-3">
+                    <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <div>
+                      <p className="text-[13px] font-semibold text-amber-700 dark:text-amber-300">
+                        Em análise
+                      </p>
+                      <p className="text-[11px] text-amber-600/80 dark:text-amber-400/70">
+                        Resposta em até 24h úteis
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => openUpgradeModal(level)}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#6F00FF] px-4 py-3 text-[14px] font-bold text-white shadow-lg shadow-[#6F00FF]/20 active:scale-95 transition-transform"
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                    Solicitar Upgrade
+                    <ChevronRight className="ml-auto h-4 w-4 opacity-60" />
+                  </button>
+                )}
+              </div>
+            )}
+          </motion.div>
+        );
+      })}
+
+      {/* ---- Max level reached ---- */}
+      {!nextLevelData && (
+        <motion.div
+          variants={fadeUp}
+          className="premium-card flex flex-col items-center py-8 text-center"
+        >
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/25">
+            <Crown className="h-8 w-8 text-white" />
+          </div>
+          <p className="text-[15px] font-bold text-foreground">
+            Nível Máximo Atingido
+          </p>
+          <p className="mt-1 max-w-[260px] text-[13px] leading-relaxed text-muted-foreground">
+            Você tem acesso ilimitado. Não há restrições em suas transações.
+          </p>
+        </motion.div>
+      )}
+
+      {/* ---- Upgrade Modal ---- */}
+      {upgradeTarget && (
+        <KycUpgradeModal
+          open={upgradeModalOpen}
+          onClose={() => setUpgradeModalOpen(false)}
+          targetLevel={upgradeTarget.level}
+          targetLevelName={upgradeTarget.name}
+          targetLimit={upgradeTarget.limit}
+          requirements={upgradeTarget.requirements}
+          onSuccess={() => {
+            setUpgradeModalOpen(false);
+            setUpgradeRequests((prev) => [
+              ...prev,
+              {
+                id: `local-${Date.now()}`,
+                targetLevel: upgradeTarget.level,
+                status: "PENDING",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+            ]);
+          }}
+        />
+      )}
+    </motion.div>
+  );
 }

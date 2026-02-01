@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { isAxiosError } from "axios";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetDescription } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, TrendingUp, CheckCircle2, Wallet, Check, Star, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
@@ -77,7 +77,7 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
     const [wallets, setWallets] = React.useState<WalletType[]>([]);
     const [walletsLoading, setWalletsLoading] = React.useState(true);
     const [selectedWalletId, setSelectedWalletId] = React.useState<string | null>(null);
-    const [conversionId, setConversionId] = React.useState<string | null>(null);
+    const [_conversionId, setConversionId] = React.useState<string | null>(null);
     const [conversionStatus, setConversionStatus] = React.useState<ConversionStatus>("PENDING");
     const [conversionDetail, setConversionDetail] = React.useState<ConversionDetail | null>(null);
     const [limitError, setLimitError] = React.useState<string | null>(null);
@@ -286,24 +286,24 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
     const selectedWallet = wallets.find(w => w.id === selectedWalletId);
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="bg-card border border-[#6F00FF]/50/20 max-w-sm shadow-2xl">
-                <DialogHeader>
-                    <DialogTitle className="text-foreground text-xl text-center">
+        <BottomSheet open={open} onOpenChange={handleClose}>
+            <BottomSheetContent>
+                <BottomSheetHeader>
+                    <BottomSheetTitle className="text-foreground text-xl text-center">
                         {step === "wallet" && "Comprar USDT"}
                         {step === "amount" && "Valor da Compra"}
                         {step === "confirm" && "Confirmar Compra"}
                         {step === "processing" && "Processando Compra"}
                         {step === "success" && "Compra Realizada!"}
-                    </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-center text-sm">
+                    </BottomSheetTitle>
+                    <BottomSheetDescription className="text-muted-foreground text-center text-sm">
                         {step === "wallet" && "Escolha onde receber seu USDT"}
                         {step === "amount" && "Digite o valor em BRL"}
                         {step === "confirm" && "Revise os dados antes de confirmar"}
                         {step === "processing" && "Acompanhe o progresso da sua compra"}
                         {step === "success" && "Sua compra foi processada"}
-                    </DialogDescription>
-                </DialogHeader>
+                    </BottomSheetDescription>
+                </BottomSheetHeader>
 
                 <div className="flex flex-col items-center space-y-5 py-4">
                     {step === "wallet" && (
@@ -694,7 +694,7 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
                         </div>
                     )}
                 </div>
-            </DialogContent>
-        </Dialog>
+            </BottomSheetContent>
+        </BottomSheet>
     );
 }

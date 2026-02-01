@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetDescription } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { useUiModals } from "@/stores/ui-modals";
 import { Copy, Check, QrCode, Loader2, ArrowLeft, Clock } from "lucide-react";
@@ -10,11 +10,6 @@ import http from "@/lib/http";
 import QRCode from "qrcode";
 import { useAuth } from "@/contexts/auth-context";
 
-type CobrancaResponse = {
-    qrCode: string;
-    qrCodeImage: string;
-    expiresAt: string;
-};
 
 const QUICK_AMOUNTS = [50, 100, 200, 500, 1000];
 
@@ -74,7 +69,7 @@ export function DepositModal() {
         try {
             const valorDecimal = Number((cents / 100).toFixed(2));
 
-            const res = await http.post<any>("/inter/pix/cobrancas", {
+            const res = await http.post<{ pixCopiaECola: string }>("/inter/pix/cobrancas", {
                 customerId: customerId,
                 valor: valorDecimal,
                 descricao: `Depósito via PIX - ${formatCurrency(cents)}`,
@@ -97,9 +92,10 @@ export function DepositModal() {
             }
 
             setStep("qrcode");
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error generating PIX:", err);
-            const message = err?.response?.data?.message || err?.response?.data?.error || "Erro ao gerar QR Code PIX. Tente novamente.";
+            const axiosErr = err as { response?: { data?: { message?: string; error?: string } } };
+            const message = axiosErr?.response?.data?.message || axiosErr?.response?.data?.error || "Erro ao gerar QR Code PIX. Tente novamente.";
             setError(message);
             toast.error(message);
         } finally {
@@ -115,7 +111,7 @@ export function DepositModal() {
             setCopied(true);
             toast.success("Código PIX copiado!");
             setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
+        } catch {
             toast.error("Erro ao copiar");
         }
     }
@@ -144,10 +140,10 @@ export function DepositModal() {
     const inputValue = formatDisplayValue(cents);
 
     return (
-        <Dialog open={open.deposit} onOpenChange={handleClose}>
-            <DialogContent className="bg-card border border-[#6F00FF]/50/20 max-w-sm shadow-2xl">
-                <DialogHeader>
-                    <DialogTitle className="text-foreground text-xl text-center flex items-center justify-center gap-2">
+        <BottomSheet open={open.deposit} onOpenChange={handleClose}>
+            <BottomSheetContent>
+                <BottomSheetHeader>
+                    <BottomSheetTitle className="text-foreground text-xl text-center flex items-center justify-center gap-2">
                         {step === "qrcode" && (
                             <Button
                                 onClick={handleBack}
@@ -159,14 +155,14 @@ export function DepositModal() {
                             </Button>
                         )}
                         {step === "amount" ? "Depositar via PIX" : "Pague com PIX"}
-                    </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-center text-sm">
+                    </BottomSheetTitle>
+                    <BottomSheetDescription className="text-muted-foreground text-center text-sm">
                         {step === "amount" 
                             ? "Escolha ou digite o valor do depósito"
                             : "Escaneie o QR Code ou copie o código"
                         }
-                    </DialogDescription>
-                </DialogHeader>
+                    </BottomSheetDescription>
+                </BottomSheetHeader>
 
                 <div className="flex flex-col items-center space-y-5 py-4">
                     {step === "amount" ? (
@@ -308,7 +304,7 @@ export function DepositModal() {
                         </>
                     )}
                 </div>
-            </DialogContent>
-        </Dialog>
+            </BottomSheetContent>
+        </BottomSheet>
     );
 }
