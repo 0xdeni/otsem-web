@@ -365,12 +365,26 @@ export function WithdrawModal() {
                                 ))}
                             </div>
 
+                            {error && (
+                                <div className="flex items-center gap-2 text-red-500 text-sm bg-red-500/10 rounded-lg px-3 py-2">
+                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                    <span>{error}</span>
+                                </div>
+                            )}
+
                             <Button
                                 onClick={handleContinueToConfirm}
-                                disabled={cents < 100}
+                                disabled={cents < 100 || loading}
                                 className="w-full bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#5800CC] hover:to-[#6F00FF] text-white font-semibold rounded-xl py-6 disabled:opacity-50 shadow-lg shadow-[#6F00FF]/25"
                             >
-                                Continuar
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                        Validando...
+                                    </>
+                                ) : (
+                                    "Continuar"
+                                )}
                             </Button>
 
                             <p className="text-muted-foreground text-xs text-center">
