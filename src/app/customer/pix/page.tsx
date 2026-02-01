@@ -288,7 +288,7 @@ export default function CustomerPixPage() {
         variants={stagger}
         initial="hidden"
         animate="show"
-        className="px-4 pt-6 pb-10 max-w-lg mx-auto"
+        className="pt-2 pb-8 max-w-lg mx-auto"
       >
         <motion.div
           variants={fadeUp}
@@ -353,7 +353,7 @@ export default function CustomerPixPage() {
       variants={stagger}
       initial="hidden"
       animate="show"
-      className="px-4 pt-6 pb-10 max-w-lg mx-auto"
+      className="pt-2 pb-8 max-w-lg mx-auto"
     >
       {/* Header */}
       <motion.div

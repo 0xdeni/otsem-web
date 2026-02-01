@@ -93,7 +93,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 <AnimatePresence mode="wait">
                     <motion.main
                         key={pathname}
-                        className="flex-1 px-5 pt-2 pb-2"
+                        className="flex-1 px-5 pt-3 pb-4"
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
