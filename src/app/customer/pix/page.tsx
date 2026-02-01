@@ -247,7 +247,7 @@ export default function CustomerPixPage() {
   async function handleValidate(pixKeyId: string) {
     setValidating(pixKeyId);
     try {
-      await http.post("/inter/pix/validar-chave/" + pixKeyId);
+      await http.post("/pix/validar-chave/" + pixKeyId);
       toast.success("Chave validada com sucesso!");
       loadPixKeys();
     } catch (err: unknown) {
