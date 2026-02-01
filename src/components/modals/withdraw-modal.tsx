@@ -92,7 +92,7 @@ export function WithdrawModal() {
         try {
             const valorDecimal = Number((cents / 100).toFixed(2));
 
-            const res = await http.post<SendPixResponse>(`/inter/pix/send-pix`, {
+            const res = await http.post<SendPixResponse>(`/pix/send-pix`, {
                 valor: valorDecimal,
                 chaveDestino: selectedKey.keyValue,
                 tipoChave: selectedKey.keyType,

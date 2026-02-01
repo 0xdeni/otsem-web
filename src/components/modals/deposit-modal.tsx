@@ -69,7 +69,7 @@ export function DepositModal() {
         try {
             const valorDecimal = Number((cents / 100).toFixed(2));
 
-            const res = await http.post<{ pixCopiaECola: string }>("/inter/pix/cobrancas", {
+            const res = await http.post<{ pixCopiaECola: string }>("/pix/cobrancas", {
                 customerId: customerId,
                 valor: valorDecimal,
                 descricao: `Depósito via PIX - ${formatCurrency(cents)}`,
