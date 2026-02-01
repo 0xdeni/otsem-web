@@ -1,0 +1,17 @@
+name: Claude Integration
+on: [push, pull_request]
+
+jobs:
+  claude-task:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Call Claude API
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          curl https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d '{"model": "claude-opus-4-5-20251101", "max_tokens": 1024, "messages": [{"role": "user", "content": "Hello"}]}'
