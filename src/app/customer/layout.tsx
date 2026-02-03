@@ -155,7 +155,7 @@ function LoadingSpinner() {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 />
             </div>
-            <span className="text-sm text-muted-foreground">Carregando...</span>
+            <span className="text-sm text-white/60">Carregando...</span>
         </div>
     );
 }
