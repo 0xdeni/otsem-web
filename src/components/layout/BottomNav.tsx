@@ -48,9 +48,9 @@ export function BottomNav() {
                 onClose={() => setActionSheetOpen(false)}
             />
 
-            {/* Fixed compact bottom nav */}
+            {/* Fixed floating bottom nav */}
             <nav className="fixed z-50 left-0 right-0 bottom-0 fintech-nav-glass pwa-nav-safe-bottom">
-                <div className="flex items-center justify-around h-14 max-w-[480px] mx-auto px-2">
+                <div className="flex items-center justify-around h-[60px] max-w-[480px] mx-auto px-2">
                     {tabs.map((tab) => {
                         const isActive = tab.id === activeTab;
                         const isAction = tab.id === "action";
@@ -62,14 +62,14 @@ export function BottomNav() {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActionSheetOpen(true)}
-                                    className="relative flex items-center justify-center outline-none"
+                                    className="relative flex items-center justify-center outline-none -mt-4"
                                 >
                                     <motion.div
-                                        className="flex items-center justify-center w-11 h-11 rounded-full"
+                                        className="flex items-center justify-center w-12 h-12 rounded-full"
                                         style={{
                                             background:
-                                                "linear-gradient(145deg, #9B4DFF 0%, #6F00FF 50%, #5800CC 100%)",
-                                            boxShadow: "0 4px 20px rgba(111, 0, 255, 0.4)",
+                                                "linear-gradient(145deg, #a78bfa 0%, #8B5CF6 50%, #7c3aed 100%)",
+                                            boxShadow: "0 4px 24px rgba(139, 92, 246, 0.5), 0 0 48px rgba(139, 92, 246, 0.2)",
                                         }}
                                         whileTap={{ scale: 0.88 }}
                                         transition={{
@@ -120,16 +120,16 @@ export function BottomNav() {
                                     <Icon
                                         className={`w-[20px] h-[20px] transition-colors duration-300 ${
                                             isActive
-                                                ? "text-[#8B2FFF]"
-                                                : "text-white/30"
+                                                ? "text-[#8B5CF6]"
+                                                : "text-[#94A3B8]/50"
                                         }`}
-                                        strokeWidth={isActive ? 2.4 : 1.7}
+                                        strokeWidth={isActive ? 2.2 : 1.6}
                                     />
                                     <span
                                         className={`text-[10px] leading-tight font-medium transition-colors duration-300 ${
                                             isActive
-                                                ? "text-[#8B2FFF]"
-                                                : "text-white/30"
+                                                ? "text-[#8B5CF6]"
+                                                : "text-[#94A3B8]/50"
                                         }`}
                                     >
                                         {tab.label}

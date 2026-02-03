@@ -145,10 +145,10 @@ function QuickAction({
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
         >
-            <div className="flex items-center justify-center w-11 h-11 rounded-full fintech-glass-btn active:bg-white/20 transition-colors">
-                <Icon className="w-[18px] h-[18px] text-white" strokeWidth={2} />
+            <div className="flex items-center justify-center w-12 h-12 rounded-full fintech-glass-btn active:bg-white/20 transition-colors">
+                <Icon className="w-[20px] h-[20px] text-[#FFFFFF]" strokeWidth={1.8} />
             </div>
-            <span className="text-[10px] font-medium text-white/60">{label}</span>
+            <span className="text-[12px] font-medium text-[#94A3B8]">{label}</span>
         </motion.button>
     );
 }
@@ -387,7 +387,7 @@ export default function Dashboard() {
     }
 
     return (
-        <motion.div className="space-y-5 pt-2" variants={stagger} initial="hidden" animate="show">
+        <motion.div className="space-y-0" variants={stagger} initial="hidden" animate="show">
             {/* Convert Modal */}
             <ConvertModal
                 open={showConvertModal}
@@ -397,25 +397,25 @@ export default function Dashboard() {
                 usdtBalance={saldoUSDT}
             />
 
-            {/* ── Balance Section (scrollable, part of content) ── */}
-            <motion.div variants={fadeUp} className="text-center pt-2">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                    <p className="text-white/70 text-[13px] font-medium">Saldo total</p>
+            {/* ── Balance Section ── */}
+            <motion.div variants={fadeUp} className="text-center pt-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                    <p className="text-[14px] font-medium text-[#94A3B8]">Saldo total</p>
                     <button
                         onClick={() => setBalanceHidden(!balanceHidden)}
                         className="p-2.5 -m-2.5 rounded-full active:bg-white/10 transition-colors"
                         aria-label={balanceHidden ? "Mostrar saldo" : "Ocultar saldo"}
                     >
                         {balanceHidden ? (
-                            <EyeOff className="w-4 h-4 text-white/50" />
+                            <EyeOff className="w-4 h-4 text-[#94A3B8]" />
                         ) : (
-                            <Eye className="w-4 h-4 text-white/50" />
+                            <Eye className="w-4 h-4 text-[#94A3B8]" />
                         )}
                     </button>
                 </div>
 
                 <motion.p
-                    className="text-[38px] font-bold text-[#FFFFFF] tracking-tight leading-none"
+                    className="text-[36px] font-bold text-[#FFFFFF] tracking-tight leading-none"
                     key={balanceHidden ? "hidden" : "visible"}
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -425,40 +425,40 @@ export default function Dashboard() {
                 </motion.p>
             </motion.div>
 
-            {/* ── Currency Cards ── */}
-            <motion.div variants={fadeUp} className="flex gap-2.5">
+            {/* ── Currency Cards (symmetrical) ── */}
+            <motion.div variants={fadeUp} className="flex gap-3 mt-4">
                 {/* BRL Card */}
-                <div className="flex-1 rounded-2xl fintech-glass-card px-3.5 py-3">
-                    <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">🇧🇷</span>
-                        <span className="text-white/50 text-[11px] font-medium">BRL</span>
+                <div className="flex-1 rounded-2xl fintech-glass-card px-4 py-4">
+                    <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-[15px]">🇧🇷</span>
+                        <span className="text-[#94A3B8] text-[12px] font-medium">BRL</span>
                     </div>
-                    <p className="text-[#FFFFFF] font-bold text-[17px] leading-tight">
+                    <p className="text-[#FFFFFF] font-semibold text-[22px] leading-tight">
                         {balanceHidden ? "••••" : formatCurrency(saldoBRL)}
                     </p>
-                    <p className="text-white/30 text-[10px] mt-1">Real Brasileiro</p>
+                    <p className="text-[#94A3B8] text-[11px] mt-1">Real Brasileiro</p>
                 </div>
 
                 {/* USDT Card (with rate integrated) */}
-                <div className="flex-1 rounded-2xl fintech-glass-card px-3.5 py-3">
-                    <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">💲</span>
-                        <span className="text-white/50 text-[11px] font-medium">USDT</span>
+                <div className="flex-1 rounded-2xl fintech-glass-card px-4 py-4">
+                    <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-[15px]">💲</span>
+                        <span className="text-[#94A3B8] text-[12px] font-medium">USDT</span>
                     </div>
-                    <p className="text-[#FFFFFF] font-bold text-[17px] leading-tight">
+                    <p className="text-[#FFFFFF] font-semibold text-[22px] leading-tight">
                         {balanceHidden ? "••••" : usdtBalanceLoading ? "..." : formatUSD(saldoUSDT)}
                     </p>
                     <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/[0.06]">
-                        <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[10px] text-white/50">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[11px] text-[#94A3B8]">
                             1 USDT = {usdtLoading ? "..." : formatCurrency(usdtRateWithSpread, 2)}
                         </span>
                     </div>
                 </div>
             </motion.div>
 
-            {/* ── Quick Actions (circular icons, horizontal row) ── */}
-            <motion.div variants={fadeUp} className="flex justify-center gap-5">
+            {/* ── Quick Actions (outlined circles) ── */}
+            <motion.div variants={fadeUp} className="flex justify-center gap-6 mt-4">
                 <QuickAction
                     icon={ArrowDownLeft}
                     label="Depositar"
@@ -482,13 +482,13 @@ export default function Dashboard() {
             </motion.div>
 
             {/* ── Recent Activity ── */}
-            <motion.div variants={fadeUp}>
+            <motion.div variants={fadeUp} className="mt-4">
                 <div className="rounded-2xl fintech-glass-activity p-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-[14px] font-bold text-[#FFFFFF]">Atividade recente</h3>
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-[18px] font-bold text-[#FFFFFF]">Atividade recente</h3>
                         <Link
                             href="/customer/transactions"
-                            className="flex items-center gap-0.5 text-[12px] font-medium text-[#a5b4fc] active:opacity-70"
+                            className="flex items-center gap-0.5 text-[12px] font-medium text-[#8B5CF6] active:opacity-70"
                         >
                             Ver tudo
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -503,10 +503,10 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="flex flex-col items-center py-8">
-                            <div className="w-10 h-10 rounded-full bg-white/[0.08] flex items-center justify-center mb-2">
-                                <ArrowDownLeft className="w-4.5 h-4.5 text-white/30" />
+                            <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center mb-2">
+                                <ArrowDownLeft className="w-4.5 h-4.5 text-[#94A3B8]" />
                             </div>
-                            <p className="text-[13px] text-white/50">Nenhuma transação ainda</p>
+                            <p className="text-[13px] text-[#94A3B8]">Nenhuma transação ainda</p>
                         </div>
                     )}
                 </div>
