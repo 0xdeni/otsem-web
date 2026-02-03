@@ -31,7 +31,7 @@ export function MobileHeader({ customerName }: { customerName?: string }) {
             transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
         >
             <div className="flex items-center justify-between px-4 py-2">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                     <Link href="/customer/dashboard" className="flex items-center">
                         <Image
                             src="/images/logo.png"
@@ -42,10 +42,10 @@ export function MobileHeader({ customerName }: { customerName?: string }) {
                         />
                     </Link>
                     <div className="flex flex-col">
-                        <span className="text-[10px] text-white/60 leading-tight">
+                        <span className="text-[11px] text-[#94A3B8] leading-tight font-normal">
                             {getGreeting()}
                         </span>
-                        <span className="text-[14px] font-semibold text-[#FFFFFF] leading-tight">
+                        <span className="text-[16px] font-semibold text-[#FFFFFF] leading-tight">
                             {displayName}
                         </span>
                     </div>
@@ -53,16 +53,16 @@ export function MobileHeader({ customerName }: { customerName?: string }) {
 
                 <div className="flex items-center gap-2">
                     <button
-                        className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 active:bg-white/20 transition-colors relative"
+                        className="flex items-center justify-center w-9 h-9 rounded-full bg-white/[0.08] border border-white/[0.08] active:bg-white/15 transition-colors relative"
                         aria-label="Notificações"
                     >
-                        <Bell className="w-4 h-4 text-white/70" strokeWidth={2} />
+                        <Bell className="w-[18px] h-[18px] text-[#94A3B8]" strokeWidth={1.8} />
                     </button>
                     <Link
                         href="/customer/settings"
-                        className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 active:bg-white/20 transition-colors"
+                        className="flex items-center justify-center w-9 h-9 rounded-full bg-white/[0.08] border border-white/[0.08] active:bg-white/15 transition-colors"
                     >
-                        <User className="w-4 h-4 text-white/70" strokeWidth={2} />
+                        <User className="w-[18px] h-[18px] text-[#94A3B8]" strokeWidth={1.8} />
                     </Link>
                 </div>
             </div>
