@@ -94,7 +94,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 onSuccess={triggerRefresh}
             />
 
-            <div className="flex flex-col h-dvh fintech-bg">
+            <div className="flex flex-col min-h-dvh h-dvh fintech-bg">
                 {/* Sticky minimal status bar */}
                 <MobileHeader customerName={customerName} />
 
