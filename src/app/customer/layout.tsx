@@ -107,7 +107,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                     <AnimatePresence mode="wait">
                         <motion.main
                             key={pathname}
-                            className="px-4 pb-32 pwa-dock-safe-bottom"
+                            className="px-4 page-content"
                             initial={{ opacity: 0, y: 6, scale: 0.97 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.97 }}
