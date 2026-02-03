@@ -197,8 +197,11 @@
    NOT when visiting otsempay.com in a regular browser.         */
 @media (display-mode: standalone) {
     html {
-        /* Must match fintech-bg-layer gradient so safe areas blend seamlessly */
-        background: linear-gradient(
+        /* IMPORTANT: Use background-color + background-image separately.
+           The `background` shorthand resets background-color to transparent,
+           which exposes the white iOS window behind the home indicator area. */
+        background-color: #000000;
+        background-image: linear-gradient(
             180deg,
             #7B22FF 0%,
             #6A10F0 8%,
@@ -212,15 +215,22 @@
             #030008 90%,
             #000000 100%
         );
+        /* Multiple height values: fallback chain for full iOS coverage */
+        height: 100vh;
         height: 100dvh;
+        height: -webkit-fill-available;
         overflow: hidden;
     }
 
     body {
-        /* Keep transparent so fintech-bg-layer (z-index: -1) shows through */
-        background: transparent;
+        /* Transparent so fintech-bg-layer shows through; black fallback
+           prevents white flash if gradient hasn't painted yet */
+        background-color: #000000;
+        background-image: none;
         overflow: hidden;
+        height: 100vh;
         height: 100dvh;
+        height: -webkit-fill-available;
         position: fixed;
         width: 100%;
         /* Native app behavior — no zoom, no text selection, no callout */
