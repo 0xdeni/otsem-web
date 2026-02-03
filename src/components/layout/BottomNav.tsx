@@ -85,7 +85,7 @@ export function BottomNav() {
     // Spring-animated translateY
     const yTarget = useMotionValue(visible ? 0 : 1);
     const ySmooth = useSpring(yTarget, { stiffness: 400, damping: 35, mass: 0.8 });
-    const y = useTransform(ySmooth, [0, 1], [0, 120]);
+    const y = useTransform(ySmooth, [0, 1], [0, 140]);
 
     useEffect(() => {
         yTarget.set(visible ? 0 : 1);
@@ -101,12 +101,12 @@ export function BottomNav() {
                 onClose={() => setActionSheetOpen(false)}
             />
 
-            {/* Liquid Glass dock — flush bottom bar */}
+            {/* Floating Liquid Glass dock — safe area aware */}
             <motion.nav
-                className="fixed z-50 bottom-0 left-0 right-0 pointer-events-none"
+                className="bottom-nav-container pointer-events-none"
                 style={{ y }}
             >
-                <div className="liquid-glass-dock pwa-nav-safe-bottom pointer-events-auto w-full">
+                <div className="liquid-glass-dock pointer-events-auto">
                     <div className="relative z-10 flex items-center justify-around h-[72px] px-4">
                         {/* Animated Glow Orb — slides behind active tab */}
                         {activeIndex >= 0 && activeIndex !== 2 && (
