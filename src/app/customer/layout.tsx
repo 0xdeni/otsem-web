@@ -99,11 +99,11 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 <MobileHeader customerName={customerName} />
 
                 {/* Single scroll surface — everything scrolls as one unit */}
-                <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain">
+                <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain">
                     <AnimatePresence mode="wait">
                         <motion.main
                             key={pathname}
-                            className="px-4 pb-[calc(64px+env(safe-area-inset-bottom,0px)+8px)]"
+                            className="px-4 pb-20"
                             initial={{ opacity: 0, y: 6, scale: 0.97 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.97 }}
