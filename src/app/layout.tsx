@@ -3,6 +3,8 @@ import type { Metadata, Viewport } from "next";
 export const viewport: Viewport = {
     width: "device-width",
     initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
     viewportFit: "cover",
     themeColor: [
         { color: "#6F00FF", media: "(prefers-color-scheme: light)" },
@@ -73,8 +75,8 @@ export default async function RootLayout({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "linear-gradient(180deg, #4200A8 0%, #180040 40%, #000000 100%)",
-            transition: "opacity 0.3s ease-out",
+            background: "linear-gradient(180deg, #7B22FF 0%, #5500D0 16%, #4200A8 25%, #320080 34%, #180040 54%, #000000 100%)",
+            transition: "opacity 0.4s ease-out",
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}

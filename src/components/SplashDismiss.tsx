@@ -7,15 +7,19 @@ export function SplashDismiss() {
     const el = document.getElementById("splash-screen");
     if (!el) return;
 
-    // Fade out, then hide — do NOT use el.remove() because React manages this
-    // node as part of its fiber tree. Removing it from the real DOM while React
-    // still tracks it causes "removeChild" errors on every subsequent re-render.
-    el.style.opacity = "0";
-    const timer = setTimeout(() => {
+    // Small delay so the page renders behind the splash before we fade out.
+    // Without this, the splash disappears before content is painted, causing a flash.
+    const delay = setTimeout(() => {
+      el.style.opacity = "0";
+    }, 100);
+    const hide = setTimeout(() => {
       el.style.display = "none";
       el.style.pointerEvents = "none";
-    }, 350);
-    return () => clearTimeout(timer);
+    }, 500);
+    return () => {
+      clearTimeout(delay);
+      clearTimeout(hide);
+    };
   }, []);
 
   return null;
