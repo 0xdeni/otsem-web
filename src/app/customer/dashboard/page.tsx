@@ -140,15 +140,15 @@ function QuickAction({
 }) {
     return (
         <motion.button
-            className="flex flex-col items-center gap-1.5"
+            className="flex flex-col items-center gap-1"
             onClick={onClick}
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
         >
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 active:bg-white/20 transition-colors">
-                <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+            <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/10 active:bg-white/20 transition-colors">
+                <Icon className="w-[18px] h-[18px] text-white" strokeWidth={2} />
             </div>
-            <span className="text-[11px] font-medium text-white/60">{label}</span>
+            <span className="text-[10px] font-medium text-white/50">{label}</span>
         </motion.button>
     );
 }
@@ -425,8 +425,8 @@ export default function Dashboard() {
             </motion.div>
 
             {/* ── Currency Breakdown (compact inline cards) ── */}
-            <motion.div variants={fadeUp} className="flex gap-3">
-                <div className="flex-1 rounded-2xl bg-white/[0.08] px-3.5 py-3">
+            <motion.div variants={fadeUp} className="flex gap-2.5">
+                <div className="flex-1 rounded-2xl fintech-glass-card px-3.5 py-3">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <span className="text-sm">🇧🇷</span>
                         <span className="text-white/40 text-[11px] font-medium">BRL</span>
@@ -435,7 +435,7 @@ export default function Dashboard() {
                         {balanceHidden ? "••••" : formatCurrency(saldoBRL)}
                     </p>
                 </div>
-                <div className="flex-1 rounded-2xl bg-white/[0.08] px-3.5 py-3">
+                <div className="flex-1 rounded-2xl fintech-glass-card px-3.5 py-3">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <span className="text-sm">💲</span>
                         <span className="text-white/40 text-[11px] font-medium">USDT</span>
@@ -462,7 +462,7 @@ export default function Dashboard() {
             </motion.div>
 
             {/* ── Quick Actions (circular icons, horizontal row) ── */}
-            <motion.div variants={fadeUp} className="flex justify-around px-4">
+            <motion.div variants={fadeUp} className="flex justify-center gap-7">
                 <QuickAction
                     icon={ArrowDownLeft}
                     label="Depositar"
@@ -487,7 +487,7 @@ export default function Dashboard() {
 
             {/* ── Recent Activity ── */}
             <motion.div variants={fadeUp}>
-                <div className="rounded-2xl bg-white/[0.06] p-4">
+                <div className="rounded-2xl border border-white/[0.06] p-4">
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="text-[14px] font-bold text-white">Atividade recente</h3>
                         <Link
