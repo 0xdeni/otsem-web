@@ -73,6 +73,20 @@ function LoginPageInner(): React.JSX.Element {
     const [userEmail, setUserEmail] = React.useState('');
     const [_pendingUser, setPendingUser] = React.useState<unknown>(null);
 
+    // Lock body scroll while login page is mounted — prevents iOS scroll
+    // state from carrying over to the dashboard after navigation.
+    React.useEffect(() => {
+        const html = document.documentElement;
+        const body = document.body;
+        html.style.overflow = 'hidden';
+        body.style.overflow = 'hidden';
+        window.scrollTo(0, 0);
+        return () => {
+            html.style.overflow = '';
+            body.style.overflow = '';
+        };
+    }, []);
+
     const onSubmit: SubmitHandler<LoginForm> = async (values) => {
         try {
             const result = await login(values.email, values.password);

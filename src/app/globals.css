@@ -633,8 +633,7 @@
     }
 
     /* ── Fullscreen edge-to-edge gradient background ─── */
-    /* Fixed layer at 120dvh — no gap during iOS rubber-band scroll.
-       Background extends behind status bar + home indicator. */
+    /* Fixed layer at 120dvh — extra coverage during iOS rubber-band scroll. */
     .fintech-bg-layer {
         position: fixed;
         inset: 0;
@@ -655,6 +654,24 @@
             #000000 100%
         );
         pointer-events: none;
+    }
+
+    /* ── Container gradient — applied directly as background, no z-index needed ─── */
+    .fintech-bg-container {
+        background: linear-gradient(
+            180deg,
+            #7B22FF 0%,
+            #6A10F0 8%,
+            #5500D0 16%,
+            #4200A8 25%,
+            #320080 34%,
+            #240060 44%,
+            #180040 54%,
+            #0F0028 65%,
+            #080014 78%,
+            #030008 90%,
+            #000000 100%
+        );
     }
 
     .fintech-bg {

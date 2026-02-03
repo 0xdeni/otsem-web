@@ -99,11 +99,13 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 onSuccess={triggerRefresh}
             />
 
-            {/* True edge-to-edge: gradient layer is the ONLY background.
-                No wrapper backgrounds behind safe areas — seamless fullscreen. */}
+            {/* Overscroll protection — extends 120dvh behind rubber-band bounce */}
             <div className="fintech-bg-layer" aria-hidden="true" />
 
-            <div className="flex flex-col min-h-dvh h-dvh relative">
+            {/* Main container carries its own gradient background directly.
+                This is immune to iOS z-index:-1 rendering bugs that can hide
+                the fixed fintech-bg-layer behind the body in certain states. */}
+            <div className="flex flex-col min-h-dvh h-dvh relative fintech-bg-container">
                 {/* Sticky header — safe-area padding on content only */}
                 <MobileHeader customerName={customerName} />
 
