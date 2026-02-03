@@ -198,7 +198,7 @@ function LoginPageInner(): React.JSX.Element {
                                     OtsemPay
                                 </span>
                             </h1>
-                            <p className="mt-4 text-lg text-white/60 font-medium">
+                            <p className="mt-4 text-lg text-white/60 font-medium whitespace-pre-line">
                                 {t('auth.accountDescription')}
                             </p>
                         </div>
