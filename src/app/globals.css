@@ -203,11 +203,6 @@
     50% { opacity: 0.8; transform: scale(0.98); }
 }
 
-@keyframes ios-shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-
 @keyframes liquid-shimmer {
     0% { transform: translateX(-100%) skewX(-15deg); }
     100% { transform: translateX(200%) skewX(-15deg); }
@@ -216,11 +211,6 @@
 @keyframes liquid-breathe {
     0%, 100% { opacity: 0.6; }
     50% { opacity: 1; }
-}
-
-@keyframes ios-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(111, 0, 255, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(111, 0, 255, 0.5); }
 }
 
 @keyframes float {
@@ -265,11 +255,6 @@
   100% { background-position: 200% 0; }
 }
 
-@keyframes glow {
-  from { box-shadow: 0 0 20px -10px rgba(111, 0, 255, 0.2); }
-  to { box-shadow: 0 0 30px 2px rgba(111, 0, 255, 0.4); }
-}
-
 @layer utilities {
     .animate-fade-in {
         animation: fade-in 0.6s cubic-bezier(0.32, 0.72, 0, 1) forwards;
@@ -288,23 +273,11 @@
         animation: float 6s ease-in-out infinite;
     }
 
-    .perspective {
-        perspective: 1200px;
-        transform-style: preserve-3d;
-    }
-    
     .ios-glass {
         background: rgba(255, 255, 255, 0.72);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         backdrop-filter: blur(20px) saturate(180%);
         border: 0.5px solid rgba(255, 255, 255, 0.5);
-    }
-
-    .ios-glass-dark {
-        background: rgba(28, 28, 30, 0.72);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        backdrop-filter: blur(20px) saturate(180%);
-        border: 0.5px solid rgba(255, 255, 255, 0.08);
     }
 
     .liquid-glass {
@@ -351,12 +324,6 @@
             inset 0 0 12px rgba(255, 255, 255, 0.02),
             0 20px 40px -10px rgba(0, 0, 0, 0.4),
             0 8px 16px -4px rgba(0, 0, 0, 0.25);
-    }
-
-    .glass-nav {
-        @apply bg-white/60 border-b border-white/80 shadow-lg;
-        -webkit-backdrop-filter: blur(24px) saturate(180%);
-        backdrop-filter: blur(24px) saturate(180%);
     }
 
     .ios-card {
@@ -498,11 +465,6 @@
         border-radius: inherit;
     }
 
-    /* ── Premium glass edge glow — pulsing purple border shadow ── */
-    .animate-ios-glow {
-        animation: glow 4s ease-in-out infinite alternate;
-    }
-
     .ios-card-premium {
         @apply bg-white rounded-[20px] p-4 sm:p-5;
         box-shadow: 
@@ -532,29 +494,6 @@
     /* ── PWA safe area utilities ─────────────────────── */
     /* These MUST be in CSS, not inline styles — Safari ignores env() in style="" */
 
-    .pwa-header-content {
-        padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
-        padding-bottom: 8px;
-    }
-
-    .pwa-header-glass {
-        top: calc(-1 * env(safe-area-inset-top, 0px));
-    }
-
-    /* Top padding on scroll content — clears the glass header overlay */
-    .pwa-content-top {
-        padding-top: calc(env(safe-area-inset-top, 0px) + 52px);
-    }
-
-    .pwa-nav-bottom {
-        bottom: 0;
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    .pwa-scroll-pad-bottom {
-        padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
-    }
-
     .pwa-sheet-safe-bottom {
         padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
     }
@@ -568,21 +507,10 @@
         padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
     }
 
-    /* ── Fintech-style status bar safe area ──────────── */
-    .pwa-status-bar-safe {
-        padding-top: env(safe-area-inset-top, 0px);
-    }
-
     /* ── Premium header — airy safe area with extra top breathing room ── */
     .pwa-header-premium {
         padding-top: calc(env(safe-area-inset-top, 0px) + 2rem);
         padding-bottom: 1.5rem;
-    }
-
-    /* ── Fintech-style nav safe area (bottom) ────────── */
-    /* Deprecated: Floating dock no longer uses full-width safe area padding */
-    .pwa-nav-safe-bottom {
-        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     /* ── Fullscreen edge-to-edge gradient background ─── */
@@ -708,30 +636,6 @@
         backdrop-filter: blur(16px);
         border: 0.5px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.18);
-    }
-
-    /* ── Liquid Glass header material ────────────────── */
-
-    .liquid-glass-header {
-        background: transparent;
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
-        box-shadow: none;
-        border: none;
-    }
-
-    .dark .liquid-glass-header {
-        background: transparent;
-        box-shadow: none;
-        border: none;
-    }
-
-    /* ── Legacy liquid-glass-nav (kept for ActionSheet compatibility) ── */
-    .liquid-glass-nav {
-        background: rgba(255, 255, 255, 0.06);
-        -webkit-backdrop-filter: blur(40px) saturate(180%);
-        backdrop-filter: blur(40px) saturate(180%);
-        border: 0.5px solid rgba(255, 255, 255, 0.12);
     }
 
     /* ── Vivid purple gradient background for customer app ── */
