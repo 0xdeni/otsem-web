@@ -30,6 +30,8 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
     // Lock body scroll — customer layout owns the single scroll container.
     // Prevents double-scroll on iOS Safari and in-browser mode.
+    // Uses black background-color on body as fallback to prevent white lip
+    // at the bottom of the iPhone home indicator area.
     React.useEffect(() => {
         const html = document.documentElement;
         const body = document.body;
@@ -40,6 +42,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             bodyHeight: body.style.height,
             bodyPosition: body.style.position,
             bodyWidth: body.style.width,
+            bodyBg: body.style.backgroundColor,
         };
         html.style.overflow = 'hidden';
         html.style.height = '100dvh';
@@ -47,6 +50,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         body.style.height = '100dvh';
         body.style.position = 'fixed';
         body.style.width = '100%';
+        body.style.backgroundColor = '#000000';
         window.scrollTo(0, 0);
         return () => {
             html.style.overflow = orig.htmlOverflow;
@@ -55,6 +59,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             body.style.height = orig.bodyHeight;
             body.style.position = orig.bodyPosition;
             body.style.width = orig.bodyWidth;
+            body.style.backgroundColor = orig.bodyBg;
         };
     }, []);
 
