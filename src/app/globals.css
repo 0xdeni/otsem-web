@@ -151,8 +151,8 @@
         -webkit-font-smoothing: antialiased;
         overscroll-behavior-y: none;
         -moz-osx-font-smoothing: grayscale;
-        /* Match gradient top edge — prevents visible borders behind status bar */
-        background-color: #000000;
+        /* Match gradient top edge — prevents visible gap behind status bar */
+        background-color: #7B22FF;
         height: 100%;
         margin: 0;
     }
@@ -502,9 +502,14 @@
         bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
     }
 
-    /* ── Safe bottom padding for content above floating dock ── */
+    /* ── Safe bottom padding for content above bottom nav ── */
     .pwa-dock-safe-bottom {
         padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ── Bottom nav safe area — padding inside the bar so background extends to edge ── */
+    .pwa-nav-safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     /* ── Premium header — airy safe area with extra top breathing room ── */
@@ -542,13 +547,13 @@
         position: relative;
     }
 
-    /* ── Floating Liquid Glass dock (Hyper-Premium) ─── */
+    /* ── Liquid Glass dock (Hyper-Premium) ─── */
     .liquid-glass-dock {
         background: rgba(255, 255, 255, 0.05);
         -webkit-backdrop-filter: blur(64px) saturate(200%);
         backdrop-filter: blur(64px) saturate(200%);
         border: 1px solid transparent;
-        border-radius: 9999px;
+        border-radius: 20px 20px 0 0;
         position: relative;
         overflow: hidden;
         box-shadow:
