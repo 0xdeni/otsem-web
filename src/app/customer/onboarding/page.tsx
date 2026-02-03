@@ -32,7 +32,7 @@ function ProgressBar({ currentStep }: { currentStep: Step }) {
                     }`}
                 />
             ))}
-            <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
+            <span className="text-xs text-white/60 ml-2 whitespace-nowrap">
                 {idx + 1}/{total}
             </span>
         </div>
@@ -105,7 +105,7 @@ export default function OnboardingPage() {
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="h-6 w-6 animate-spin text-white/60" />
             </div>
         );
     }
