@@ -13,9 +13,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
-import { VisualEditsMessenger } from "orchids-visual-edits";
-import ErrorReporter from "@/components/ErrorReporter";
-import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 
@@ -91,24 +88,6 @@ export default async function RootLayout({
         </div>
         {/* TODO: Re-enable ConnectionStatus after creating a /health endpoint */}
         {/* <ConnectionStatus /> */}
-        <Script
-          id="orchids-browser-logs"
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts/orchids-browser-logs.js"
-          strategy="afterInteractive"
-          data-orchids-project-id="8dca9fc2-17fe-42a1-b323-5e4a298d9904"
-        />
-        <ErrorReporter />
-        <Script
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts//route-messenger.js"
-          strategy="afterInteractive"
-          data-target-origin="*"
-          data-message-type="ROUTE_CHANGE"
-          data-include-search-params="true"
-          data-only-in-iframe="true"
-          data-debug="true"
-          data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
-        />
-
         <NextIntlClientProvider locale={locale} messages={messages}>
         <ThemeProvider
             attribute="class"
@@ -123,7 +102,6 @@ export default async function RootLayout({
             <CookieConsent />
         </ThemeProvider>
         </NextIntlClientProvider>
-        <VisualEditsMessenger />
         <ServiceWorkerRegistrar />
         <SplashDismiss />
       </body>
