@@ -48,128 +48,98 @@ export function BottomNav() {
                 onClose={() => setActionSheetOpen(false)}
             />
 
-            {/* Floating bar wrapper — full bleed, no veil */}
-            <div className="fixed z-50 left-0 right-0 flex justify-center pointer-events-none pwa-nav-bottom">
+            {/* Fixed floating bottom nav */}
+            <nav className="fixed z-50 left-0 right-0 bottom-0 fintech-nav-glass pwa-nav-safe-bottom">
+                <div className="flex items-center justify-around h-[60px] max-w-[480px] mx-auto px-2">
+                    {tabs.map((tab) => {
+                        const isActive = tab.id === activeTab;
+                        const isAction = tab.id === "action";
+                        const Icon = tab.icon;
 
-                <nav className="pointer-events-auto relative mx-4 mb-2 w-full max-w-[400px] rounded-[26px] liquid-glass-nav">
-
-                    {/* Tab items */}
-                    <div className="relative flex items-center justify-around px-1 py-2.5 z-10">
-                        {tabs.map((tab) => {
-                            const isActive = tab.id === activeTab;
-                            const isAction = tab.id === "action";
-                            const Icon = tab.icon;
-
-                            /* ─── Center FAB ─── */
-                            if (isAction) {
-                                return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActionSheetOpen(true)}
-                                        className="relative flex items-center justify-center outline-none -my-1"
-                                    >
-                                        <motion.div
-                                            className="relative flex items-center justify-center w-[52px] h-[52px] rounded-full"
-                                            style={{
-                                                background:
-                                                    "linear-gradient(145deg, #9B4DFF 0%, #6F00FF 50%, #5800CC 100%)",
-                                                boxShadow: [
-                                                    "0 4px 24px rgba(111, 0, 255, 0.45)",
-                                                    "0 1px 4px rgba(111, 0, 255, 0.3)",
-                                                    "inset 0 1px 0 rgba(255,255,255,0.3)",
-                                                    "inset 0 -1px 0 rgba(0,0,0,0.15)",
-                                                ].join(", "),
-                                            }}
-                                            whileTap={{ scale: 0.88 }}
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 500,
-                                                damping: 25,
-                                            }}
-                                        >
-                                            <AnimatePresence mode="wait">
-                                                <motion.div
-                                                    key={actionSheetOpen ? "close" : "open"}
-                                                    initial={{ rotate: actionSheetOpen ? -90 : 90, opacity: 0, scale: 0.5 }}
-                                                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                                                    exit={{ rotate: actionSheetOpen ? 90 : -90, opacity: 0, scale: 0.5 }}
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 500,
-                                                        damping: 25,
-                                                    }}
-                                                >
-                                                    <Plus
-                                                        className={`w-6 h-6 text-white ${actionSheetOpen ? "rotate-45" : ""}`}
-                                                        strokeWidth={2.5}
-                                                    />
-                                                </motion.div>
-                                            </AnimatePresence>
-                                        </motion.div>
-                                    </button>
-                                );
-                            }
-
-                            /* ─── Regular tab ─── */
+                        /* ─── Center FAB ─── */
+                        if (isAction) {
                             return (
-                                <Link
+                                <button
                                     key={tab.id}
-                                    href={tab.href}
-                                    className="relative flex flex-col items-center justify-center px-3 py-1 outline-none"
+                                    onClick={() => setActionSheetOpen(true)}
+                                    className="relative flex items-center justify-center outline-none -mt-4"
                                 >
-                                    {/* Active pill — subtle white glow behind icon */}
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="navActivePill"
-                                            className="absolute inset-0 rounded-[18px]"
-                                            style={{
-                                                background:
-                                                    "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)",
-                                                boxShadow:
-                                                    "inset 0 0 0 0.5px rgba(255,255,255,0.15), 0 0 12px rgba(155,77,255,0.15)",
-                                            }}
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 500,
-                                                damping: 32,
-                                                mass: 0.8,
-                                            }}
-                                        />
-                                    )}
-
                                     <motion.div
-                                        className="relative flex flex-col items-center gap-0.5 z-10"
-                                        whileTap={{ scale: 0.82 }}
+                                        className="flex items-center justify-center w-12 h-12 rounded-full"
+                                        style={{
+                                            background:
+                                                "linear-gradient(145deg, #a78bfa 0%, #8B5CF6 50%, #7c3aed 100%)",
+                                            boxShadow: "0 4px 24px rgba(139, 92, 246, 0.5), 0 0 48px rgba(139, 92, 246, 0.2)",
+                                        }}
+                                        whileTap={{ scale: 0.88 }}
                                         transition={{
                                             type: "spring",
                                             stiffness: 500,
                                             damping: 25,
                                         }}
                                     >
-                                        <Icon
-                                            className={`w-[22px] h-[22px] transition-colors duration-300 ${
-                                                isActive
-                                                    ? "text-white"
-                                                    : "text-white/40"
-                                            }`}
-                                            strokeWidth={isActive ? 2.4 : 1.7}
-                                        />
-                                        <span
-                                            className={`text-[10px] leading-tight font-medium transition-colors duration-300 ${
-                                                isActive
-                                                    ? "text-white"
-                                                    : "text-white/40"
-                                            }`}
-                                        >
-                                            {tab.label}
-                                        </span>
+                                        <AnimatePresence mode="wait">
+                                            <motion.div
+                                                key={actionSheetOpen ? "close" : "open"}
+                                                initial={{ rotate: actionSheetOpen ? -90 : 90, opacity: 0, scale: 0.5 }}
+                                                animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                                                exit={{ rotate: actionSheetOpen ? 90 : -90, opacity: 0, scale: 0.5 }}
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 500,
+                                                    damping: 25,
+                                                }}
+                                            >
+                                                <Plus
+                                                    className={`w-5 h-5 text-white ${actionSheetOpen ? "rotate-45" : ""}`}
+                                                    strokeWidth={2.5}
+                                                />
+                                            </motion.div>
+                                        </AnimatePresence>
                                     </motion.div>
-                                </Link>
+                                </button>
                             );
-                        })}
-                    </div>
-                </nav>
-            </div>
+                        }
+
+                        /* ─── Regular tab ─── */
+                        return (
+                            <Link
+                                key={tab.id}
+                                href={tab.href}
+                                className="relative flex flex-col items-center justify-center px-3 py-1 outline-none"
+                            >
+                                <motion.div
+                                    className="relative flex flex-col items-center gap-0.5 z-10"
+                                    whileTap={{ scale: 0.82 }}
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 500,
+                                        damping: 25,
+                                    }}
+                                >
+                                    <Icon
+                                        className={`w-[20px] h-[20px] transition-colors duration-300 ${
+                                            isActive
+                                                ? "text-[#8B5CF6]"
+                                                : "text-[#94A3B8]/50"
+                                        }`}
+                                        strokeWidth={isActive ? 2.2 : 1.6}
+                                    />
+                                    <span
+                                        className={`text-[10px] leading-tight font-medium transition-colors duration-300 ${
+                                            isActive
+                                                ? "text-[#8B5CF6]"
+                                                : "text-[#94A3B8]/50"
+                                        }`}
+                                    >
+                                        {tab.label}
+                                    </span>
+                                </motion.div>
+                            </Link>
+                        );
+                    })}
+                </div>
+            </nav>
         </>
     );
 }
