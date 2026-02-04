@@ -651,15 +651,19 @@
         padding-bottom: 1rem;
     }
 
-    /* ── Fullscreen edge-to-edge gradient background ─── */
-    /* Fixed layer at 120dvh — extra coverage during iOS rubber-band scroll. */
+    /* ── Fullscreen edge-to-edge background image ─────── */
+    /* Extends 50px past each viewport edge so the gradient covers the home
+       indicator area and rubber-band overscroll region.  z-index: 0 keeps it
+       above the html/body background-color (-1 would hide it behind the root
+       element's canvas).  The container sits on top because it comes later
+       in DOM order and has position: relative. */
     .fintech-bg-layer {
         position: fixed;
         top: -50px;
         left: 0;
         right: 0;
         bottom: -50px;
-        z-index: -1;
+        z-index: 0;
         background: url('/images/customer-bg.png') center top / cover no-repeat;
         pointer-events: none;
     }
@@ -749,7 +753,7 @@
         left: 0;
         right: 0;
         bottom: -50px;
-        z-index: -1;
+        z-index: 0;
         background: url('/images/customer-bg.png') center top / cover no-repeat;
         pointer-events: none;
     }

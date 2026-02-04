@@ -137,10 +137,9 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             {/* Overscroll protection — extends 120dvh behind rubber-band bounce */}
             <div className="fintech-bg-layer" aria-hidden="true" />
 
-            {/* Main container — h-full fills the body (position:fixed inset:0)
-                which covers the full viewport including the home indicator area.
+            {/* Main container — h-dvh sizes to viewport (doesn't need parent heights).
                 Background image applied directly (immune to iOS z-index bugs). */}
-            <div className="flex flex-col h-full relative fintech-bg-container overflow-hidden">
+            <div className="flex flex-col h-dvh relative fintech-bg-container overflow-hidden">
                 {/* Single scroll surface — header + content scroll together.
                     No fixed/sticky header = no permanent non-scrollable zone. */}
                 <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain">
