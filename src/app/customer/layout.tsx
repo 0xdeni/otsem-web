@@ -41,13 +41,11 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             bodyOverflow: body.style.overflow,
             bodyPosition: body.style.position,
             bodyInset: body.style.inset,
-            bodyBg: body.style.backgroundColor,
         };
         html.style.overflow = 'hidden';
         body.style.overflow = 'hidden';
         body.style.position = 'fixed';
         body.style.inset = '0';
-        body.style.backgroundColor = '#0C0432';
         window.scrollTo(0, 0);
 
         // Prevent pinch-to-zoom in iOS PWA — gesturestart fires for
@@ -62,7 +60,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             body.style.overflow = orig.bodyOverflow;
             body.style.position = orig.bodyPosition;
             body.style.inset = orig.bodyInset;
-            body.style.backgroundColor = orig.bodyBg;
             document.removeEventListener('gesturestart', preventZoom);
             document.removeEventListener('gesturechange', preventZoom);
         };
@@ -137,9 +134,10 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             {/* Overscroll protection — extends 120dvh behind rubber-band bounce */}
             <div className="fintech-bg-layer" aria-hidden="true" />
 
-            {/* Main container — h-dvh sizes to viewport (doesn't need parent heights).
+            {/* Main container — fintech-bg-container sets height: 100dvh (browser) or
+                calc(100dvh + safe-area-inset-bottom) (standalone PWA) via CSS.
                 Background image applied directly (immune to iOS z-index bugs). */}
-            <div className="flex flex-col h-dvh relative fintech-bg-container overflow-hidden">
+            <div className="flex flex-col relative fintech-bg-container overflow-hidden">
                 {/* Single scroll surface — header + content scroll together.
                     No fixed/sticky header = no permanent non-scrollable zone. */}
                 <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain">
