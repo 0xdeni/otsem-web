@@ -205,10 +205,11 @@
         background-size: cover;
         background-position: center top;
         background-repeat: no-repeat;
-        /* Multiple height values: fallback chain for full iOS coverage */
-        height: 100vh;
-        height: 100dvh;
-        height: -webkit-fill-available;
+        /* min-height (not height) so background extends behind home indicator.
+           Fixed height clips the background; min-height lets it fill fully. */
+        min-height: 100vh;
+        min-height: 100dvh;
+        min-height: -webkit-fill-available;
         overflow: hidden;
     }
 
@@ -654,9 +655,11 @@
     /* Fixed layer at 120dvh — extra coverage during iOS rubber-band scroll. */
     .fintech-bg-layer {
         position: fixed;
-        inset: 0;
+        top: -50px;
+        left: 0;
+        right: 0;
+        bottom: -50px;
         z-index: -1;
-        min-height: 120dvh;
         background: url('/images/customer-bg.png') center top / cover no-repeat;
         pointer-events: none;
     }
@@ -742,9 +745,11 @@
 
     .customer-app-bg-layer {
         position: fixed;
-        inset: 0;
+        top: -50px;
+        left: 0;
+        right: 0;
+        bottom: -50px;
         z-index: -1;
-        min-height: 120dvh;
         background: url('/images/customer-bg.png') center top / cover no-repeat;
         pointer-events: none;
     }
