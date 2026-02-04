@@ -46,6 +46,7 @@ const nextConfig: NextConfig = {
       { source: "/wallet/:path*", destination: `${base}/wallet/:path*` },
       { source: "/fdbank/:path*", destination: `${base}/fdbank/:path*` },
       { source: "/inter/:path*", destination: `${base}/inter/:path*` },
+      { source: "/transactions/:path*", destination: `${base}/transactions/:path*` },
     ];
   },
   images: {
