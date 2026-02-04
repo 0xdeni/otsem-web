@@ -205,23 +205,23 @@
         background-size: cover;
         background-position: center top;
         background-repeat: no-repeat;
-        /* min-height (not height) so background extends behind home indicator.
-           Fixed height clips the background; min-height lets it fill fully. */
+        /* 100dvh does NOT include the home indicator safe area on iOS.
+           Extend the html box to cover the full physical screen so
+           background-size: cover stretches the image behind the indicator. */
         min-height: 100vh;
-        min-height: 100dvh;
-        min-height: -webkit-fill-available;
+        min-height: calc(100dvh + env(safe-area-inset-bottom, 34px));
         overflow: hidden;
     }
 
     body {
-        /* Dark purple fallback prevents white flash if background image
-           hasn't painted yet */
-        background-color: #0C0432;
+        /* Transparent — let the html canvas background-image show through
+           everywhere, including the home indicator safe area. The container
+           and bg-layer provide their own backgrounds for the visible area. */
+        background-color: transparent;
         background-image: none;
         overflow: hidden;
         /* inset: 0 fills the FULL viewport including the home indicator
-           safe area (with viewport-fit: cover). Using height: 100dvh
-           stops short of the home indicator, leaving a dark strip. */
+           safe area (with viewport-fit: cover). */
         position: fixed;
         inset: 0;
         /* Native app behavior — no zoom, no text selection, no callout */
@@ -671,6 +671,17 @@
     /* ── Container gradient — applied directly as background, no z-index needed ─── */
     .fintech-bg-container {
         background: url('/images/customer-bg.png') center top / cover no-repeat;
+        /* Default height for browser mode (same as Tailwind h-dvh).
+           Standalone PWA mode overrides this below to include safe area. */
+        height: 100dvh;
+    }
+
+    /* In installed PWA mode, extend the container to cover the home indicator
+       safe area so no background-color strip is visible at the bottom. */
+    @media (display-mode: standalone) {
+        .fintech-bg-container {
+            height: calc(100dvh + env(safe-area-inset-bottom, 34px));
+        }
     }
 
     .fintech-bg {
