@@ -30,35 +30,30 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
     // Lock body scroll — customer layout owns the single scroll container.
     // Prevents double-scroll on iOS Safari and in-browser mode.
-    // Uses black background-color on body as fallback to prevent white lip
-    // at the bottom of the iPhone home indicator area.
+    // Uses inset: 0 on body to fill the FULL viewport including the
+    // home indicator safe area (viewport-fit: cover), avoiding the dark
+    // strip at the bottom that appears when using height: 100dvh.
     React.useEffect(() => {
         const html = document.documentElement;
         const body = document.body;
         const orig = {
             htmlOverflow: html.style.overflow,
-            htmlHeight: html.style.height,
             bodyOverflow: body.style.overflow,
-            bodyHeight: body.style.height,
             bodyPosition: body.style.position,
-            bodyWidth: body.style.width,
+            bodyInset: body.style.inset,
             bodyBg: body.style.backgroundColor,
         };
         html.style.overflow = 'hidden';
-        html.style.height = '100dvh';
         body.style.overflow = 'hidden';
-        body.style.height = '100dvh';
         body.style.position = 'fixed';
-        body.style.width = '100%';
+        body.style.inset = '0';
         body.style.backgroundColor = '#0C0432';
         window.scrollTo(0, 0);
         return () => {
             html.style.overflow = orig.htmlOverflow;
-            html.style.height = orig.htmlHeight;
             body.style.overflow = orig.bodyOverflow;
-            body.style.height = orig.bodyHeight;
             body.style.position = orig.bodyPosition;
-            body.style.width = orig.bodyWidth;
+            body.style.inset = orig.bodyInset;
             body.style.backgroundColor = orig.bodyBg;
         };
     }, []);
@@ -132,9 +127,10 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             {/* Overscroll protection — extends 120dvh behind rubber-band bounce */}
             <div className="fintech-bg-layer" aria-hidden="true" />
 
-            {/* Main container — h-dvh + overflow-hidden locks the viewport.
-                Gradient background applied directly (immune to iOS z-index bugs). */}
-            <div className="flex flex-col h-dvh relative fintech-bg-container overflow-hidden">
+            {/* Main container — h-full fills the body (position:fixed inset:0)
+                which covers the full viewport including the home indicator area.
+                Background image applied directly (immune to iOS z-index bugs). */}
+            <div className="flex flex-col h-full relative fintech-bg-container overflow-hidden">
                 {/* Single scroll surface — header + content scroll together.
                     No fixed/sticky header = no permanent non-scrollable zone. */}
                 <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain">

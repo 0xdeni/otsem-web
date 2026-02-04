@@ -214,16 +214,16 @@
     }
 
     body {
-        /* Transparent so fintech-bg-layer shows through; dark purple fallback
-           prevents white flash if background image hasn't painted yet */
+        /* Dark purple fallback prevents white flash if background image
+           hasn't painted yet */
         background-color: #0C0432;
         background-image: none;
         overflow: hidden;
-        height: 100vh;
-        height: 100dvh;
-        height: -webkit-fill-available;
+        /* inset: 0 fills the FULL viewport including the home indicator
+           safe area (with viewport-fit: cover). Using height: 100dvh
+           stops short of the home indicator, leaving a dark strip. */
         position: fixed;
-        width: 100%;
+        inset: 0;
         /* Native app behavior — no zoom, no text selection, no callout */
         touch-action: pan-x pan-y;
         -webkit-user-select: none;
