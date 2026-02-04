@@ -7,13 +7,8 @@ import {
     BottomSheetHeader,
     BottomSheetTitle,
 } from "@/components/ui/bottom-sheet";
-import {
-    Loader2,
-    XCircle,
-    Download,
-    Share2,
-    CheckCircle2,
-} from "lucide-react";
+import { Loader2, XCircle, Download, Share2, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import http from "@/lib/http";
 import type { TransactionReceipt } from "@/types/transaction";
 
@@ -36,17 +31,43 @@ function formatDateTime(dateString: string): string {
     });
 }
 
+function truncateId(id: string): string {
+    if (id.length <= 20) return id;
+    return `${id.slice(0, 10)}...${id.slice(-8)}`;
+}
+
 type Props = {
     transactionId: string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
 
+async function captureReceiptImage(element: HTMLElement): Promise<Blob> {
+    const html2canvas = (await import("html2canvas")).default;
+    const canvas = await html2canvas(element, {
+        scale: 3,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+    });
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(
+            (blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error("Failed to create image"));
+            },
+            "image/png",
+            1.0
+        );
+    });
+}
+
 export function ReceiptSheet({ transactionId, open, onOpenChange }: Props) {
     const [receipt, setReceipt] = React.useState<TransactionReceipt | null>(null);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
-    const receiptRef = React.useRef<HTMLDivElement>(null);
+    const [exporting, setExporting] = React.useState(false);
+    const receiptCardRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         if (!open || !transactionId) {
@@ -78,39 +99,62 @@ export function ReceiptSheet({ transactionId, open, onOpenChange }: Props) {
         };
     }, [open, transactionId]);
 
-    async function handleShare() {
-        if (!receipt) return;
-
-        const text = buildReceiptText(receipt);
-
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: receipt.title,
-                    text,
-                });
-            } catch {
-                // User cancelled share
-            }
-        } else {
-            await navigator.clipboard.writeText(text);
-            // Rely on component re-rendering isn't needed, just a simple feedback
+    async function handleDownload() {
+        if (!receipt || !receiptCardRef.current) return;
+        setExporting(true);
+        try {
+            const blob = await captureReceiptImage(receiptCardRef.current);
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `comprovante-${receipt.transactionId.slice(0, 8)}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            toast.success("Comprovante salvo!");
+        } catch {
+            toast.error("Erro ao salvar comprovante.");
+        } finally {
+            setExporting(false);
         }
     }
 
-    async function handleDownload() {
-        if (!receipt) return;
+    async function handleShare() {
+        if (!receipt || !receiptCardRef.current) return;
+        setExporting(true);
+        try {
+            const blob = await captureReceiptImage(receiptCardRef.current);
+            const file = new File([blob], `comprovante-${receipt.transactionId.slice(0, 8)}.png`, {
+                type: "image/png",
+            });
 
-        const text = buildReceiptText(receipt);
-        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `comprovante-${receipt.transactionId.slice(0, 8)}.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+            if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                await navigator.share({
+                    title: receipt.title,
+                    files: [file],
+                });
+            } else if (navigator.share) {
+                // Fallback: share without file
+                const url = URL.createObjectURL(blob);
+                await navigator.share({
+                    title: receipt.title,
+                    text: `${receipt.title}\nValor: ${formatCurrency(receipt.amount)}\nData: ${formatDateTime(receipt.date)}`,
+                    url,
+                });
+                URL.revokeObjectURL(url);
+            } else {
+                // Desktop fallback: download
+                await handleDownload();
+            }
+        } catch (err) {
+            // User cancelled share — not an error
+            if (err instanceof Error && err.name !== "AbortError") {
+                toast.error("Erro ao compartilhar.");
+            }
+        } finally {
+            setExporting(false);
+        }
     }
 
     return (
@@ -139,98 +183,277 @@ export function ReceiptSheet({ transactionId, open, onOpenChange }: Props) {
                                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
                                     <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                                 </div>
-                                <BottomSheetTitle>{receipt.title}</BottomSheetTitle>
+                                <BottomSheetTitle>Comprovante</BottomSheetTitle>
                             </div>
                         </BottomSheetHeader>
 
-                        {/* Receipt card */}
-                        <div
-                            ref={receiptRef}
-                            className="rounded-2xl border border-border/40 bg-card/50 p-5 space-y-4"
-                        >
-                            {/* Amount */}
-                            <div className="text-center pb-4 border-b border-border/30">
-                                <p className="text-[28px] font-bold text-foreground leading-none">
+                        {/* ── Professional Receipt Card (captured as image) ── */}
+                        <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+                            <div
+                                ref={receiptCardRef}
+                                style={{
+                                    background: "#ffffff",
+                                    padding: "32px 24px 28px",
+                                    fontFamily:
+                                        "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif",
+                                }}
+                            >
+                                {/* Logo + Brand */}
+                                <div style={{ textAlign: "center", marginBottom: "24px" }}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src="/images/logo.png"
+                                        alt="Otsem Pay"
+                                        style={{
+                                            height: "36px",
+                                            objectFit: "contain",
+                                            margin: "0 auto 8px",
+                                            display: "block",
+                                        }}
+                                    />
+                                    <p
+                                        style={{
+                                            fontSize: "11px",
+                                            color: "#9ca3af",
+                                            letterSpacing: "0.08em",
+                                            textTransform: "uppercase",
+                                            fontWeight: 500,
+                                            margin: 0,
+                                        }}
+                                    >
+                                        Comprovante de Transação
+                                    </p>
+                                </div>
+
+                                {/* Status badge */}
+                                <div style={{ textAlign: "center", marginBottom: "20px" }}>
+                                    <span
+                                        style={{
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: "6px",
+                                            padding: "4px 14px",
+                                            borderRadius: "999px",
+                                            background: "#ecfdf5",
+                                            color: "#059669",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                width: "6px",
+                                                height: "6px",
+                                                borderRadius: "50%",
+                                                background: "#10b981",
+                                                display: "inline-block",
+                                            }}
+                                        />
+                                        Transação concluída
+                                    </span>
+                                </div>
+
+                                {/* Title */}
+                                <p
+                                    style={{
+                                        textAlign: "center",
+                                        fontSize: "14px",
+                                        fontWeight: 600,
+                                        color: "#374151",
+                                        margin: "0 0 4px",
+                                    }}
+                                >
+                                    {receipt.title}
+                                </p>
+
+                                {/* Amount */}
+                                <p
+                                    style={{
+                                        textAlign: "center",
+                                        fontSize: "32px",
+                                        fontWeight: 700,
+                                        color: "#111827",
+                                        margin: "0 0 4px",
+                                        letterSpacing: "-0.02em",
+                                    }}
+                                >
                                     {formatCurrency(receipt.amount)}
                                 </p>
-                                <p className="text-[12px] text-muted-foreground mt-1.5">
+
+                                {/* Date */}
+                                <p
+                                    style={{
+                                        textAlign: "center",
+                                        fontSize: "12px",
+                                        color: "#9ca3af",
+                                        margin: "0 0 24px",
+                                    }}
+                                >
                                     {formatDateTime(receipt.date)}
                                 </p>
-                                {receipt.completionDate && receipt.completionDate !== receipt.date && (
-                                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                                        Concluído em {formatDateTime(receipt.completionDate)}
-                                    </p>
-                                )}
-                            </div>
 
-                            {/* Payer */}
-                            <ReceiptSection title="Pagador">
-                                <ReceiptRow label="Nome" value={receipt.payer.name} />
-                                <ReceiptRow label="CPF/CNPJ" value={receipt.payer.maskedTaxNumber} />
-                                {receipt.payer.pixKey && (
-                                    <ReceiptRow label="Chave PIX" value={receipt.payer.pixKey} />
-                                )}
-                                {receipt.payer.bankCode && (
-                                    <ReceiptRow label="Banco" value={receipt.payer.bankCode} />
-                                )}
-                            </ReceiptSection>
-
-                            {/* Receiver */}
-                            <ReceiptSection title="Recebedor">
-                                <ReceiptRow label="Nome" value={receipt.receiver.name} />
-                                <ReceiptRow label="CPF/CNPJ" value={receipt.receiver.maskedTaxNumber} />
-                                {receipt.receiver.pixKey && (
-                                    <ReceiptRow label="Chave PIX" value={receipt.receiver.pixKey} />
-                                )}
-                                {receipt.receiver.bankCode && (
-                                    <ReceiptRow label="Banco" value={receipt.receiver.bankCode} />
-                                )}
-                            </ReceiptSection>
-
-                            {/* IDs */}
-                            <ReceiptSection title="Identificação">
-                                <ReceiptRow
-                                    label="ID"
-                                    value={truncateId(receipt.transactionId)}
+                                {/* Divider */}
+                                <div
+                                    style={{
+                                        height: "1px",
+                                        background:
+                                            "linear-gradient(90deg, transparent, #e5e7eb, transparent)",
+                                        margin: "0 0 20px",
+                                    }}
                                 />
-                                {receipt.endToEndId && (
-                                    <ReceiptRow
-                                        label="End-to-End"
-                                        value={truncateId(receipt.endToEndId)}
-                                    />
-                                )}
-                                {receipt.txid && (
-                                    <ReceiptRow label="TxID" value={truncateId(receipt.txid)} />
-                                )}
-                                {receipt.bankProvider && (
-                                    <ReceiptRow label="Provedor" value={receipt.bankProvider} />
-                                )}
-                            </ReceiptSection>
 
-                            {/* Payer message */}
-                            {receipt.payerMessage && (
-                                <ReceiptSection title="Mensagem">
-                                    <p className="text-[13px] text-foreground">
-                                        {receipt.payerMessage}
+                                {/* Payer */}
+                                <ReceiptCardSection title="Pagador">
+                                    <ReceiptCardRow label="Nome" value={receipt.payer.name} />
+                                    <ReceiptCardRow
+                                        label="CPF/CNPJ"
+                                        value={receipt.payer.maskedTaxNumber}
+                                    />
+                                    {receipt.payer.pixKey && (
+                                        <ReceiptCardRow
+                                            label="Chave PIX"
+                                            value={receipt.payer.pixKey}
+                                        />
+                                    )}
+                                    {receipt.payer.bankCode && (
+                                        <ReceiptCardRow
+                                            label="Banco"
+                                            value={receipt.payer.bankCode}
+                                        />
+                                    )}
+                                </ReceiptCardSection>
+
+                                {/* Receiver */}
+                                <ReceiptCardSection title="Recebedor">
+                                    <ReceiptCardRow label="Nome" value={receipt.receiver.name} />
+                                    <ReceiptCardRow
+                                        label="CPF/CNPJ"
+                                        value={receipt.receiver.maskedTaxNumber}
+                                    />
+                                    {receipt.receiver.pixKey && (
+                                        <ReceiptCardRow
+                                            label="Chave PIX"
+                                            value={receipt.receiver.pixKey}
+                                        />
+                                    )}
+                                    {receipt.receiver.bankCode && (
+                                        <ReceiptCardRow
+                                            label="Banco"
+                                            value={receipt.receiver.bankCode}
+                                        />
+                                    )}
+                                </ReceiptCardSection>
+
+                                {/* IDs */}
+                                <ReceiptCardSection title="Identificação">
+                                    <ReceiptCardRow
+                                        label="ID"
+                                        value={truncateId(receipt.transactionId)}
+                                    />
+                                    {receipt.endToEndId && (
+                                        <ReceiptCardRow
+                                            label="End-to-End"
+                                            value={truncateId(receipt.endToEndId)}
+                                        />
+                                    )}
+                                    {receipt.txid && (
+                                        <ReceiptCardRow
+                                            label="TxID"
+                                            value={truncateId(receipt.txid)}
+                                        />
+                                    )}
+                                    {receipt.bankProvider && (
+                                        <ReceiptCardRow
+                                            label="Provedor"
+                                            value={receipt.bankProvider}
+                                        />
+                                    )}
+                                </ReceiptCardSection>
+
+                                {/* Completion date */}
+                                {receipt.completionDate &&
+                                    receipt.completionDate !== receipt.date && (
+                                        <ReceiptCardSection title="Conclusão">
+                                            <ReceiptCardRow
+                                                label="Data"
+                                                value={formatDateTime(receipt.completionDate)}
+                                            />
+                                        </ReceiptCardSection>
+                                    )}
+
+                                {/* Payer message */}
+                                {receipt.payerMessage && (
+                                    <ReceiptCardSection title="Mensagem">
+                                        <p
+                                            style={{
+                                                fontSize: "13px",
+                                                color: "#374151",
+                                                margin: 0,
+                                            }}
+                                        >
+                                            {receipt.payerMessage}
+                                        </p>
+                                    </ReceiptCardSection>
+                                )}
+
+                                {/* Footer */}
+                                <div
+                                    style={{
+                                        marginTop: "24px",
+                                        paddingTop: "16px",
+                                        borderTop: "1px solid #f3f4f6",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    <p
+                                        style={{
+                                            fontSize: "10px",
+                                            color: "#d1d5db",
+                                            margin: "0 0 2px",
+                                            letterSpacing: "0.05em",
+                                            textTransform: "uppercase",
+                                        }}
+                                    >
+                                        Processado por
                                     </p>
-                                </ReceiptSection>
-                            )}
+                                    <p
+                                        style={{
+                                            fontSize: "13px",
+                                            fontWeight: 700,
+                                            color: "#6F00FF",
+                                            margin: 0,
+                                        }}
+                                    >
+                                        Otsem Pay
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Action buttons */}
                         <div className="flex gap-3 mt-5 mb-2">
                             <button
                                 onClick={handleShare}
-                                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border border-border/50 bg-card/30 text-foreground font-semibold text-[14px] active:bg-card/60 transition-colors"
+                                disabled={exporting}
+                                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border border-border/50 bg-card/30 text-foreground font-semibold text-[14px] active:bg-card/60 transition-colors disabled:opacity-50"
                             >
-                                <Share2 className="w-4 h-4" />
+                                {exporting ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Share2 className="w-4 h-4" />
+                                )}
                                 Compartilhar
                             </button>
                             <button
                                 onClick={handleDownload}
-                                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#6F00FF] text-white font-semibold text-[14px] active:bg-[#5800CC] transition-colors"
+                                disabled={exporting}
+                                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#6F00FF] text-white font-semibold text-[14px] active:bg-[#5800CC] transition-colors disabled:opacity-50"
                             >
-                                <Download className="w-4 h-4" />
+                                {exporting ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Download className="w-4 h-4" />
+                                )}
                                 Salvar
                             </button>
                         </div>
@@ -241,72 +464,75 @@ export function ReceiptSheet({ transactionId, open, onOpenChange }: Props) {
     );
 }
 
-// ─── Sub-components ──────────────────────────────────────
+// ─── Receipt card sub-components (inline styles for html2canvas) ──────
 
-function ReceiptSection({ title, children }: { title: string; children: React.ReactNode }) {
+function ReceiptCardSection({
+    title,
+    children,
+}: {
+    title: string;
+    children: React.ReactNode;
+}) {
     return (
-        <div className="pt-3 border-t border-border/30 first:border-t-0 first:pt-0">
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        <div style={{ marginBottom: "16px" }}>
+            <p
+                style={{
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    color: "#9ca3af",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    margin: "0 0 8px",
+                }}
+            >
                 {title}
             </p>
-            <div className="space-y-1.5">{children}</div>
+            <div
+                style={{
+                    background: "#f9fafb",
+                    borderRadius: "12px",
+                    padding: "12px 14px",
+                }}
+            >
+                {children}
+            </div>
         </div>
     );
 }
 
-function ReceiptRow({ label, value }: { label: string; value: string }) {
+function ReceiptCardRow({ label, value }: { label: string; value: string }) {
     return (
-        <div className="flex items-center justify-between">
-            <span className="text-[12px] text-muted-foreground">{label}</span>
-            <span className="text-[12px] font-medium text-foreground text-right max-w-[60%] truncate">
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "4px 0",
+            }}
+        >
+            <span
+                style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    fontWeight: 400,
+                }}
+            >
+                {label}
+            </span>
+            <span
+                style={{
+                    fontSize: "12px",
+                    color: "#111827",
+                    fontWeight: 600,
+                    textAlign: "right",
+                    maxWidth: "60%",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                }}
+            >
                 {value}
             </span>
         </div>
     );
-}
-
-function truncateId(id: string): string {
-    if (id.length <= 16) return id;
-    return `${id.slice(0, 8)}...${id.slice(-8)}`;
-}
-
-function buildReceiptText(receipt: TransactionReceipt): string {
-    const lines: string[] = [
-        receipt.title,
-        "═".repeat(40),
-        "",
-        `Valor: ${formatCurrency(receipt.amount)}`,
-        `Data: ${formatDateTime(receipt.date)}`,
-    ];
-
-    if (receipt.completionDate) {
-        lines.push(`Concluído em: ${formatDateTime(receipt.completionDate)}`);
-    }
-
-    lines.push("", "── Pagador ──");
-    lines.push(`Nome: ${receipt.payer.name}`);
-    lines.push(`CPF/CNPJ: ${receipt.payer.maskedTaxNumber}`);
-    if (receipt.payer.pixKey) lines.push(`Chave PIX: ${receipt.payer.pixKey}`);
-    if (receipt.payer.bankCode) lines.push(`Banco: ${receipt.payer.bankCode}`);
-
-    lines.push("", "── Recebedor ──");
-    lines.push(`Nome: ${receipt.receiver.name}`);
-    lines.push(`CPF/CNPJ: ${receipt.receiver.maskedTaxNumber}`);
-    if (receipt.receiver.pixKey) lines.push(`Chave PIX: ${receipt.receiver.pixKey}`);
-    if (receipt.receiver.bankCode) lines.push(`Banco: ${receipt.receiver.bankCode}`);
-
-    lines.push("", "── Identificação ──");
-    lines.push(`ID: ${receipt.transactionId}`);
-    if (receipt.endToEndId) lines.push(`End-to-End: ${receipt.endToEndId}`);
-    if (receipt.txid) lines.push(`TxID: ${receipt.txid}`);
-    if (receipt.bankProvider) lines.push(`Provedor: ${receipt.bankProvider}`);
-
-    if (receipt.payerMessage) {
-        lines.push("", `Mensagem: ${receipt.payerMessage}`);
-    }
-
-    lines.push("", "═".repeat(40));
-    lines.push("Otsem Pay");
-
-    return lines.join("\n");
 }
