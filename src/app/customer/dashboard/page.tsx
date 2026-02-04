@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useUsdtRate } from "@/lib/useUsdtRate";
 import { useUiModals } from "@/stores/ui-modals";
 import { ConvertModal } from "@/components/modals/convert-modal";
+import { TransactionDetailSheet } from "@/components/modals/transaction-detail-sheet";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -155,7 +156,7 @@ function QuickAction({
 }
 
 // ─── Transaction Row ─────────────────────────────────────
-function TransactionRow({ tx }: { tx: Transaction }) {
+function TransactionRow({ tx, onTap }: { tx: Transaction; onTap?: () => void }) {
     const amount = Number(tx.amount);
     const isIncoming = tx.type === "PIX_IN";
     const isPending = tx.status === "PENDING" || tx.status === "PROCESSING";
@@ -206,8 +207,9 @@ function TransactionRow({ tx }: { tx: Transaction }) {
 
     return (
         <motion.div
-            className="flex items-center gap-3 py-2.5 active:bg-white/5 -mx-1 px-1 rounded-xl transition-colors"
+            className="flex items-center gap-3 py-2.5 active:bg-white/5 -mx-1 px-1 rounded-xl transition-colors cursor-pointer"
             whileTap={{ scale: 0.98 }}
+            onClick={onTap}
         >
             <div className={`flex items-center justify-center w-9 h-9 rounded-full ${iconConfig.bg}`}>
                 <iconConfig.Icon className={`w-4 h-4 ${iconConfig.color}`} strokeWidth={2} />
@@ -261,6 +263,8 @@ export default function Dashboard() {
     const [refreshCounter, setRefreshCounter] = React.useState(0);
     const [balanceHidden, setBalanceHidden] = React.useState(false);
     const [showConvertModal, setShowConvertModal] = React.useState(false);
+    const [selectedTxId, setSelectedTxId] = React.useState<string | null>(null);
+    const [detailOpen, setDetailOpen] = React.useState(false);
 
     const refreshData = React.useCallback(() => setRefreshCounter((c) => c + 1), []);
     const initialLoadDone = React.useRef(false);
@@ -577,7 +581,14 @@ export default function Dashboard() {
                     {filteredTransactions.length > 0 ? (
                         <div className="divide-y divide-white/[0.06]">
                             {filteredTransactions.slice(0, 5).map((tx) => (
-                                <TransactionRow key={tx.transactionId} tx={tx} />
+                                <TransactionRow
+                                    key={tx.transactionId}
+                                    tx={tx}
+                                    onTap={() => {
+                                        setSelectedTxId(tx.transactionId);
+                                        setDetailOpen(true);
+                                    }}
+                                />
                             ))}
                         </div>
                     ) : (
@@ -590,6 +601,16 @@ export default function Dashboard() {
                     )}
                 </div>
             </motion.div>
+
+            {/* ── Transaction Detail Sheet ── */}
+            <TransactionDetailSheet
+                transactionId={selectedTxId}
+                open={detailOpen}
+                onOpenChange={(open) => {
+                    setDetailOpen(open);
+                    if (!open) setSelectedTxId(null);
+                }}
+            />
         </motion.div>
     );
 }

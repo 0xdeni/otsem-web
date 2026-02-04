@@ -13,32 +13,8 @@ import {
 } from "lucide-react";
 import http from "@/lib/http";
 import { useAuth } from "@/contexts/auth-context";
-
-// ─── Types ───────────────────────────────────────────────
-
-type Transaction = {
-    transactionId: string;
-    type: "PIX_IN" | "PIX_OUT" | "CONVERSION" | "TRANSFER";
-    status: "PENDING" | "COMPLETED" | "FAILED" | "PROCESSING";
-    amount: number;
-    description: string;
-    senderName?: string | null;
-    senderCpf?: string | null;
-    recipientName?: string | null;
-    recipientCpf?: string | null;
-    recipientCnpj?: string | null;
-    createdAt: string;
-    usdtAmount?: string | number | null;
-    subType?: "BUY" | "SELL" | null;
-    externalData?: {
-        txHash?: string;
-        usdtAmount?: string | number;
-        walletAddress?: string;
-        network?: string;
-        pagador?: { nome?: string };
-        [key: string]: unknown;
-    };
-};
+import { TransactionDetailSheet } from "@/components/modals/transaction-detail-sheet";
+import type { Transaction } from "@/types/transaction";
 
 type FilterType = "ALL" | "PIX_IN" | "PIX_OUT" | "CONVERSION";
 
@@ -299,6 +275,8 @@ export default function TransactionsPage() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [filter, setFilter] = useState<FilterType>("ALL");
+    const [selectedTxId, setSelectedTxId] = useState<string | null>(null);
+    const [detailOpen, setDetailOpen] = useState(false);
 
     // ── Fetch all transactions ──────────────────────────
 
@@ -755,6 +733,10 @@ export default function TransactionsPage() {
                                                     key={tx.transactionId}
                                                     variants={fadeUp}
                                                     whileTap={{ scale: 0.98 }}
+                                                    onClick={() => {
+                                                        setSelectedTxId(tx.transactionId);
+                                                        setDetailOpen(true);
+                                                    }}
                                                     className={`
                                                         flex items-center gap-3 px-4 py-3.5
                                                         cursor-pointer
@@ -881,6 +863,16 @@ export default function TransactionsPage() {
                     Página {page} de {totalPages}
                 </motion.p>
             )}
+
+            {/* ── Transaction Detail Sheet ─────────── */}
+            <TransactionDetailSheet
+                transactionId={selectedTxId}
+                open={detailOpen}
+                onOpenChange={(open) => {
+                    setDetailOpen(open);
+                    if (!open) setSelectedTxId(null);
+                }}
+            />
         </motion.div>
     );
 }
