@@ -73,7 +73,8 @@ export default async function RootLayout({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "linear-gradient(180deg, #7B22FF 0%, #5500D0 16%, #4200A8 25%, #320080 34%, #180040 54%, #000000 100%)",
+            background: "url('/images/customer-bg.png') center top / cover no-repeat",
+            backgroundColor: "#0C0432",
             transition: "opacity 0.4s ease-out",
           }}
         >

@@ -149,8 +149,8 @@
     html {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        /* Black fallback — matches gradient bottom so bottom safe area is dark */
-        background-color: #000000;
+        /* Dark purple fallback — matches background image bottom so bottom safe area is dark */
+        background-color: #0C0432;
         height: 100%;
         margin: 0;
         padding: 0;
@@ -200,21 +200,11 @@
         /* IMPORTANT: Use background-color + background-image separately.
            The `background` shorthand resets background-color to transparent,
            which exposes the white iOS window behind the home indicator area. */
-        background-color: #000000;
-        background-image: linear-gradient(
-            180deg,
-            #7B22FF 0%,
-            #6A10F0 8%,
-            #5500D0 16%,
-            #4200A8 25%,
-            #320080 34%,
-            #240060 44%,
-            #180040 54%,
-            #0F0028 65%,
-            #080014 78%,
-            #030008 90%,
-            #000000 100%
-        );
+        background-color: #0C0432;
+        background-image: url('/images/customer-bg.png');
+        background-size: cover;
+        background-position: center top;
+        background-repeat: no-repeat;
         /* Multiple height values: fallback chain for full iOS coverage */
         height: 100vh;
         height: 100dvh;
@@ -223,9 +213,9 @@
     }
 
     body {
-        /* Transparent so fintech-bg-layer shows through; black fallback
-           prevents white flash if gradient hasn't painted yet */
-        background-color: #000000;
+        /* Transparent so fintech-bg-layer shows through; dark purple fallback
+           prevents white flash if background image hasn't painted yet */
+        background-color: #0C0432;
         background-image: none;
         overflow: hidden;
         height: 100vh;
@@ -667,39 +657,13 @@
         inset: 0;
         z-index: -1;
         min-height: 120dvh;
-        background: linear-gradient(
-            180deg,
-            #7B22FF 0%,
-            #6A10F0 8%,
-            #5500D0 16%,
-            #4200A8 25%,
-            #320080 34%,
-            #240060 44%,
-            #180040 54%,
-            #0F0028 65%,
-            #080014 78%,
-            #030008 90%,
-            #000000 100%
-        );
+        background: url('/images/customer-bg.png') center top / cover no-repeat;
         pointer-events: none;
     }
 
     /* ── Container gradient — applied directly as background, no z-index needed ─── */
     .fintech-bg-container {
-        background: linear-gradient(
-            180deg,
-            #7B22FF 0%,
-            #6A10F0 8%,
-            #5500D0 16%,
-            #4200A8 25%,
-            #320080 34%,
-            #240060 44%,
-            #180040 54%,
-            #0F0028 65%,
-            #080014 78%,
-            #030008 90%,
-            #000000 100%
-        );
+        background: url('/images/customer-bg.png') center top / cover no-repeat;
     }
 
     .fintech-bg {
@@ -781,38 +745,12 @@
         inset: 0;
         z-index: -1;
         min-height: 120dvh;
-        background: linear-gradient(
-            180deg,
-            #7B22FF 0%,
-            #6A10F0 8%,
-            #5500D0 16%,
-            #4200A8 25%,
-            #320080 34%,
-            #240060 44%,
-            #180040 54%,
-            #0F0028 65%,
-            #080014 78%,
-            #030008 90%,
-            #000000 100%
-        );
+        background: url('/images/customer-bg.png') center top / cover no-repeat;
         pointer-events: none;
     }
 
     .dark .customer-app-bg-layer {
-        background: linear-gradient(
-            180deg,
-            #7B22FF 0%,
-            #6A10F0 8%,
-            #5500D0 16%,
-            #4200A8 25%,
-            #320080 34%,
-            #240060 44%,
-            #180040 54%,
-            #0F0028 65%,
-            #080014 78%,
-            #030008 90%,
-            #000000 100%
-        );
+        background: url('/images/customer-bg.png') center top / cover no-repeat;
     }
 
     .social-icon-hover {

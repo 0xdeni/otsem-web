@@ -50,7 +50,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         body.style.height = '100dvh';
         body.style.position = 'fixed';
         body.style.width = '100%';
-        body.style.backgroundColor = '#000000';
+        body.style.backgroundColor = '#0C0432';
         window.scrollTo(0, 0);
         return () => {
             html.style.overflow = orig.htmlOverflow;
