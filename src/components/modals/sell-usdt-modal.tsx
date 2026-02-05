@@ -165,16 +165,20 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
         }
     }
 
-    function formatBRL(value: number): string {
-        return value.toLocaleString("pt-BR", {
+    function formatBRL(value: number | null | undefined): string {
+        const safe = Number(value ?? 0);
+        if (isNaN(safe)) return "R$ 0,00";
+        return safe.toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL",
             minimumFractionDigits: 2,
         });
     }
 
-    function formatUSDT(value: number): string {
-        return `$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    function formatUSDT(value: number | null | undefined): string {
+        const safe = Number(value ?? 0);
+        if (isNaN(safe)) return "$ 0,00";
+        return `$ ${safe.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
     function handleSelectWallet(wallet: WalletItem) {

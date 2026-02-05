@@ -100,17 +100,21 @@ export function BoletoPaymentModal({ open, onClose, onSuccess }: BoletoPaymentMo
         }
     }
 
-    function formatBRL(value: number): string {
-        return value.toLocaleString("pt-BR", {
+    function formatBRL(value: number | null | undefined): string {
+        const safe = Number(value ?? 0);
+        if (isNaN(safe)) return "R$ 0,00";
+        return safe.toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL",
             minimumFractionDigits: 2,
         });
     }
 
-    function formatCrypto(value: number, currency: string): string {
+    function formatCrypto(value: number | null | undefined, currency: string): string {
+        const safe = Number(value ?? 0);
         const decimals = currency === "USDT" ? 2 : 4;
-        return `${value.toLocaleString("pt-BR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} ${currency}`;
+        if (isNaN(safe)) return `0,${"0".repeat(decimals)} ${currency}`;
+        return `${safe.toLocaleString("pt-BR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} ${currency}`;
     }
 
     async function handleGetQuote() {

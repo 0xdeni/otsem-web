@@ -54,22 +54,27 @@ const staggerContainer = {
 
 // ─── Helpers ─────────────────────────────────────────────
 
-function formatCurrency(value: number): string {
-    return value.toLocaleString("pt-BR", {
+function formatCurrency(value: number | null | undefined): string {
+    const safe = Number(value ?? 0);
+    if (isNaN(safe)) return "R$ 0,00";
+    return safe.toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL",
         minimumFractionDigits: 2,
     });
 }
 
-function formatUSD(value: number): string {
-    return `$ ${value.toLocaleString("pt-BR", {
+function formatUSD(value: number | null | undefined): string {
+    const safe = Number(value ?? 0);
+    if (isNaN(safe)) return "$ 0,00";
+    return `$ ${safe.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     })}`;
 }
 
-function formatTime(dateString: string): string {
+function formatTime(dateString: string | null | undefined): string {
+    if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleTimeString("pt-BR", {
         hour: "2-digit",

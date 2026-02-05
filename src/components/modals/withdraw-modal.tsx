@@ -161,16 +161,19 @@ export function WithdrawModal() {
         setError(null);
     }
 
-    function formatDisplayValue(centValue: number): string {
-        if (centValue === 0) return "";
-        return (centValue / 100).toLocaleString("pt-BR", {
+    function formatDisplayValue(centValue: number | null | undefined): string {
+        const safe = Number(centValue ?? 0);
+        if (safe === 0 || isNaN(safe)) return "";
+        return (safe / 100).toLocaleString("pt-BR", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         });
     }
 
-    function formatCurrency(centValue: number): string {
-        return (centValue / 100).toLocaleString("pt-BR", {
+    function formatCurrency(centValue: number | null | undefined): string {
+        const safe = Number(centValue ?? 0);
+        if (isNaN(safe)) return "R$ 0,00";
+        return (safe / 100).toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL",
         });
