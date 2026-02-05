@@ -8,7 +8,7 @@ import { Loader2, ArrowRight, TrendingUp, CheckCircle2, Wallet, Check, Star, Ale
 import { toast } from "sonner";
 import http from "@/lib/http";
 import { useUsdtRate } from "@/lib/useUsdtRate";
-import { useAuth } from "@/contexts/auth-context";
+
 import Link from "next/link";
 
 function isLimitExceededError(message?: string): boolean {
@@ -73,8 +73,7 @@ const STATUS_ORDER: ConversionStatus[] = ["PENDING", "PIX_SENT", "USDT_BOUGHT", 
 const QUICK_AMOUNTS = [100, 500, 1000, 5000];
 
 export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertModalProps) {
-    const { user } = useAuth();
-    const { rate: usdtRate, loading: rateLoading } = useUsdtRate();
+    const { buyRate: usdtBuyRate, loading: rateLoading } = useUsdtRate();
     const [step, setStep] = React.useState<"wallet" | "amount" | "confirm" | "processing" | "success">("wallet");
     const [amount, setAmount] = React.useState("");
     const [loading, setLoading] = React.useState(false);
@@ -89,11 +88,8 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
     const [usdtNet, setUsdtNet] = React.useState<number>(0);
     const pollingRef = React.useRef<NodeJS.Timeout | null>(null);
 
-    const customerSpread = user?.spreadValue ?? 0.95;
-    const usdtRateWithSpread = usdtRate ? usdtRate * (1 + customerSpread / 100) : 0;
-
     const numAmount = parseFloat(amount) || 0;
-    const convertedAmount = usdtRateWithSpread ? numAmount / usdtRateWithSpread : 0;
+    const convertedAmount = usdtBuyRate ? numAmount / usdtBuyRate : 0;
     const minAmount = 10;
 
     React.useEffect(() => {
@@ -325,7 +321,7 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
                                     <span className="text-muted-foreground text-sm">Cotação atual</span>
                                 </div>
                                 <p className="text-foreground font-bold text-lg">
-                                    {rateLoading ? "..." : `1 USDT = ${formatBRL(usdtRateWithSpread)}`}
+                                    {rateLoading ? "..." : `1 USDT = ${formatBRL(usdtBuyRate)}`}
                                 </p>
                             </div>
 
@@ -525,7 +521,7 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
                                 <div className="border-t border-border pt-4 space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Cotação</span>
-                                        <span className="text-foreground">1 USDT = {formatBRL(usdtRateWithSpread)}</span>
+                                        <span className="text-foreground">1 USDT = {formatBRL(usdtBuyRate)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Rede</span>

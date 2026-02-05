@@ -7,33 +7,35 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.otsembank.com";
+
 const ExchangeWidget = () => {
   const [amount, setAmount] = useState("1000");
-  const [rate, setRate] = useState(6.01);
+  const [buyRate, setBuyRate] = useState(6.01);
+  const [sellRate, setSellRate] = useState(5.95);
   const [isLoading, setIsLoading] = useState(true);
   const [direction, setDirection] = useState<"buy" | "sell">("buy");
   const [showAuthScreen, setShowAuthScreen] = useState(false);
   const [countdown, setCountdown] = useState(30);
-  const prevRateRef = useRef(rate);
+  const prevRateRef = useRef(buyRate);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user } = useAuth();
 
-  // Fetch rate from CoinGecko API
+  // Fetch rate from OKX via public quote API
   useEffect(() => {
     const fetchRate = async () => {
       try {
-        const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=brl");
+        const response = await fetch(`${API_URL}/public/quote`);
         const data = await response.json();
-        if (data.tether?.brl) {
-          const baseRate = data.tether.brl;
-          const newRate = baseRate * 1.0098; // Apply 0.98% spread
-          prevRateRef.current = newRate;
-          setRate(newRate);
+        if (data.buyRate && data.sellRate) {
+          prevRateRef.current = data.buyRate;
+          setBuyRate(data.buyRate);
+          setSellRate(data.sellRate);
           setCountdown(30); // Reset countdown when rate updates
         }
       } catch (error) {
-        console.error("Failed to fetch CoinGecko rate:", error);
+        console.error("Failed to fetch quote:", error);
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +61,8 @@ const ExchangeWidget = () => {
   }, []);
 
   const numericAmount = parseFloat(amount) || 0;
-  const convertedAmount = direction === "buy" ? numericAmount / rate : numericAmount * rate;
+  const rate = direction === "buy" ? buyRate : sellRate;
+  const convertedAmount = direction === "buy" ? numericAmount / buyRate : numericAmount * sellRate;
 
   const formatBRL = (value: number): string => {
     return value.toLocaleString("pt-BR", {

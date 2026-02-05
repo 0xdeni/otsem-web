@@ -81,7 +81,7 @@ const STATUS_ORDER: ConversionStatus[] = ["PENDING", "USDT_RECEIVED", "USDT_SOLD
 const QUICK_AMOUNTS = [10, 50, 100, 500];
 
 export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) {
-    const { rate: usdtRate, loading: rateLoading } = useUsdtRate();
+    const { sellRate: usdtSellRate, loading: rateLoading } = useUsdtRate();
     const [step, setStep] = React.useState<"wallet" | "amount" | "sign" | "processing" | "success">("wallet");
     const [amount, setAmount] = React.useState("");
     const [network, setNetwork] = React.useState<Network>("SOLANA");
@@ -100,7 +100,7 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
 
     const numAmount = parseFloat(amount) || 0;
     const minAmount = 5;
-    const estimatedBrl = usdtRate ? numAmount * usdtRate * 0.99 : 0;
+    const estimatedBrl = usdtSellRate ? numAmount * usdtSellRate : 0;
 
     React.useEffect(() => {
         if (open) {
@@ -442,7 +442,7 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
                                     <span className="text-muted-foreground text-sm">Cotação atual</span>
                                 </div>
                                 <p className="text-foreground font-bold text-lg">
-                                    {rateLoading ? "..." : `1 USDT = ${formatBRL(usdtRate || 0)}`}
+                                    {rateLoading ? "..." : `1 USDT = ${formatBRL(usdtSellRate || 0)}`}
                                 </p>
                             </div>
 
