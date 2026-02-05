@@ -49,7 +49,8 @@ otsem-web/
 │   ├── stores/                   # Zustand stores
 │   │   └── ui-modals.ts          # Modal open/close state
 │   ├── lib/                      # Utility libraries
-│   ├── types/                    # TypeScript types (customer.ts, wallet.ts)
+│   │   └── kyc/                  # KYC-specific utilities (cep, types)
+│   ├── types/                    # TypeScript types (customer.ts, wallet.ts, transaction.ts)
 │   └── i18n/                     # next-intl config
 ├── messages/                     # i18n translations (en, pt-BR, es, ru)
 ├── public/                       # Static assets, PWA icons, splash screens
@@ -132,13 +133,14 @@ otsem-web/
 There is no Next.js API route or middleware. All backend calls are proxied via **Next.js rewrites** in `next.config.ts`:
 
 ```
-/auth/*       → {API_URL}/auth/*
-/pix/*        → {API_URL}/pix/*
-/accounts/*   → {API_URL}/accounts/*
-/customers/*  → {API_URL}/customers/*
-/wallet/*     → {API_URL}/wallet/*
-/fdbank/*     → {API_URL}/fdbank/*
-/inter/*      → {API_URL}/inter/*
+/auth/*           → {API_URL}/auth/*
+/pix/*            → {API_URL}/pix/*
+/accounts/*       → {API_URL}/accounts/*
+/customers/*      → {API_URL}/customers/*
+/wallet/*         → {API_URL}/wallet/*
+/fdbank/*         → {API_URL}/fdbank/*
+/inter/*          → {API_URL}/inter/*
+/transactions/*   → {API_URL}/transactions/*
 ```
 
 Default API base: `https://api.otsembank.com` (overridden by `NEXT_PUBLIC_API_URL` env var).
@@ -213,7 +215,7 @@ For text gradients: `from-[#6F00FF] to-[#8B2FFF]` (vibrant, not washed).
 
 #### Typography
 
-- Font stack: SF Pro Display / SF Pro Text via `-apple-system, BlinkMacSystemFont`
+- Font stack: `"Figtree"` (Google Fonts) with fallback to `-apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif`
 - Text rendering: `-webkit-font-smoothing: antialiased`, `font-feature-settings: "kern" 1, "liga" 1, "calt" 1`
 - **All customer-facing text is white** — no grey (`#94A3B8`) or low-opacity (`white/40`, `white/35`) text on the purple gradient background
 - Inactive navigation labels: `text-white/70` (not dimmer)
@@ -239,7 +241,7 @@ CSS animations in `globals.css`:
 
 Safari ignores `env(safe-area-inset-*)` in React inline `style` props. Always use CSS classes from `globals.css`:
 
-- `.pwa-header-premium` — Header safe area: `calc(env(safe-area-inset-top) + 2rem)` top, `1.5rem` bottom
+- `.pwa-header-premium` — Header safe area: `calc(env(safe-area-inset-top) + 1.25rem)` top, `1rem` bottom
 - `.pwa-dock-safe-bottom` — Content padding above floating dock: `calc(1.5rem + env(safe-area-inset-bottom))`
 - `.pwa-sheet-safe-bottom` — Bottom sheet padding
 - `.pwa-install-prompt-bottom` — PWA install prompt positioning
@@ -328,7 +330,9 @@ Default theme is `light` (set in `ThemeProvider` in `src/app/layout.tsx`). The P
 | `src/lib/viacep.ts` | ViaCEP API client for Brazilian address lookup |
 | `src/lib/error-utils.ts` | Error handling and formatting utilities |
 | `src/lib/push-notifications.ts` | Web Push notification setup (VAPID) |
-| `src/lib/useUsdtRate.ts` | Hook for USDT/BRL exchange rate |
+| `src/lib/useUsdtRate.ts` | Hook for USDT/BRL exchange rate (polls `/public/quote` via OKX every 15s) |
+| `src/lib/kyc/cep.ts` | KYC-specific CEP/ZIP handling |
+| `src/lib/kyc/types.ts` | KYC type definitions (accreditation, document types) |
 
 ## Custom Hooks
 
@@ -355,6 +359,7 @@ type CustomerResponse = {
     email: string;
     phone?: string;
     birthday?: string;
+    profilePhotoUrl?: string;
     address?: CustomerAddress;
     createdAt: string;
 }
@@ -366,6 +371,57 @@ type CustomerResponse = {
 type Fiat = "BRL";
 type Crypto = "USDT";
 type ConvertDirection = "BRL_TO_USDT" | "USDT_TO_BRL";
+```
+
+### Transaction (`src/types/transaction.ts`)
+
+```typescript
+type TransactionType = "PIX_IN" | "PIX_OUT" | "CONVERSION" | "TRANSFER";
+type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "PROCESSING";
+
+type Transaction = {
+    transactionId: string;
+    type: TransactionType;
+    status: TransactionStatus;
+    amount: number;
+    description: string;
+    senderName?: string | null;
+    recipientName?: string | null;
+    pixKey?: string | null;
+    endToEnd?: string | null;
+    txid?: string | null;
+    bankProvider?: string | null;
+    createdAt: string;
+    usdtAmount?: string | number | null;
+    subType?: "BUY" | "SELL" | null;
+    externalData?: { txHash?: string; usdtAmount?: string | number; walletAddress?: string; network?: string; [key: string]: unknown };
+}
+
+type TransactionDetails = {
+    transactionId: string;
+    type: TransactionType;
+    status: TransactionStatus;
+    amount: number;
+    description: string;
+    createdAt: string;
+    completedAt?: string | null;
+    balanceBefore?: number | null;
+    balanceAfter?: number | null;
+    payer?: PartyDetails | null;
+    receiver?: PartyDetails | null;
+    hasReceipt: boolean;
+}
+
+type TransactionReceipt = {
+    title: string;
+    transactionId: string;
+    amount: number;
+    date: string;
+    payer: PartyDetails;
+    receiver: PartyDetails;
+}
+
+type PartyDetails = { name: string; maskedTaxNumber: string; pixKey?: string; bankCode?: string }
 ```
 
 ## Key Files
@@ -390,6 +446,9 @@ type ConvertDirection = "BRL_TO_USDT" | "USDT_TO_BRL";
 | `src/components/modals/sell-usdt-modal.tsx` | USDT to BRL sale |
 | `src/components/modals/send-usdt-modal.tsx` | USDT external transfer |
 | `src/components/modals/ReceiveUsdtModal.tsx` | Receive USDT instructions |
+| `src/components/modals/receipt-sheet.tsx` | Transaction receipt bottom sheet |
+| `src/components/modals/transaction-detail-sheet.tsx` | Transaction detail view bottom sheet |
+| `src/components/modals/send-email-modal.tsx` | Send receipt via email |
 | `src/components/modals/kyc-upgrade-modal.tsx` | KYC document upload |
 | `src/components/layout/PwaInstallPrompt.tsx` | iOS "Add to Home Screen" prompt |
 | `src/components/app-sidebar.tsx` | Admin sidebar navigation |
@@ -401,7 +460,7 @@ type ConvertDirection = "BRL_TO_USDT" | "USDT_TO_BRL";
 
 ## PWA Configuration
 
-- `public/manifest.json` — name: "Otsem Pay", display: standalone, start_url: `/customer/dashboard`, theme_color: `#6F00FF`, background_color: `#0a0118`
+- `public/manifest.json` — name: "Otsem Pay", display: standalone, start_url: `/customer/dashboard`, theme_color: `#6F00FF`, background_color: `#050010`
 - PWA shortcuts: Depositar (deposit), Transacoes (transactions), Carteira (wallet)
 - `public/apple-touch-icon.png` (180x180), `icon-192.png`, `icon-512.png`, `icon-1024.png` — with maskable variants
 - `public/splash/` — 11 iOS splash screens for different device sizes
@@ -422,12 +481,13 @@ type ConvertDirection = "BRL_TO_USDT" | "USDT_TO_BRL";
 
 ## Linting
 
-ESLint runs via **Husky pre-commit hook** + **lint-staged** (not during build). Key rules:
+ESLint runs via **Husky pre-commit hook** + **lint-staged** (not during build). Config in `eslint.config.mjs` (flat config with `@eslint/eslintrc` FlatCompat). Extends `next/core-web-vitals` and `next/typescript`. Key custom rules:
 
 - `@typescript-eslint/no-explicit-any` — **error**: use `unknown` instead of `any`
 - `@typescript-eslint/no-unused-vars` — **warn**: unused vars must be prefixed with `_` (also ignores rest siblings)
 - `no-console` — **warn**: only `console.warn` and `console.error` allowed
-- `react/no-unescaped-entities` — use `&ldquo;` / `&rdquo;` for quotes in JSX
+
+The pre-commit hook also runs `scripts/verify-lockfile-sync.sh` to ensure `package-lock.json` stays in sync when `package.json` is staged.
 
 ## Key Dependencies
 
@@ -453,9 +513,25 @@ ESLint runs via **Husky pre-commit hook** + **lint-staged** (not during build). 
 | `otplib` | ^13.2.1 | TOTP 2FA |
 | `qrcode` / `qrcode.react` | various | QR code generation |
 | `date-fns` / `dayjs` | various | Date utilities |
+| `html2canvas` | ^1.4.1 | Screenshot/receipt image generation |
+| `numeral` | ^2.0.6 | Number formatting |
+| `@google-cloud/storage` | ^7.18.0 | Google Cloud Storage (file uploads) |
+| `next-themes` | ^0.4.6 | Theme management (light/dark) |
 | `husky` | ^9.1.7 | Git hooks |
 | `lint-staged` | ^16.2.7 | Pre-commit lint |
+| `tw-animate-css` | ^1.3.8 | Tailwind CSS animation utilities |
 
 ## Path Alias
 
 `@/*` maps to `./src/*` (configured in `tsconfig.json`). Always use `@/` imports.
+
+## CI/CD
+
+GitHub Actions workflows in `.github/workflows/`:
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `deploy.yml` | Push to `main` | Deploys to **Fly.io** via `flyctl deploy --remote-only` |
+| `claude.yml` | Issues/comments with `claude` label or `@claude` mention | Claude Code AI agent — parses issues, makes code changes, creates PRs |
+
+**Deployment**: The app uses `output: 'standalone'` in `next.config.ts` for Docker-ready Fly.io deployment. Secrets required: `FLY_API_TOKEN`, `ANTHROPIC_API_KEY`.
