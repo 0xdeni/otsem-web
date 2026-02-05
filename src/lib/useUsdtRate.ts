@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.otsembank.com";
-
 export function useUsdtRate() {
     const [buyRate, setBuyRate] = useState<number | null>(null);
     const [sellRate, setSellRate] = useState<number | null>(null);
@@ -11,7 +9,8 @@ export function useUsdtRate() {
     async function fetchRate() {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/public/quote`);
+            // Use relative URL to go through Next.js rewrites
+            const res = await fetch(`/public/quote`);
             const data = await res.json();
             setBuyRate(data.buyRate ?? null);
             setSellRate(data.sellRate ?? null);

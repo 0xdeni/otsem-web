@@ -1,6 +1,5 @@
 // src/hooks/use-health-check.ts
 import { useState, useEffect, useCallback } from 'react';
-import { ENV } from '@/lib/env';
 
 export function useHealthCheck(intervalMs = 30000) {
   const [isHealthy, setIsHealthy] = useState<boolean | null>(null);
@@ -8,7 +7,8 @@ export function useHealthCheck(intervalMs = 30000) {
 
   const checkHealth = useCallback(async () => {
     try {
-      const response = await fetch(`${ENV.API_URL}/auth/me`, {
+      // Use relative URL to go through Next.js rewrites
+      const response = await fetch(`/auth/me`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
