@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, ArrowLeft, Mail, Phone, MapPin, Calendar, Clock, Shield, Wallet, ArrowUpDown, BadgeCheck, UserX, UserCheck, Edit, RefreshCw, Percent, Save, Trash2 } from "lucide-react";
+import { Loader2, ArrowLeft, Mail, Phone, MapPin, Calendar, Clock, Shield, Wallet, ArrowUpDown, BadgeCheck, UserX, UserCheck, Edit, RefreshCw, Percent, Save, Trash2, KeyRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -171,6 +171,10 @@ export default function AdminUserDetailPage() {
     const [userLimits, setUserLimits] = React.useState<UserLimits | null>(null);
     const [loadingLimits, setLoadingLimits] = React.useState(false);
     const [deleteLoading, setDeleteLoading] = React.useState(false);
+    const [passwordModalOpen, setPasswordModalOpen] = React.useState(false);
+    const [newPassword, setNewPassword] = React.useState("");
+    const [confirmPassword, setConfirmPassword] = React.useState("");
+    const [savingPassword, setSavingPassword] = React.useState(false);
 
     const loadUser = React.useCallback(async () => {
         try {
@@ -331,6 +335,34 @@ export default function AdminUserDetailPage() {
         }
     };
 
+    const handleResetPassword = async () => {
+        if (newPassword.length < 8) {
+            toast.error("A senha deve ter pelo menos 8 caracteres");
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            toast.error("As senhas não coincidem");
+            return;
+        }
+
+        try {
+            setSavingPassword(true);
+            await http.patch(`/admin/users/${userId}/password`, {
+                newPassword,
+            });
+            toast.success("Senha alterada com sucesso");
+            setPasswordModalOpen(false);
+            setNewPassword("");
+            setConfirmPassword("");
+        } catch (err: unknown) {
+            const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+            const errorMsg = axiosErr.response?.data?.message || "Falha ao alterar senha";
+            toast.error(errorMsg);
+        } finally {
+            setSavingPassword(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex h-96 items-center justify-center">
@@ -399,6 +431,10 @@ export default function AdminUserDetailPage() {
                             Desbloquear
                         </Button>
                     )}
+                    <Button variant="outline" size="sm" onClick={() => setPasswordModalOpen(true)}>
+                        <KeyRound className="mr-2 h-4 w-4" />
+                        Alterar Senha
+                    </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900 dark:hover:bg-red-950" disabled={deleteLoading}>
@@ -817,6 +853,58 @@ export default function AdminUserDetailPage() {
                                 <Save className="h-4 w-4 mr-2" />
                             )}
                             Salvar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={passwordModalOpen} onOpenChange={(open) => {
+                setPasswordModalOpen(open);
+                if (!open) {
+                    setNewPassword("");
+                    setConfirmPassword("");
+                }
+            }}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Alterar Senha do Usuário</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <p className="text-sm text-muted-foreground">
+                            Defina uma nova senha para <strong>{user.name || user.email}</strong>.
+                        </p>
+                        <div className="space-y-2">
+                            <Label htmlFor="newPassword">Nova Senha</Label>
+                            <Input
+                                id="newPassword"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="Mínimo 8 caracteres"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                            <Input
+                                id="confirmPassword"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Repita a nova senha"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setPasswordModalOpen(false)}>
+                            Cancelar
+                        </Button>
+                        <Button onClick={handleResetPassword} disabled={savingPassword || !newPassword || !confirmPassword}>
+                            {savingPassword ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                                <KeyRound className="h-4 w-4 mr-2" />
+                            )}
+                            Alterar Senha
                         </Button>
                     </DialogFooter>
                 </DialogContent>
