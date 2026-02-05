@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { User, Bell } from "lucide-react";
+import { User } from "lucide-react";
 
 const PHOTO_KEY = "otsem_profile_photo";
 
@@ -37,9 +37,9 @@ function getInitials(name?: string | null): string {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function MobileHeader({ customerName, profilePhotoUrl }: { customerName?: string; profilePhotoUrl?: string }) {
+export function MobileHeader({ customerName, profilePhotoUrl, username }: { customerName?: string; profilePhotoUrl?: string; username?: string | null }) {
     const { user } = useAuth();
-    const displayName = getFirstName(customerName) || getFirstName(user?.name);
+    const displayName = username ? `@${username}` : getFirstName(customerName) || getFirstName(user?.name);
     const initials = getInitials(customerName) || getInitials(user?.name);
 
     // Track profile photo: prefer prop, fallback to localStorage, listen for changes
@@ -108,17 +108,8 @@ export function MobileHeader({ customerName, profilePhotoUrl }: { customerName?:
                         </div>
                     </div>
 
-                    {/* Right side: bell + profile photo */}
+                    {/* Right side: profile photo */}
                     <div className="flex items-center gap-2.5">
-                        <motion.button
-                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.08] border border-white/[0.08] active:bg-white/15 transition-colors relative"
-                            style={{ transition: "background 0.25s cubic-bezier(0.32, 0.72, 0, 1)" }}
-                            whileTap={{ scale: 0.97 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                            aria-label="Notificações"
-                        >
-                            <Bell className="w-[20px] h-[20px] text-white" strokeWidth={1.8} />
-                        </motion.button>
                         <motion.div
                             whileTap={{ scale: 0.97 }}
                             transition={{ type: "spring", stiffness: 500, damping: 25 }}

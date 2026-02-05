@@ -4,7 +4,7 @@ import * as React from "react";
 import { isAxiosError } from "axios";
 import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetDescription } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, TrendingUp, CheckCircle2, Wallet, Check, Star, AlertTriangle } from "lucide-react";
+import { Loader2, ArrowRight, TrendingUp, CheckCircle2, Wallet, Check, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import http from "@/lib/http";
 import { useUsdtRate } from "@/lib/useUsdtRate";
@@ -69,8 +69,6 @@ const STATUS_LABELS: Record<ConversionStatus, string> = {
 };
 
 const STATUS_ORDER: ConversionStatus[] = ["PENDING", "PIX_SENT", "USDT_BOUGHT", "USDT_WITHDRAWN", "COMPLETED"];
-
-const QUICK_AMOUNTS = [100, 500, 1000, 5000];
 
 export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertModalProps) {
     const { buyRate: usdtBuyRate, loading: rateLoading } = useUsdtRate();
@@ -183,10 +181,6 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
 
     function formatUSDT(value: number): string {
         return `$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
-
-    function handleQuickAmount(value: number) {
-        setAmount(value.toString());
     }
 
     function handleMax() {
@@ -355,8 +349,8 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
                                                                 {wallet.label || `Carteira ${index + 1}`}
                                                             </p>
                                                             {isMain && (
-                                                                <span className="flex items-center gap-1 px-1.5 py-0.5 bg-white/10 rounded text-white/70 text-xs shrink-0">
-                                                                    <Star className="w-3 h-3" />
+                                                                <span className="flex items-center gap-1 px-1.5 py-0.5 bg-white/10 rounded text-white text-xs shrink-0">
+                                                                    <span className="w-2 h-2 rounded-full bg-[#39FF14] animate-pulse" />
                                                                     Principal
                                                                 </span>
                                                             )}
@@ -443,7 +437,6 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
                                     onChange={(e) => setAmount(e.target.value)}
                                     placeholder="0,00"
                                     className="w-full pl-12 pr-16 text-center text-xl bg-muted border border-border text-foreground h-14 rounded-xl focus:border-[#6F00FF]/50 focus:ring-2 focus:ring-[#6F00FF]/20 focus:outline-none placeholder:text-muted-foreground/50"
-                                    autoFocus
                                 />
                                 <button
                                     onClick={handleMax}
@@ -451,18 +444,6 @@ export function ConvertModal({ open, onClose, onSuccess, brlBalance }: ConvertMo
                                 >
                                     MAX
                                 </button>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 justify-center">
-                                {QUICK_AMOUNTS.map((value) => (
-                                    <button
-                                        key={value}
-                                        onClick={() => handleQuickAmount(value)}
-                                        className="px-4 py-2 text-sm font-medium rounded-full border border-[#6F00FF]/30 bg-[#6F00FF]/10 text-[#6F00FF] dark:text-[#A78BFA] hover:bg-[#6F00FF]/20 hover:border-[#6F00FF]/50 transition"
-                                    >
-                                        R$ {value}
-                                    </button>
-                                ))}
                             </div>
 
                             <div className="bg-muted border border-border rounded-xl p-4">

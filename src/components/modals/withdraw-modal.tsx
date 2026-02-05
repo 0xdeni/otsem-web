@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetDescription } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { useUiModals } from "@/stores/ui-modals";
-import { Loader2, ArrowLeft, Send, AlertCircle, CheckCircle2, KeyRound, Plus, AlertTriangle } from "lucide-react";
+import { Loader2, ArrowLeft, Send, AlertCircle, CheckCircle2, KeyRound, Plus, AlertTriangle, ArrowUpRight, UserRoundSearch } from "lucide-react";
 import { toast } from "sonner";
 import http from "@/lib/http";
 import { pixPost } from "@/lib/pix";
@@ -49,8 +49,8 @@ export function WithdrawModal() {
     const router = useRouter();
     const { user } = useAuth();
     const customerId = user?.customerId;
-    const { open, closeModal, triggerRefresh } = useUiModals();
-    const [step, setStep] = React.useState<"loading" | "nokeys" | "select" | "amount" | "confirm" | "success">("loading");
+    const { open, closeModal, openModal, triggerRefresh } = useUiModals();
+    const [step, setStep] = React.useState<"choose" | "loading" | "nokeys" | "select" | "amount" | "confirm" | "success">("choose");
     const [pixKeys, setPixKeys] = React.useState<PixKey[]>([]);
     const [selectedKey, setSelectedKey] = React.useState<PixKey | null>(null);
     const [cents, setCents] = React.useState(0);
@@ -59,11 +59,10 @@ export function WithdrawModal() {
     const [txResult, setTxResult] = React.useState<SendPixResponse | null>(null);
 
     React.useEffect(() => {
-        if (open.withdraw && customerId) {
-            loadPixKeys();
+        if (open.withdraw) {
+            setStep("choose");
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open.withdraw, customerId]);
+    }, [open.withdraw]);
 
     async function loadPixKeys() {
         if (!customerId) return;
@@ -128,7 +127,7 @@ export function WithdrawModal() {
     }
 
     function resetState() {
-        setStep("loading");
+        setStep("choose");
         setSelectedKey(null);
         setCents(0);
         setError(null);
@@ -136,8 +135,23 @@ export function WithdrawModal() {
         setPixKeys([]);
     }
 
+    function handleChoosePix() {
+        if (customerId) {
+            loadPixKeys();
+        }
+    }
+
+    function handleChooseUsername() {
+        closeModal("withdraw");
+        setTimeout(() => {
+            openModal("usernameTransfer");
+        }, 150);
+    }
+
     function handleBack() {
-        if (step === "amount") {
+        if (step === "select" || step === "nokeys") {
+            setStep("choose");
+        } else if (step === "amount") {
             setStep("select");
             setCents(0);
             setSelectedKey(null);
@@ -193,7 +207,7 @@ export function WithdrawModal() {
             <BottomSheetContent>
                 <BottomSheetHeader>
                     <BottomSheetTitle className="text-foreground text-xl text-center flex items-center justify-center gap-2">
-                        {(step === "amount" || step === "confirm") && (
+                        {(step === "amount" || step === "confirm" || step === "select" || step === "nokeys") && (
                             <Button
                                 onClick={handleBack}
                                 variant="ghost"
@@ -203,6 +217,7 @@ export function WithdrawModal() {
                                 <ArrowLeft className="w-4 h-4" />
                             </Button>
                         )}
+                        {step === "choose" && "Transferir"}
                         {step === "loading" && "Carregando..."}
                         {step === "nokeys" && "Nenhuma Chave PIX"}
                         {step === "select" && "Transferir via PIX"}
@@ -211,6 +226,7 @@ export function WithdrawModal() {
                         {step === "success" && "PIX Enviado!"}
                     </BottomSheetTitle>
                     <BottomSheetDescription className="text-muted-foreground text-center text-sm">
+                        {step === "choose" && "Escolha como deseja transferir"}
                         {step === "loading" && "Buscando suas chaves PIX..."}
                         {step === "nokeys" && "Cadastre uma chave para transferir"}
                         {step === "select" && "Selecione a chave PIX de destino"}
@@ -221,6 +237,42 @@ export function WithdrawModal() {
                 </BottomSheetHeader>
 
                 <div className="flex flex-col items-center space-y-5 py-4">
+                    {step === "choose" && (
+                        <div className="w-full space-y-3">
+                            <button
+                                onClick={handleChoosePix}
+                                className="w-full bg-muted border border-border rounded-xl p-4 hover:border-[#6F00FF]/50 hover:bg-[#6F00FF]/10 transition text-left"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                        <ArrowUpRight className="w-5 h-5 text-blue-400" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-foreground font-medium">Transferência PIX</p>
+                                        <p className="text-muted-foreground text-sm">PIX para qualquer banco</p>
+                                    </div>
+                                    <ArrowLeft className="w-5 h-5 rotate-180 text-[#6F00FF]" />
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={handleChooseUsername}
+                                className="w-full bg-muted border border-border rounded-xl p-4 hover:border-[#6F00FF]/50 hover:bg-[#6F00FF]/10 transition text-left"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center">
+                                        <UserRoundSearch className="w-5 h-5 text-violet-400" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-foreground font-medium">Enviar para usuário</p>
+                                        <p className="text-muted-foreground text-sm">Transferir BRL por @username</p>
+                                    </div>
+                                    <ArrowLeft className="w-5 h-5 rotate-180 text-[#6F00FF]" />
+                                </div>
+                            </button>
+                        </div>
+                    )}
+
                     {step === "loading" && (
                         <div className="flex flex-col items-center py-8">
                             <Loader2 className="w-10 h-10 animate-spin text-[#6F00FF] dark:text-[#6F00FF]" />

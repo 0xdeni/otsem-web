@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, User, Lock, CheckCircle2, Shield, Zap, Globe2, Gift, Loader2, ArrowRight, ArrowLeft, Building2, IdCard } from "lucide-react";
+import { Eye, EyeOff, Mail, User, Lock, CheckCircle2, Shield, Zap, Globe2, Gift, Loader2, ArrowRight, ArrowLeft, Building2, IdCard, AtSign } from "lucide-react";
 import http from "@/lib/http";
 import { setTokens } from "@/lib/token";
 import { toast } from "sonner";
@@ -100,6 +100,7 @@ function formatCNPJ(value: string): string {
 const schema = z
     .object({
         name: z.string().min(3, "Informe seu nome").transform((v) => v.trim()),
+        username: z.string().min(3, "Mínimo 3 caracteres").max(30, "Máximo 30 caracteres").regex(/^[a-zA-Z0-9_]+$/, "Apenas letras, números e underline").transform((v) => v.trim().toLowerCase()),
         email: z.string().email("E-mail inválido").transform((v) => v.trim().toLowerCase()),
         password: z.string().min(8, "Mínimo 8 caracteres"),
         confirm: z.string().min(8, "Confirme sua senha"),
@@ -217,6 +218,7 @@ function RegisterPageInner(): React.JSX.Element {
         resolver,
         defaultValues: {
             name: "",
+            username: "",
             email: "",
             password: "",
             confirm: "",
@@ -231,10 +233,13 @@ function RegisterPageInner(): React.JSX.Element {
     const [showAffiliateField, setShowAffiliateField] = React.useState(!!refCode);
     const [validatingCode, setValidatingCode] = React.useState(false);
     const [codeValid, setCodeValid] = React.useState<boolean | null>(null);
+    const [validatingUsername, setValidatingUsername] = React.useState(false);
+    const [usernameAvailable, setUsernameAvailable] = React.useState<boolean | null>(null);
     const affiliateCode = form.watch("affiliateCode") || "";
     const customerType = form.watch("customerType");
     const cpfValue = form.watch("cpf") || "";
     const cnpjValue = form.watch("cnpj") || "";
+    const usernameValue = form.watch("username") || "";
 
     const validateAffiliateCode = React.useCallback(async (code: string) => {
         if (!code || code.length < 3) {
@@ -263,6 +268,37 @@ function RegisterPageInner(): React.JSX.Element {
         return () => clearTimeout(timer);
     }, [affiliateCode, validateAffiliateCode]);
 
+    const validateUsername = React.useCallback(async (uname: string) => {
+        if (!uname || uname.length < 3 || !/^[a-zA-Z0-9_]+$/.test(uname)) {
+            setUsernameAvailable(null);
+            return;
+        }
+        try {
+            setValidatingUsername(true);
+            await http.get(`/customers/by-username/${uname.toLowerCase()}`, { headers: { "X-Anonymous": "true" } });
+            // If found, username is taken
+            setUsernameAvailable(false);
+            form.setError("username", { message: "Este username já está em uso" });
+        } catch {
+            // 404 = not found = available
+            setUsernameAvailable(true);
+            form.clearErrors("username");
+        } finally {
+            setValidatingUsername(false);
+        }
+    }, [form]);
+
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            if (usernameValue && usernameValue.length >= 3) {
+                validateUsername(usernameValue);
+            } else {
+                setUsernameAvailable(null);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [usernameValue, validateUsername]);
+
     const pw = form.watch("password") || "";
     const score = passwordScore(pw);
     const scoreText = SCORE_TEXT[score] ?? "fraca";
@@ -275,6 +311,7 @@ function RegisterPageInner(): React.JSX.Element {
                 email: v.email,
                 password: v.password,
                 name: v.name,
+                username: v.username,
                 type: v.customerType,
             };
 
@@ -327,6 +364,9 @@ function RegisterPageInner(): React.JSX.Element {
                 } else if (msg.includes("invalid_cnpj")) {
                     form.setError("cnpj", { message: "CNPJ inválido" });
                     toast.error("CNPJ inválido");
+                } else if (msg.includes("username") && (msg.includes("taken") || msg.includes("already") || msg.includes("use"))) {
+                    form.setError("username", { message: "Este username já está em uso" });
+                    toast.error("Este username já está em uso");
                 } else {
                     toast.error(`Dados inválidos: ${msg}`);
                 }
@@ -537,6 +577,36 @@ function RegisterPageInner(): React.JSX.Element {
                                             )}
                                         </div>
                                     )}
+
+                                    {/* Username */}
+                                    <div className="grid gap-1.5 sm:gap-2">
+                                        <Label htmlFor="username" className="text-xs sm:text-sm font-black text-slate-900">
+                                            Nome de usuário
+                                        </Label>
+                                        <div className="relative">
+                                            <AtSign className="pointer-events-none absolute left-3 sm:left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                                            <Input
+                                                id="username"
+                                                className="h-11 sm:h-12 rounded-xl sm:rounded-2xl border-black/[0.05] bg-white/60 pl-9 sm:pl-10 pr-10 sm:pr-11 text-sm sm:text-base text-slate-900 placeholder:text-slate-500 transition focus:border-primary focus:ring-2 focus:ring-primary/20 lowercase"
+                                                placeholder="seunome"
+                                                autoComplete="username"
+                                                {...form.register("username")}
+                                            />
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                {validatingUsername ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+                                                ) : usernameAvailable === true ? (
+                                                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                                                ) : usernameAvailable === false ? (
+                                                    <span className="text-xs text-red-500 font-medium">Em uso</span>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                        {form.formState.errors.username && (
+                                            <p className="text-xs text-red-500 font-medium">{form.formState.errors.username.message}</p>
+                                        )}
+                                        <p className="text-[10px] sm:text-xs text-slate-400">3-30 caracteres: letras, números e underline</p>
+                                    </div>
 
                                     {/* Email */}
                                     <div className="grid gap-1.5 sm:gap-2">

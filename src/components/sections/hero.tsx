@@ -6,7 +6,6 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  BookOpen,
   Globe,
   Clock,
 } from "lucide-react";
@@ -207,16 +206,15 @@ const HeroSection = () => {
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
             </Link>
-            <a
-              href="#como-funciona"
+            <Link
+              href="/login"
               className="block w-full sm:w-auto"
               onClick={() => haptic.light()}
             >
-              <button className="btn-premium-outline w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-[14px] sm:text-[15px] rounded-[12px] sm:rounded-[14px] font-semibold transition-transform duration-150 active:scale-[0.98]">
-                <BookOpen className="w-4 h-4 text-primary" />
+              <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 text-[14px] sm:text-[15px] rounded-[12px] sm:rounded-[14px] font-semibold transition-transform duration-150 active:scale-[0.98] bg-yellow-400 hover:bg-yellow-500 text-black shadow-lg shadow-yellow-400/25">
                 {t("learnMore")}
               </button>
-            </a>
+            </Link>
           </motion.div>
 
           <motion.div

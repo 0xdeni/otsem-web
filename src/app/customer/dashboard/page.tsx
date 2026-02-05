@@ -12,6 +12,7 @@ import {
     EyeOff,
     Loader2,
     UserRoundSearch,
+    Receipt,
 } from "lucide-react";
 import http from "@/lib/http";
 import { useAuth } from "@/contexts/auth-context";
@@ -572,6 +573,11 @@ export default function Dashboard() {
                     icon={DollarSign}
                     label="Vender"
                     onClick={() => openModal("sellUsdt")}
+                />
+                <QuickAction
+                    icon={Receipt}
+                    label="Pagar"
+                    onClick={() => openModal("payBoleto")}
                 />
             </motion.div>
 
