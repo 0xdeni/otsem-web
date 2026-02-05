@@ -38,3 +38,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Capacitor native projects (regenerated via `npx cap add`)
+# Uncomment these if you prefer to commit native projects for custom native code:
+# ios/
+# android/
+ios/App/Pods
+ios/App/Podfile.lock
+android/.gradle
+android/app/build
+android/build
+android/local.properties
+android/.idea
+
+# Capacitor
+www/capacitor_plugins

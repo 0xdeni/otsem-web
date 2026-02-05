@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Otsem Pay</string>
+    <string name="title_activity_main">Otsem Pay</string>
+    <string name="package_name">com.otsempay.app</string>
+    <string name="custom_url_scheme">com.otsempay.app</string>
+</resources>

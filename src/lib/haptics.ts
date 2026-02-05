@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+
 type HapticStyle = 'light' | 'medium' | 'heavy' | 'selection' | 'success' | 'warning' | 'error';
 
 interface HapticPatterns {
@@ -18,13 +20,61 @@ const patterns: HapticPatterns = {
   notification: [10, 30, 10, 30, 15],
 };
 
+/**
+ * Use native Capacitor Haptics on iOS/Android, falling back to navigator.vibrate on web.
+ */
+async function nativeHaptic(style: HapticStyle): Promise<boolean> {
+  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('Haptics')) {
+    return false;
+  }
+
+  try {
+    const { Haptics, ImpactStyle, NotificationType } = await import('@capacitor/haptics');
+
+    switch (style) {
+      case 'light':
+        await Haptics.impact({ style: ImpactStyle.Light });
+        break;
+      case 'medium':
+        await Haptics.impact({ style: ImpactStyle.Medium });
+        break;
+      case 'heavy':
+        await Haptics.impact({ style: ImpactStyle.Heavy });
+        break;
+      case 'selection':
+        await Haptics.selectionStart();
+        await Haptics.selectionChanged();
+        await Haptics.selectionEnd();
+        break;
+      case 'success':
+        await Haptics.notification({ type: NotificationType.Success });
+        break;
+      case 'warning':
+        await Haptics.notification({ type: NotificationType.Warning });
+        break;
+      case 'error':
+        await Haptics.notification({ type: NotificationType.Error });
+        break;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function webVibrate(pattern: number[]): void {
+  if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+    navigator.vibrate(pattern);
+  }
+}
+
 export const haptic = {
-  trigger: (style: HapticStyle = 'light') => {
+  trigger: async (style: HapticStyle = 'light') => {
     if (typeof window === 'undefined') return;
 
-    if ('vibrate' in navigator) {
-      const pattern = patterns[style] || patterns.light;
-      navigator.vibrate(pattern);
+    const handled = await nativeHaptic(style);
+    if (!handled) {
+      webVibrate(patterns[style] || patterns.light);
     }
   },
 
@@ -36,29 +86,33 @@ export const haptic = {
   warning: () => haptic.trigger('warning'),
   error: () => haptic.trigger('error'),
 
-  tap: () => {
+  tap: async () => {
     if (typeof window === 'undefined') return;
-    if ('vibrate' in navigator) navigator.vibrate(patterns.tap);
+    const handled = await nativeHaptic('light');
+    if (!handled) webVibrate(patterns.tap);
   },
 
-  doubleTap: () => {
+  doubleTap: async () => {
     if (typeof window === 'undefined') return;
-    if ('vibrate' in navigator) navigator.vibrate(patterns.doubleTap);
+    const handled = await nativeHaptic('medium');
+    if (!handled) webVibrate(patterns.doubleTap);
   },
 
-  impact: () => {
+  impact: async () => {
     if (typeof window === 'undefined') return;
-    if ('vibrate' in navigator) navigator.vibrate(patterns.impact);
+    const handled = await nativeHaptic('heavy');
+    if (!handled) webVibrate(patterns.impact);
   },
 
-  notification: () => {
+  notification: async () => {
     if (typeof window === 'undefined') return;
-    if ('vibrate' in navigator) navigator.vibrate(patterns.notification);
+    const handled = await nativeHaptic('success');
+    if (!handled) webVibrate(patterns.notification);
   },
 
   custom: (pattern: number[]) => {
     if (typeof window === 'undefined') return;
-    if ('vibrate' in navigator) navigator.vibrate(pattern);
+    webVibrate(pattern);
   },
 
   stop: () => {
