@@ -130,7 +130,7 @@ function FAQAccordion({ items }: { items: FAQItem[] }) {
                             transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
                             className="flex-shrink-0"
                         >
-                            <ChevronDown className="w-[18px] h-[18px] text-white/60" />
+                            <ChevronDown className="w-[18px] h-[18px] text-white" />
                         </motion.div>
                     </button>
                     <AnimatePresence initial={false}>
@@ -142,7 +142,7 @@ function FAQAccordion({ items }: { items: FAQItem[] }) {
                                 transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
                                 className="overflow-hidden"
                             >
-                                <div className="px-4 pb-4 text-[13px] text-white/60 leading-relaxed">
+                                <div className="px-4 pb-4 text-[13px] text-white leading-relaxed">
                                     {item.answer}
                                 </div>
                             </motion.div>
@@ -190,7 +190,7 @@ export default function SupportPage() {
             {/* ── Header ──────────────────────────────────── */}
             <motion.div variants={fadeUp}>
                 <h1 className="text-[22px] font-bold text-white">Ajuda</h1>
-                <p className="text-[13px] text-white/60 mt-0.5">
+                <p className="text-[13px] text-white mt-0.5">
                     Encontre respostas ou fale conosco
                 </p>
             </motion.div>
@@ -209,7 +209,7 @@ export default function SupportPage() {
                             <p className="text-[14px] font-semibold text-white">
                                 Sistema Operacional
                             </p>
-                            <p className="text-[12px] text-white/60">
+                            <p className="text-[12px] text-white">
                                 Todos os serviços funcionando normalmente
                             </p>
                         </div>
@@ -237,12 +237,12 @@ export default function SupportPage() {
                             <span className="text-[14px] font-semibold text-white">
                                 WhatsApp
                             </span>
-                            <ExternalLink className="w-3 h-3 text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <ExternalLink className="w-3 h-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
-                        <p className="text-[12px] text-white/60 leading-snug">
+                        <p className="text-[12px] text-white leading-snug">
                             Atendimento rápido
                         </p>
-                        <p className="text-[11px] text-white/40 mt-1.5">
+                        <p className="text-[11px] text-white mt-1.5">
                             Seg-Sex 9h-18h
                         </p>
                     </a>
@@ -259,12 +259,12 @@ export default function SupportPage() {
                             <span className="text-[14px] font-semibold text-white">
                                 Email
                             </span>
-                            <ExternalLink className="w-3 h-3 text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <ExternalLink className="w-3 h-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
-                        <p className="text-[12px] text-white/60 leading-snug">
+                        <p className="text-[12px] text-white leading-snug">
                             suporte@otsempay.com
                         </p>
-                        <p className="text-[11px] text-white/40 mt-1.5">
+                        <p className="text-[11px] text-white mt-1.5">
                             Resposta em até 24h
                         </p>
                     </a>
@@ -277,10 +277,10 @@ export default function SupportPage() {
                         <span className="text-[14px] font-semibold text-white block mb-1">
                             Telefone
                         </span>
-                        <p className="text-[12px] text-white/60 leading-snug">
+                        <p className="text-[12px] text-white leading-snug">
                             (11) 3000-0000
                         </p>
-                        <p className="text-[11px] text-white/40 mt-1.5">
+                        <p className="text-[11px] text-white mt-1.5">
                             Seg-Sex 9h-18h
                         </p>
                     </div>
@@ -306,7 +306,7 @@ export default function SupportPage() {
                             <h3 className="text-[13px] font-semibold text-white mb-0.5 leading-snug">
                                 {tutorial.title}
                             </h3>
-                            <p className="text-[11px] text-white/60 leading-snug">
+                            <p className="text-[11px] text-white leading-snug">
                                 {tutorial.description}
                             </p>
                             <div className="flex items-center gap-1 text-[#6F00FF] text-[11px] font-medium mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -338,7 +338,7 @@ export default function SupportPage() {
                             Abrir Chamado
                         </h2>
                     </div>
-                    <p className="text-[13px] text-white/60 mb-5">
+                    <p className="text-[13px] text-white mb-5">
                         Não encontrou o que procurava? Envie sua dúvida ou reporte um problema.
                     </p>
 
@@ -347,7 +347,7 @@ export default function SupportPage() {
                             <div className="space-y-1.5">
                                 <Label
                                     htmlFor="subject"
-                                    className="text-[13px] font-medium text-white/80"
+                                    className="text-[13px] font-medium text-white"
                                 >
                                     Assunto
                                 </Label>
@@ -356,13 +356,13 @@ export default function SupportPage() {
                                     value={ticketSubject}
                                     onChange={(e) => setTicketSubject(e.target.value)}
                                     placeholder="Ex: Problema com depósito"
-                                    className="h-11 rounded-xl bg-white/10 border-white/15 text-[14px] placeholder:text-white/40"
+                                    className="h-11 rounded-xl bg-white/10 border-white/15 text-[14px] placeholder:text-white"
                                 />
                             </div>
                             <div className="space-y-1.5">
                                 <Label
                                     htmlFor="category"
-                                    className="text-[13px] font-medium text-white/80"
+                                    className="text-[13px] font-medium text-white"
                                 >
                                     Categoria
                                 </Label>
@@ -385,7 +385,7 @@ export default function SupportPage() {
                         <div className="space-y-1.5">
                             <Label
                                 htmlFor="message"
-                                className="text-[13px] font-medium text-white/80"
+                                className="text-[13px] font-medium text-white"
                             >
                                 Mensagem
                             </Label>
@@ -395,7 +395,7 @@ export default function SupportPage() {
                                 onChange={(e) => setTicketMessage(e.target.value)}
                                 placeholder="Descreva sua dúvida ou problema com o máximo de detalhes possível..."
                                 rows={5}
-                                className="rounded-xl bg-white/10 border-white/15 text-[14px] placeholder:text-white/40 resize-none"
+                                className="rounded-xl bg-white/10 border-white/15 text-[14px] placeholder:text-white resize-none"
                             />
                         </div>
 

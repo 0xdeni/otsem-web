@@ -91,9 +91,6 @@ export function BottomNav() {
         yTarget.set(visible ? 0 : 1);
     }, [visible, yTarget]);
 
-    // Get the index of the active tab for pill positioning
-    const activeIndex = tabs.findIndex((t) => t.id === activeTab);
-
     return (
         <>
             <ActionSheet
@@ -109,28 +106,6 @@ export function BottomNav() {
                 <div className="metaball-glass-dock pointer-events-auto">
                     {/* Tab icons layer */}
                     <div className="relative z-10 flex items-center justify-around h-[68px] px-3">
-                        {/* Active glow pill — slides behind active tab */}
-                        {activeIndex >= 0 && activeIndex !== 2 && (
-                            <motion.div
-                                layoutId="nav-active-pill"
-                                className="absolute h-[46px] w-[46px] rounded-full z-0"
-                                style={{
-                                    background: "rgba(255, 255, 255, 0.15)",
-                                    boxShadow:
-                                        "0 0 20px 4px rgba(255, 255, 255, 0.08), inset 0 0.5px 0 rgba(255, 255, 255, 0.3)",
-                                    left: `calc(${(activeIndex / tabs.length) * 100}% + ${100 / tabs.length / 2}% - 23px)`,
-                                    top: "50%",
-                                    marginTop: -23,
-                                }}
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 400,
-                                    damping: 30,
-                                    mass: 0.8,
-                                }}
-                            />
-                        )}
-
                         {tabs.map((tab) => {
                             const isActive = tab.id === activeTab;
                             const isAction = tab.id === "action";
@@ -148,8 +123,8 @@ export function BottomNav() {
                                             className="flex items-center justify-center w-12 h-12 rounded-full"
                                             style={{
                                                 background:
-                                                    "linear-gradient(145deg, #a78bfa 0%, #8B5CF6 50%, #7c3aed 100%)",
-                                                boxShadow: "0 4px 20px rgba(139, 92, 246, 0.45)",
+                                                    "linear-gradient(145deg, #FFD700 0%, #FFC107 50%, #FFB300 100%)",
+                                                boxShadow: "0 4px 20px rgba(255, 193, 7, 0.45)",
                                             }}
                                             whileTap={{ scale: 0.88 }}
                                             transition={iosSpring}
@@ -163,7 +138,7 @@ export function BottomNav() {
                                                     transition={iosSpring}
                                                 >
                                                     <Plus
-                                                        className={`w-5.5 h-5.5 text-white ${actionSheetOpen ? "rotate-45" : ""}`}
+                                                        className={`w-5.5 h-5.5 text-black ${actionSheetOpen ? "rotate-45" : ""}`}
                                                         strokeWidth={2.5}
                                                     />
                                                 </motion.div>
@@ -186,18 +161,12 @@ export function BottomNav() {
                                         transition={iosSpring}
                                     >
                                         <Icon
-                                            className={`w-[22px] h-[22px] transition-all duration-300 ${
-                                                isActive
-                                                    ? "text-white"
-                                                    : "text-white/60"
-                                            }`}
+                                            className={`w-[22px] h-[22px] transition-all duration-300 text-white`}
                                             strokeWidth={isActive ? 2.2 : 1.6}
                                         />
                                         <span
-                                            className={`text-[10px] leading-tight tracking-tight transition-all duration-300 ${
-                                                isActive
-                                                    ? "text-white font-semibold"
-                                                    : "text-white/60 font-medium"
+                                            className={`text-[10px] leading-tight tracking-tight transition-all duration-300 text-white ${
+                                                isActive ? "font-semibold" : "font-medium"
                                             }`}
                                         >
                                             {tab.label}

@@ -81,7 +81,17 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 const c = customer as CustomerResponse;
                 setOnboardingCompleted(c.onboardingCompleted ?? true);
                 setCustomerName(c.name);
-                setProfilePhotoUrl(c.profilePhotoUrl);
+                // Prefer API photo, fallback to localStorage
+                if (c.profilePhotoUrl) {
+                    setProfilePhotoUrl(c.profilePhotoUrl);
+                } else {
+                    try {
+                        const stored = localStorage.getItem("otsem_profile_photo");
+                        if (stored) setProfilePhotoUrl(stored);
+                    } catch {
+                        // localStorage unavailable
+                    }
+                }
             } catch (err) {
                 console.error("Erro ao buscar dados do cliente:", err);
                 setOnboardingCompleted(true);
@@ -195,7 +205,7 @@ function LoadingSpinner() {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 />
             </div>
-            <span className="text-sm text-white/60">Carregando...</span>
+            <span className="text-sm text-white">Carregando...</span>
         </div>
     );
 }

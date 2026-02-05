@@ -125,7 +125,7 @@ export function PersonalDataStep({ customer, onComplete }: PersonalDataStepProps
                 <h2 className="text-xl font-bold text-white">
                     Dados pessoais
                 </h2>
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-white">
                     Informe sua data de nascimento e endereco.
                 </p>
             </div>
@@ -166,7 +166,7 @@ export function PersonalDataStep({ customer, onComplete }: PersonalDataStepProps
                             className="h-12 rounded-xl"
                         />
                         {loadingCep && (
-                            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-white/60" />
+                            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-white" />
                         )}
                     </div>
                     {form.formState.errors.zipCode && (

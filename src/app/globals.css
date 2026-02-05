@@ -667,18 +667,21 @@
         bottom: -50px;
         z-index: 0;
         background: linear-gradient(
-            160deg,
-            #e8deff 0%,
-            #c8b8ff 12%,
-            #a898f8 24%,
-            #8878e8 36%,
-            #7060d8 48%,
-            #5848c0 58%,
-            #4030a0 68%,
-            #2a2080 78%,
-            #181060 88%,
-            #0a0838 95%,
-            #040420 100%
+            180deg,
+            #020008 0%,
+            #080020 8%,
+            #100040 16%,
+            #1a0a60 24%,
+            #261080 32%,
+            #3418a0 40%,
+            #4428b8 48%,
+            #5838c8 56%,
+            #7050d8 64%,
+            #8868e0 72%,
+            #a088e8 80%,
+            #b8a8f0 88%,
+            #d0c4f8 94%,
+            #e8e0ff 100%
         );
         pointer-events: none;
     }
@@ -686,18 +689,21 @@
     /* ── Container gradient — applied directly as background, no z-index needed ─── */
     .fintech-bg-container {
         background: linear-gradient(
-            160deg,
-            #e8deff 0%,
-            #c8b8ff 12%,
-            #a898f8 24%,
-            #8878e8 36%,
-            #7060d8 48%,
-            #5848c0 58%,
-            #4030a0 68%,
-            #2a2080 78%,
-            #181060 88%,
-            #0a0838 95%,
-            #040420 100%
+            180deg,
+            #020008 0%,
+            #080020 8%,
+            #100040 16%,
+            #1a0a60 24%,
+            #261080 32%,
+            #3418a0 40%,
+            #4428b8 48%,
+            #5838c8 56%,
+            #7050d8 64%,
+            #8868e0 72%,
+            #a088e8 80%,
+            #b8a8f0 88%,
+            #d0c4f8 94%,
+            #e8e0ff 100%
         );
         /* Default height for browser mode (same as Tailwind h-dvh).
            Standalone PWA mode overrides this below to include safe area. */
@@ -759,18 +765,18 @@
     .metaball-glass-dock {
         width: 92vw;
         max-width: 420px;
-        background: rgba(255, 255, 255, 0.12);
-        -webkit-backdrop-filter: blur(48px) saturate(180%) brightness(1.05);
-        backdrop-filter: blur(48px) saturate(180%) brightness(1.05);
-        border: 0.5px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.06);
+        -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.08);
+        backdrop-filter: blur(60px) saturate(200%) brightness(1.08);
+        border: 0.5px solid rgba(255, 255, 255, 0.15);
         border-radius: 28px;
         position: relative;
         overflow: visible;
         box-shadow:
-            0 8px 40px -8px rgba(0, 0, 0, 0.25),
-            0 2px 12px rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
-            inset 0 -0.5px 0 0 rgba(255, 255, 255, 0.05);
+            0 8px 40px -8px rgba(0, 0, 0, 0.2),
+            0 2px 12px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+            inset 0 -0.5px 0 0 rgba(255, 255, 255, 0.03);
     }
 
     /* Liquid glass shimmer highlight on top edge */
