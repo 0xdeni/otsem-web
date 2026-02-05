@@ -87,8 +87,38 @@ export function MobileHeader({ customerName, profilePhotoUrl }: { customerName?:
             {/* Safe area container — gradient flows through, pt handles notch */}
             <div className="pwa-header-premium">
                 <div className="flex items-center justify-between px-5">
-                    {/* Left side: profile photo + greeting */}
+                    {/* Left side: logo + greeting */}
                     <div className="flex items-center gap-3.5">
+                        <Link href="/customer/dashboard" className="flex items-center">
+                            <Image
+                                src="/images/logo.png"
+                                alt="OtsemPay"
+                                width={44}
+                                height={44}
+                                className="object-contain"
+                            />
+                        </Link>
+                        <div className="flex flex-col">
+                            <span className="text-[14px] font-semibold text-white leading-tight">
+                                {getGreeting()}
+                            </span>
+                            <span className="text-[17px] font-bold text-white leading-tight tracking-tight">
+                                {displayName}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Right side: bell + profile photo */}
+                    <div className="flex items-center gap-2.5">
+                        <motion.button
+                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.08] border border-white/[0.08] active:bg-white/15 transition-colors relative"
+                            style={{ transition: "background 0.25s cubic-bezier(0.32, 0.72, 0, 1)" }}
+                            whileTap={{ scale: 0.97 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                            aria-label="Notificações"
+                        >
+                            <Bell className="w-[20px] h-[20px] text-white" strokeWidth={1.8} />
+                        </motion.button>
                         <motion.div
                             whileTap={{ scale: 0.97 }}
                             transition={{ type: "spring", stiffness: 500, damping: 25 }}
@@ -114,36 +144,6 @@ export function MobileHeader({ customerName, profilePhotoUrl }: { customerName?:
                                 )}
                             </Link>
                         </motion.div>
-                        <div className="flex flex-col">
-                            <span className="text-[17px] font-semibold text-white leading-tight">
-                                {getGreeting()}
-                            </span>
-                            <span className="text-[22px] font-bold text-white leading-tight tracking-tight">
-                                {displayName}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Right side: bell + logo */}
-                    <div className="flex items-center gap-2.5">
-                        <motion.button
-                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.08] border border-white/[0.08] active:bg-white/15 transition-colors relative"
-                            style={{ transition: "background 0.25s cubic-bezier(0.32, 0.72, 0, 1)" }}
-                            whileTap={{ scale: 0.97 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                            aria-label="Notificações"
-                        >
-                            <Bell className="w-[20px] h-[20px] text-white" strokeWidth={1.8} />
-                        </motion.button>
-                        <Link href="/customer/dashboard" className="flex items-center">
-                            <Image
-                                src="/images/logo.png"
-                                alt="OtsemPay"
-                                width={44}
-                                height={44}
-                                className="object-contain"
-                            />
-                        </Link>
                     </div>
                 </div>
             </div>

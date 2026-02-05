@@ -224,7 +224,7 @@ function RegisterPageInner(): React.JSX.Element {
             cpf: "",
             cnpj: "",
             affiliateCode: refCode.toUpperCase(),
-            accept: true
+            accept: undefined as unknown as true
         },
     });
 
@@ -305,7 +305,7 @@ function RegisterPageInner(): React.JSX.Element {
             ].join("; ");
 
             toast.success("Conta criada! Bem-vindo(a).");
-            router.replace("/customer/onboarding");
+            router.replace("/customer/dashboard");
         } catch (e: unknown) {
             const status = getHttpStatus(e);
 

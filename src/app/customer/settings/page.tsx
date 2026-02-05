@@ -328,9 +328,6 @@ export default function SettingsPage() {
             <p className="text-[14px] font-medium text-white">
               {profilePhoto ? "Alterar foto" : "Adicionar foto"}
             </p>
-            <p className="text-[12px] text-white">
-              JPG ou PNG, máximo 10MB
-            </p>
             <div className="flex gap-2">
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -476,7 +473,7 @@ export default function SettingsPage() {
         <Button
           onClick={handleSaveProfile}
           disabled={saving}
-          className="mt-6 bg-[#6F00FF] hover:bg-[#6F00FF]/90 text-white rounded-2xl h-12 w-full text-[14px] font-semibold active:scale-95 transition-transform"
+          className="mt-6 bg-yellow-500 hover:bg-yellow-400 text-black rounded-2xl h-12 w-full text-[14px] font-semibold active:scale-95 transition-transform"
         >
           {saving ? "Salvando..." : "Salvar alterações"}
         </Button>

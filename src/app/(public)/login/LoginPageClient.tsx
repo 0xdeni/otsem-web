@@ -235,7 +235,7 @@ function LoginPageInner(): React.JSX.Element {
                                 <h2 className="text-center text-2xl font-black text-white">
                                     {t('auth.loginTitle')}
                                 </h2>
-                                <p className="text-center text-sm text-white/60 font-medium">
+                                <p className="text-center text-sm text-white font-medium">
                                     {t('auth.loginSubtitle')}
                                 </p>
                             </div>
@@ -294,7 +294,7 @@ function LoginPageInner(): React.JSX.Element {
                                     </div>
 
                                     <div className="flex items-center justify-between text-sm">
-                                        <label className="inline-flex items-center gap-2 text-white/60 font-medium">
+                                        <label className="inline-flex items-center gap-2 text-white font-medium">
                                             <input
                                                 type="checkbox"
                                                 className="h-4 w-4 rounded border-white/20 bg-white/10 text-[#6F00FF] focus:ring-2 focus:ring-[#8B2FFF]/20"
@@ -304,7 +304,7 @@ function LoginPageInner(): React.JSX.Element {
                                         </label>
                                         <Link
                                             href="/forgot"
-                                            className="font-bold text-[#9B4DFF] transition hover:text-[#8B2FFF]"
+                                            className="font-bold text-white transition hover:text-white/80"
                                         >
                                             {t('auth.forgotPassword')}
                                         </Link>
@@ -324,11 +324,11 @@ function LoginPageInner(): React.JSX.Element {
 
                                     <div className="my-2 h-px bg-white/[0.08]" />
 
-                                    <p className="text-center text-sm text-white/60 font-medium">
+                                    <p className="text-center text-sm text-white font-medium">
                                         {t('auth.noAccount')}{' '}
                                         <Link
                                             href="/register"
-                                            className="font-bold text-[#9B4DFF] transition hover:text-[#8B2FFF]"
+                                            className="font-bold text-white transition hover:text-white/80"
                                         >
                                             {t('auth.createAccount')}
                                         </Link>

@@ -532,7 +532,7 @@ function AddKeyModal({
     <BottomSheet open={open} onOpenChange={onOpenChange}>
       <BottomSheetContent>
         <BottomSheetHeader className="p-5 pb-0">
-          <BottomSheetTitle className="text-[18px] font-bold text-white">
+          <BottomSheetTitle className="text-[18px] font-bold text-foreground">
             Nova Chave Pix
           </BottomSheetTitle>
         </BottomSheetHeader>
@@ -540,7 +540,7 @@ function AddKeyModal({
         <form onSubmit={onSubmit} className="p-5 pt-4 space-y-5">
           {/* Key type grid */}
           <div>
-            <label className="block text-[12px] font-semibold text-white uppercase tracking-wider mb-2.5">
+            <label className="block text-[12px] font-semibold text-foreground uppercase tracking-wider mb-2.5">
               Tipo de chave
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -553,7 +553,7 @@ function AddKeyModal({
                     "flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-[12px] font-medium active:scale-95 transition-all " +
                     (newType === kt.value
                       ? "bg-[#6F00FF]/10 text-[#6F00FF] border-2 border-[#6F00FF]/40 shadow-sm"
-                      : "bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] text-white hover:border-[#6F00FF]/20")
+                      : "bg-muted/50 border border-border text-foreground hover:border-[#6F00FF]/20")
                   }
                 >
                   <KeyTypeIconComponent type={kt.value} size="sm" />
@@ -566,7 +566,7 @@ function AddKeyModal({
           {/* Key value input */}
           {newType !== "RANDOM" && (
             <div>
-              <label className="block text-[12px] font-semibold text-white uppercase tracking-wider mb-2">
+              <label className="block text-[12px] font-semibold text-foreground uppercase tracking-wider mb-2">
                 Valor da chave
               </label>
               <Input
@@ -583,9 +583,9 @@ function AddKeyModal({
                         : "+55 11 99999-9999"
                 }
                 required
-                className="h-11 rounded-xl bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] text-white placeholder:text-white text-[14px]"
+                className="h-11 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground text-[14px]"
               />
-              <p className="text-[11px] text-white mt-1.5">
+              <p className="text-[11px] text-muted-foreground mt-1.5">
                 Se corresponder aos seus dados, ser&aacute; validada automaticamente.
               </p>
             </div>
@@ -593,13 +593,13 @@ function AddKeyModal({
 
           {/* Random key notice */}
           {newType === "RANDOM" && (
-            <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-white/5 border border-white/10">
-              <AlertCircle className="w-4 h-4 text-white shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-muted/50 border border-border">
+              <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               <div>
-                <p className="text-[13px] font-semibold text-white">
+                <p className="text-[13px] font-semibold text-foreground">
                   Chave Aleat&oacute;ria
                 </p>
-                <p className="text-[12px] text-white mt-0.5 leading-relaxed">
+                <p className="text-[12px] text-muted-foreground mt-0.5 leading-relaxed">
                   Ser&aacute; gerada automaticamente. Requer valida&ccedil;&atilde;o manual via
                   micro-transfer&ecirc;ncia.
                 </p>
@@ -612,7 +612,7 @@ function AddKeyModal({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] hover:bg-white/80 dark:hover:bg-white/[0.08] active:scale-95 transition-transform"
+              className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-foreground bg-muted border border-border hover:bg-muted/80 active:scale-95 transition-transform"
             >
               Cancelar
             </button>
@@ -656,28 +656,28 @@ function DeleteKeyModal({
     <BottomSheet open={open} onOpenChange={onOpenChange}>
       <BottomSheetContent>
         <BottomSheetHeader className="p-5 pb-0">
-          <BottomSheetTitle className="text-[18px] font-bold text-white">
+          <BottomSheetTitle className="text-[18px] font-bold text-foreground">
             Remover Chave Pix
           </BottomSheetTitle>
         </BottomSheetHeader>
 
         <div className="p-5 pt-3 space-y-4">
-          <p className="text-[14px] text-white">
+          <p className="text-[14px] text-foreground">
             Tem certeza que deseja remover esta chave?
           </p>
 
           {keyToDelete && (
-            <div className={"flex items-center gap-3 p-3.5 rounded-xl bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08]"}>
+            <div className={"flex items-center gap-3 p-3.5 rounded-xl bg-muted/50 border border-border"}>
               <div
-                className={"w-9 h-9 rounded-full flex items-center justify-center shrink-0 " + getKeyIconColor(keyToDelete.keyType)}
+                className={"w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-muted text-foreground"}
               >
                 <KeyTypeIconComponent type={keyToDelete.keyType} />
               </div>
               <div className="min-w-0">
-                <p className="text-[14px] font-semibold text-white">
+                <p className="text-[14px] font-semibold text-foreground">
                   {getKeyTypeLabel(keyToDelete.keyType)}
                 </p>
-                <code className="text-[12px] text-white font-mono truncate block">
+                <code className="text-[12px] text-muted-foreground font-mono truncate block">
                   {keyToDelete.keyValue}
                 </code>
               </div>
@@ -688,7 +688,7 @@ function DeleteKeyModal({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-white bg-white/50 dark:bg-white/[0.05] border border-white/60 dark:border-white/[0.08] hover:bg-white/80 dark:hover:bg-white/[0.08] active:scale-95 transition-transform"
+              className="flex-1 h-11 rounded-2xl text-[14px] font-semibold text-foreground bg-muted border border-border hover:bg-muted/80 active:scale-95 transition-transform"
             >
               Cancelar
             </button>

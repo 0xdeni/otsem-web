@@ -23,7 +23,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
     const router = useRouter();
     const pathname = usePathname();
     const { open, closeModal, triggerRefresh } = useUiModals();
-    const [onboardingCompleted, setOnboardingCompleted] = React.useState<boolean | null>(null);
     const [loading, setLoading] = React.useState(true);
     const [customerName, setCustomerName] = React.useState<string | undefined>();
     const [profilePhotoUrl, setProfilePhotoUrl] = React.useState<string | undefined>();
@@ -79,7 +78,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 ]);
                 const customer = "data" in customerRes.data && customerRes.data.data ? customerRes.data.data : customerRes.data;
                 const c = customer as CustomerResponse;
-                setOnboardingCompleted(c.onboardingCompleted ?? true);
                 setCustomerName(c.name);
                 // Prefer API photo, fallback to localStorage
                 if (c.profilePhotoUrl) {
@@ -94,7 +92,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 }
             } catch (err) {
                 console.error("Erro ao buscar dados do cliente:", err);
-                setOnboardingCompleted(true);
             }
             setLoading(false);
         }
@@ -103,33 +100,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             loadData();
         }
     }, [user]);
-
-    // Redirect to onboarding if not completed
-    React.useEffect(() => {
-        if (loading || onboardingCompleted === null) return;
-        if (
-            onboardingCompleted === false &&
-            !pathname?.startsWith("/customer/onboarding") &&
-            pathname !== "/customer/logout"
-        ) {
-            router.replace("/customer/onboarding");
-        }
-    }, [loading, onboardingCompleted, pathname, router]);
-
-    // Render clean layout (no nav) for onboarding page
-    if (pathname?.startsWith("/customer/onboarding")) {
-        return (
-            <Protected>
-                {loading ? (
-                    <div className="flex min-h-dvh items-center justify-center">
-                        <LoadingSpinner />
-                    </div>
-                ) : (
-                    children
-                )}
-            </Protected>
-        );
-    }
 
     return (
         <Protected>
