@@ -574,6 +574,11 @@ export default function Dashboard() {
                     label="Vender"
                     onClick={() => openModal("sellUsdt")}
                 />
+                <QuickAction
+                    icon={Receipt}
+                    label="Pagar"
+                    onClick={() => openModal("payBoleto")}
+                />
             </motion.div>
 
             {/* ── Mercado Link ── */}

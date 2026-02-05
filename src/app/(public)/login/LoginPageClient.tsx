@@ -315,10 +315,10 @@ function LoginPageInner(): React.JSX.Element {
                                         disabled={isSubmitting}
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="btn-premium h-12 rounded-2xl font-black text-base disabled:opacity-50"
+                                        className="flex items-center justify-center gap-2 w-full h-12 rounded-2xl font-black text-base disabled:opacity-50 bg-yellow-400 hover:bg-yellow-500 text-black shadow-lg shadow-yellow-400/25 transition-colors"
                                         aria-busy={isSubmitting}
                                     >
-                                        {isSubmitting ? t('auth.loggingIn') : t('auth.loginTitle')}
+                                        {isSubmitting ? t('auth.loggingIn') : 'Entrar'}
                                         {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
                                     </motion.button>
 

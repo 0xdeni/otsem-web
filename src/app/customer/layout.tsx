@@ -28,6 +28,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
     const [loading, setLoading] = React.useState(true);
     const [customerName, setCustomerName] = React.useState<string | undefined>();
     const [profilePhotoUrl, setProfilePhotoUrl] = React.useState<string | undefined>();
+    const [customerUsername, setCustomerUsername] = React.useState<string | null | undefined>();
     const scrollRef = React.useRef<HTMLDivElement>(null);
 
     // Lock body scroll — customer layout owns the single scroll container.
@@ -81,6 +82,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 const customer = "data" in customerRes.data && customerRes.data.data ? customerRes.data.data : customerRes.data;
                 const c = customer as CustomerResponse;
                 setCustomerName(c.name);
+                setCustomerUsername(c.username);
                 // Prefer API photo, fallback to localStorage
                 if (c.profilePhotoUrl) {
                     setProfilePhotoUrl(c.profilePhotoUrl);
@@ -136,7 +138,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                         triggers on ALL pages (not just long ones). */}
                     <div className="min-h-[calc(100%+1px)]">
                         {/* Header scrolls with content — collapses naturally on scroll */}
-                        <MobileHeader customerName={customerName} profilePhotoUrl={profilePhotoUrl} />
+                        <MobileHeader customerName={customerName} profilePhotoUrl={profilePhotoUrl} username={customerUsername} />
 
                         <AnimatePresence mode="wait">
                             <motion.main
