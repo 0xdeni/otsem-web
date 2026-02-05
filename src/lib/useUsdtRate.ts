@@ -9,8 +9,8 @@ export function useUsdtRate() {
     async function fetchRate() {
         setLoading(true);
         try {
-            // Use relative URL to go through Next.js rewrites
-            const res = await fetch(`/public/quote`);
+            // Use /api prefix to go through Next.js rewrites
+            const res = await fetch(`/api/public/quote`);
             const data = await res.json();
             setBuyRate(data.buyRate ?? null);
             setSellRate(data.sellRate ?? null);
