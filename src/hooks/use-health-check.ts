@@ -7,8 +7,8 @@ export function useHealthCheck(intervalMs = 30000) {
 
   const checkHealth = useCallback(async () => {
     try {
-      // Use relative URL to go through Next.js rewrites
-      const response = await fetch(`/auth/me`, {
+      // Use /api prefix to go through Next.js rewrites
+      const response = await fetch(`/api/auth/me`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

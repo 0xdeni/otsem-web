@@ -3,9 +3,10 @@ import axios, { type AxiosInstance, type AxiosRequestConfig, type InternalAxiosR
 import { getAccessToken, clearTokens } from './token';
 import { ENV } from './env';
 
-// Client-side: use relative URLs so requests go through Next.js rewrites (avoids CORS).
+// Client-side: use /api prefix so requests go through Next.js rewrites (avoids CORS)
+// and don't conflict with page routes (e.g. /admin/* pages vs /admin/* API endpoints).
 // Server-side (SSR): use the full API URL directly since rewrites aren't available.
-const BASE_URL = typeof window !== 'undefined' ? '' : ENV.API_URL;
+const BASE_URL = typeof window !== 'undefined' ? '/api' : ENV.API_URL;
 
 interface CustomAxiosConfig extends AxiosRequestConfig {
     anonymous?: boolean;
