@@ -269,9 +269,8 @@ export default function Dashboard() {
     const refreshData = React.useCallback(() => setRefreshCounter((c) => c + 1), []);
     const initialLoadDone = React.useRef(false);
 
-    const { rate: usdtRate, loading: usdtLoading } = useUsdtRate();
-    const customerSpread = user?.spreadValue ?? 0.95;
-    const usdtRateWithSpread = usdtRate ? usdtRate * (1 + customerSpread / 100) : 0;
+    const { buyRate: usdtRate, loading: usdtLoading } = useUsdtRate();
+    const usdtRateWithSpread = usdtRate ?? 0;
 
     // Handle exchange widget redirect
     React.useEffect(() => {

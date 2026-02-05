@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.otsembank.com";
+
 export function useUsdtRate() {
-    const [rate, setRate] = useState<number | null>(null);
+    const [buyRate, setBuyRate] = useState<number | null>(null);
+    const [sellRate, setSellRate] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [updatedAt, setUpdatedAt] = useState(Date.now());
 
     async function fetchRate() {
         setLoading(true);
         try {
-            const res = await fetch("/api/usdt-rate");
+            const res = await fetch(`${API_URL}/public/quote`);
             const data = await res.json();
-            setRate(data.rate ?? null);
-            setUpdatedAt(Date.now()); // atualiza o timestamp
+            setBuyRate(data.buyRate ?? null);
+            setSellRate(data.sellRate ?? null);
+            setUpdatedAt(Date.now());
         } catch {
-            setRate(null);
+            setBuyRate(null);
+            setSellRate(null);
         } finally {
             setLoading(false);
         }
@@ -25,5 +30,5 @@ export function useUsdtRate() {
         return () => clearInterval(interval);
     }, []);
 
-    return { rate, loading, updatedAt };
+    return { buyRate, sellRate, loading, updatedAt };
 }
