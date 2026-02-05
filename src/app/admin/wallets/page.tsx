@@ -17,6 +17,7 @@ type CryptoWallet = {
     id: string;
     customerId: string;
     customerName: string;
+    customerUsername?: string | null;
     customerEmail: string;
     address: string;
     network: "SOLANA" | "TRON";
@@ -203,7 +204,48 @@ export default function AdminWalletsPage() {
                             <p className="text-muted-foreground">Nenhuma carteira cadastrada</p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
+                        <>
+                        {/* Mobile card view */}
+                        <div className="md:hidden space-y-3">
+                            {wallets.map((wallet) => {
+                                const networkInfo = networkConfig[wallet.network] || networkConfig.SOLANA;
+                                return (
+                                    <div key={wallet.id} className="rounded-lg border p-4 space-y-3">
+                                        <div className="flex items-start justify-between">
+                                            <div className="min-w-0 flex-1">
+                                                <p className="font-medium">{wallet.customerName || "—"}</p>
+                                                {wallet.customerUsername && (
+                                                    <p className="text-sm font-medium text-[#6F00FF]">@{wallet.customerUsername}</p>
+                                                )}
+                                                <p className="text-sm text-muted-foreground truncate">{wallet.customerEmail}</p>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 ml-2">
+                                                {wallet.okxWhitelisted && (
+                                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                                )}
+                                                <Badge variant={wallet.isActive ? "default" : "secondary"}>
+                                                    {wallet.isActive ? "Ativa" : "Inativa"}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <code className="rounded bg-muted px-2 py-1 text-xs flex-1 truncate">{wallet.address}</code>
+                                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => copyAddress(wallet.address)}>
+                                                <Copy className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs">
+                                            <span className={`rounded-full px-2 py-1 font-medium ${networkInfo.className}`}>{networkInfo.label}</span>
+                                            {wallet.label && <span className="text-muted-foreground">{wallet.label}</span>}
+                                            <span className="text-muted-foreground ml-auto">{formatDate(wallet.createdAt)}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Desktop table view */}
+                        <div className="hidden md:block overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -226,6 +268,9 @@ export default function AdminWalletsPage() {
                                                 <TableCell>
                                                     <div>
                                                         <p className="font-medium">{wallet.customerName || "—"}</p>
+                                                        {wallet.customerUsername && (
+                                                            <p className="text-sm font-medium text-[#6F00FF]">@{wallet.customerUsername}</p>
+                                                        )}
                                                         <p className="text-sm text-muted-foreground">{wallet.customerEmail}</p>
                                                     </div>
                                                 </TableCell>
@@ -337,6 +382,7 @@ export default function AdminWalletsPage() {
                                 </TableBody>
                             </Table>
                         </div>
+                        </>
                     )}
                 </CardContent>
             </Card>

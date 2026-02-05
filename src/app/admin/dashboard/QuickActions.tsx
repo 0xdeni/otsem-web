@@ -4,15 +4,13 @@ import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-    Users, 
-    BadgeCheck, 
-    ArrowUpDown, 
-    Wallet, 
-    Settings, 
-    FileText,
+import {
+    Users,
+    BadgeCheck,
+    ArrowUpDown,
+    Wallet,
+    Settings,
     Building2,
-    Shield
 } from "lucide-react";
 
 const actions = [
@@ -30,9 +28,9 @@ const actions = [
     },
     {
         label: "Transações",
-        href: "/admin/transactions",
+        href: "/admin/recebidos",
         icon: ArrowUpDown,
-        color: "border-[#6F00FF]/50/20 hover:bg-[#6F00FF]/50/5 hover:border-[#6F00FF]/50/40",
+        color: "border-[#6F00FF]/20 hover:bg-[#6F00FF]/5 hover:border-[#6F00FF]/40",
     },
     {
         label: "Carteiras USDT",
@@ -41,26 +39,14 @@ const actions = [
         color: "border-amber-500/20 hover:bg-amber-500/5 hover:border-amber-500/40",
     },
     {
-        label: "Extrato Banco",
-        href: "/admin/bank",
+        label: "Config. Banco",
+        href: "/admin/settings/bank",
         icon: Building2,
         color: "border-emerald-500/20 hover:bg-emerald-500/5 hover:border-emerald-500/40",
     },
     {
-        label: "Relatórios",
-        href: "/admin/reports",
-        icon: FileText,
-        color: "border-cyan-500/20 hover:bg-cyan-500/5 hover:border-cyan-500/40",
-    },
-    {
-        label: "Segurança",
-        href: "/admin/security",
-        icon: Shield,
-        color: "border-red-500/20 hover:bg-red-500/5 hover:border-red-500/40",
-    },
-    {
         label: "Configurações",
-        href: "/admin/settings",
+        href: "/admin/settings/bank",
         icon: Settings,
         color: "border-slate-500/20 hover:bg-slate-500/5 hover:border-slate-500/40",
     },

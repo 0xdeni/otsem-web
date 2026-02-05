@@ -13,10 +13,10 @@ export default function DashboardHeader() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline" asChild>
-                    <Link href="/admin/settings">Configurações</Link>
+                    <Link href="/admin/settings/bank">Configurações</Link>
                 </Button>
                 <Button className="bg-[#b852ff] hover:bg-[#a942ee]" asChild>
-                    <Link href="/admin/transactions">
+                    <Link href="/admin/recebidos">
                         Ver todas transações <ArrowUpRight className="ml-1 size-4" />
                     </Link>
                 </Button>

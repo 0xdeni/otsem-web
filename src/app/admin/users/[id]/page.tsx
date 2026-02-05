@@ -27,6 +27,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 type UserDetail = {
     id: string;
     name: string;
+    username?: string | null;
     email: string;
     cpfCnpj: string;
     phone: string;
@@ -395,6 +396,9 @@ export default function AdminUserDetailPage() {
                 </Button>
                 <div className="flex-1">
                     <h1 className="text-2xl font-bold tracking-tight">{user.name || "Usuário sem nome"}</h1>
+                    {user.username && (
+                        <p className="text-sm font-medium text-[#6F00FF]">@{user.username}</p>
+                    )}
                     <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -477,6 +481,10 @@ export default function AdminUserDetailPage() {
                             <div className="space-y-1">
                                 <p className="text-sm text-muted-foreground">Nome Completo</p>
                                 <p className="font-medium">{user.name || "—"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-sm text-muted-foreground">Username</p>
+                                <p className="font-medium text-[#6F00FF]">{user.username ? `@${user.username}` : "—"}</p>
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm text-muted-foreground">CPF/CNPJ</p>

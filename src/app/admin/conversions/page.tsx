@@ -38,6 +38,7 @@ type Conversion = {
     customer: {
         id: string;
         name: string;
+        username?: string | null;
         email: string;
     };
     brlCharged: number;
@@ -432,7 +433,56 @@ export default function ConversionsPage() {
                             <p className="text-muted-foreground">Nenhuma conversão encontrada</p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
+                        <>
+                        {/* Mobile card view */}
+                        <div className="md:hidden space-y-3">
+                            {conversions.map((conv) => (
+                                <div
+                                    key={conv.id}
+                                    className="rounded-lg border p-4 space-y-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                    onClick={() => setSelectedConversion(conv)}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-medium">{conv.customer.name}</p>
+                                            {conv.customer.username && (
+                                                <p className="text-sm font-medium text-[#6F00FF]">@{conv.customer.username}</p>
+                                            )}
+                                            <p className="text-xs text-muted-foreground">{conv.customer.email}</p>
+                                        </div>
+                                        <Badge className={getStatusColor(conv.status)}>{getStatusLabel(conv.status)}</Badge>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2 text-sm">
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">BRL</p>
+                                            <p className="font-medium">{formatCurrency(conv.brlCharged ?? 0)}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">USDT</p>
+                                            <p className="font-medium">{formatUSDT(conv.usdtWithdrawn ?? 0)}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">Lucro</p>
+                                            <p className={`font-medium ${(conv.netProfit ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {formatCurrency(conv.netProfit ?? 0)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <span>{formatShortDate(conv.createdAt)}</span>
+                                        <Badge variant="outline" className={conv.network === 'SOLANA' ? 'border-[#6F00FF] text-[#6F00FF]' : 'border-blue-500 text-blue-600'}>
+                                            {conv.network || '-'}
+                                        </Badge>
+                                        {conv.affiliate && (
+                                            <span className="text-[#6F00FF] ml-auto">{conv.affiliate.code}</span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop table view */}
+                        <div className="hidden md:block overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -458,6 +508,9 @@ export default function ConversionsPage() {
                                             <TableCell>
                                                 <div>
                                                     <p className="font-medium">{conv.customer.name}</p>
+                                                    {conv.customer.username && (
+                                                        <p className="text-xs font-medium text-[#6F00FF]">@{conv.customer.username}</p>
+                                                    )}
                                                     <p className="text-xs text-muted-foreground">{conv.customer.email}</p>
                                                 </div>
                                             </TableCell>
@@ -510,6 +563,7 @@ export default function ConversionsPage() {
                                 </TableBody>
                             </Table>
                         </div>
+                        </>
                     )}
                 </CardContent>
             </Card>
@@ -540,6 +594,9 @@ export default function ConversionsPage() {
                                     <div className="space-y-1">
                                         <p className="text-sm text-muted-foreground">Nome</p>
                                         <p className="font-medium">{selectedConversion.customer.name}</p>
+                                        {selectedConversion.customer.username && (
+                                            <p className="text-sm font-medium text-[#6F00FF]">@{selectedConversion.customer.username}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-sm text-muted-foreground">Email</p>
