@@ -149,7 +149,7 @@ export default function AffiliatesPage() {
             <div className="flex items-center justify-center h-[50dvh]">
                 <div className="flex flex-col items-center gap-3">
                     <div className="w-8 h-8 rounded-full border-2 border-[#6F00FF]/30 border-t-[#6F00FF] animate-spin" />
-                    <span className="text-[13px] text-white/60">Carregando...</span>
+                    <span className="text-[13px] text-white">Carregando...</span>
                 </div>
             </div>
         );
@@ -167,7 +167,7 @@ export default function AffiliatesPage() {
             >
                 <motion.div variants={fadeUp}>
                     <h1 className="text-[22px] font-bold text-white">Afiliados</h1>
-                    <p className="text-[13px] text-white/60 mt-0.5">Indique amigos e ganhe comissões</p>
+                    <p className="text-[13px] text-white mt-0.5">Indique amigos e ganhe comissões</p>
                 </motion.div>
 
                 <motion.div variants={fadeUp} className="fintech-glass-card rounded-[20px] p-5 !p-8 text-center">
@@ -175,7 +175,7 @@ export default function AffiliatesPage() {
                         <Users className="w-7 h-7 text-[#6F00FF]" strokeWidth={1.8} />
                     </div>
                     <h3 className="text-[15px] font-semibold text-white mb-1">Recurso não disponível</h3>
-                    <p className="text-[13px] text-white/60 leading-relaxed max-w-[280px] mx-auto">
+                    <p className="text-[13px] text-white leading-relaxed max-w-[280px] mx-auto">
                         O programa de afiliados não está habilitado para a sua conta. Entre em contato com o suporte para solicitar acesso.
                     </p>
                 </motion.div>
@@ -195,7 +195,7 @@ export default function AffiliatesPage() {
             {/* Header */}
             <motion.div variants={fadeUp}>
                 <h1 className="text-[22px] font-bold text-white">Afiliados</h1>
-                <p className="text-[13px] text-white/60 mt-0.5">
+                <p className="text-[13px] text-white mt-0.5">
                     Indique amigos e ganhe comissões em cada transação
                 </p>
             </motion.div>
@@ -211,7 +211,7 @@ export default function AffiliatesPage() {
                     <div className="relative space-y-4">
                         {/* Top: link */}
                         <div>
-                            <p className="text-white/60 text-[12px] font-medium mb-1.5">Seu link de indicação</p>
+                            <p className="text-white text-[12px] font-medium mb-1.5">Seu link de indicação</p>
                             <div className="flex items-center gap-2">
                                 <div className="flex-1 min-w-0 bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2.5 border border-white/10">
                                     <p className="text-white text-[13px] font-mono truncate">{referralLink}</p>
@@ -232,7 +232,7 @@ export default function AffiliatesPage() {
                         {/* Bottom: code + share */}
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-white/50 text-[11px] font-medium mb-0.5">Seu código</p>
+                                <p className="text-white text-[11px] font-medium mb-0.5">Seu código</p>
                                 <button
                                     onClick={copyCode}
                                     className="text-white text-[18px] font-bold tracking-wide active:opacity-70 transition-opacity"
@@ -262,7 +262,7 @@ export default function AffiliatesPage() {
                         </div>
                     </div>
                     <p className="text-[20px] font-bold text-white">{stats.totalReferrals ?? 0}</p>
-                    <p className="text-[11px] text-white/60 mt-0.5">Total indicados</p>
+                    <p className="text-[11px] text-white mt-0.5">Total indicados</p>
                     <p className="text-[11px] text-[#6F00FF] dark:text-[#8B2FFF] font-medium mt-0.5">
                         {stats.activeReferrals ?? 0} ativos
                     </p>
@@ -279,12 +279,12 @@ export default function AffiliatesPage() {
                         {formatCurrency(stats.totalEarnings)}
                     </p>
                     {(stats.totalEarningsUsdt ?? 0) > 0 && (
-                        <p className="text-[12px] text-white/70 font-medium">
+                        <p className="text-[12px] text-white font-medium">
                             {formatUsdt(stats.totalEarningsUsdt)} USDT
                         </p>
                     )}
-                    <p className="text-[11px] text-white/60 mt-0.5">Total ganho</p>
-                    <p className="text-[11px] text-white/70 font-medium mt-0.5">
+                    <p className="text-[11px] text-white mt-0.5">Total ganho</p>
+                    <p className="text-[11px] text-white font-medium mt-0.5">
                         {stats.commissionRate ?? 0}% comissão
                     </p>
                 </div>
@@ -296,16 +296,16 @@ export default function AffiliatesPage() {
                             <Clock className="w-4 h-4 text-white" strokeWidth={2} />
                         </div>
                     </div>
-                    <p className="text-[20px] font-bold text-white/70">
+                    <p className="text-[20px] font-bold text-white">
                         {formatCurrency(stats.pendingEarnings)}
                     </p>
                     {(stats.pendingEarningsUsdt ?? 0) > 0 && (
-                        <p className="text-[12px] text-white/60 font-medium">
+                        <p className="text-[12px] text-white font-medium">
                             {formatUsdt(stats.pendingEarningsUsdt)} USDT
                         </p>
                     )}
-                    <p className="text-[11px] text-white/60 mt-0.5">Pendente</p>
-                    <p className="text-[11px] text-white/60 mt-0.5">Aguardando pgto</p>
+                    <p className="text-[11px] text-white mt-0.5">Pendente</p>
+                    <p className="text-[11px] text-white mt-0.5">Aguardando pgto</p>
                 </div>
 
                 {/* Paid */}
@@ -318,8 +318,8 @@ export default function AffiliatesPage() {
                     <p className="text-[20px] font-bold text-white">
                         {formatCurrency(stats.paidEarnings)}
                     </p>
-                    <p className="text-[11px] text-white/60 mt-0.5">Já recebido</p>
-                    <p className="text-[11px] text-white/60 mt-0.5">Total pago</p>
+                    <p className="text-[11px] text-white mt-0.5">Já recebido</p>
+                    <p className="text-[11px] text-white mt-0.5">Total pago</p>
                 </div>
             </motion.div>
 
@@ -330,7 +330,7 @@ export default function AffiliatesPage() {
                     className={`px-4 py-2 rounded-full text-[13px] font-semibold active:scale-95 transition-all ${
                         activeTab === "referrals"
                             ? "bg-[#6F00FF] text-white shadow-lg shadow-[#6F00FF]/25"
-                            : "bg-white/60 dark:bg-white/[0.06] text-white/60 border border-white/60 dark:border-white/[0.08]"
+                            : "bg-white/60 dark:bg-white/[0.06] text-white border border-white/60 dark:border-white/[0.08]"
                     }`}
                 >
                     Indicações
@@ -340,7 +340,7 @@ export default function AffiliatesPage() {
                     className={`px-4 py-2 rounded-full text-[13px] font-semibold active:scale-95 transition-all ${
                         activeTab === "commissions"
                             ? "bg-[#6F00FF] text-white shadow-lg shadow-[#6F00FF]/25"
-                            : "bg-white/60 dark:bg-white/[0.06] text-white/60 border border-white/60 dark:border-white/[0.08]"
+                            : "bg-white/60 dark:bg-white/[0.06] text-white border border-white/60 dark:border-white/[0.08]"
                     }`}
                 >
                     Comissões
@@ -356,7 +356,7 @@ export default function AffiliatesPage() {
                                 <Users className="w-6 h-6 text-[#6F00FF]" strokeWidth={1.8} />
                             </div>
                             <p className="text-[14px] font-medium text-white mb-1">Nenhum indicado ainda</p>
-                            <p className="text-[13px] text-white/60">Compartilhe seu link para começar!</p>
+                            <p className="text-[13px] text-white">Compartilhe seu link para começar!</p>
                         </div>
                     ) : (
                         <div className="divide-y divide-border/50">
@@ -370,7 +370,7 @@ export default function AffiliatesPage() {
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-[14px] font-semibold text-white truncate">{referral.name}</p>
-                                            <p className="text-[12px] text-white/60">
+                                            <p className="text-[12px] text-white">
                                                 Desde {formatDate(referral.registeredAt)}
                                             </p>
                                         </div>
@@ -379,7 +379,7 @@ export default function AffiliatesPage() {
                                         <p className="text-[14px] font-semibold text-white">
                                             {formatCurrency(referral.commissionEarned)}
                                         </p>
-                                        <p className="text-[11px] text-white/60">
+                                        <p className="text-[11px] text-white">
                                             Vol: {formatCurrency(referral.totalVolume)}
                                         </p>
                                     </div>
@@ -393,7 +393,7 @@ export default function AffiliatesPage() {
                             <DollarSign className="w-6 h-6 text-white" strokeWidth={1.8} />
                         </div>
                         <p className="text-[14px] font-medium text-white mb-1">Nenhuma comissão ainda</p>
-                        <p className="text-[13px] text-white/60">Suas comissões aparecerão aqui.</p>
+                        <p className="text-[13px] text-white">Suas comissões aparecerão aqui.</p>
                     </div>
                 ) : (
                     <div className="divide-y divide-border/50">
@@ -403,22 +403,22 @@ export default function AffiliatesPage() {
                                     <div className="flex items-center gap-1.5">
                                         <p className="text-[14px] font-semibold text-white truncate">{commission.referralName}</p>
                                         {commission.conversionType && (
-                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white/10 text-white/70">
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white/10 text-white">
                                                 {commission.conversionType === "BUY" ? "Compra" : "Venda"}
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-[12px] text-white/60">
+                                    <p className="text-[12px] text-white">
                                         Transação {formatCurrency(commission.transactionAmount)}
                                     </p>
-                                    <p className="text-[11px] text-white/60">{formatDate(commission.createdAt)}</p>
+                                    <p className="text-[11px] text-white">{formatDate(commission.createdAt)}</p>
                                 </div>
                                 <div className="flex items-center gap-2.5 shrink-0 pl-3">
                                     <span
                                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                                             commission.status === "paid"
-                                                ? "bg-white/10 text-white/80"
-                                                : "bg-white/10 text-white/60"
+                                                ? "bg-white/10 text-white"
+                                                : "bg-white/10 text-white"
                                         }`}
                                     >
                                         {commission.status === "paid" ? "Pago" : "Pendente"}
@@ -428,7 +428,7 @@ export default function AffiliatesPage() {
                                             {formatCurrency(commission.amount)}
                                         </span>
                                         {(commission.amountUsdt ?? 0) > 0 && (
-                                            <span className="text-[11px] text-white/60">
+                                            <span className="text-[11px] text-white">
                                                 {formatUsdt(commission.amountUsdt)} USDT
                                             </span>
                                         )}

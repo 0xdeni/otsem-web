@@ -43,18 +43,38 @@ export function MobileHeader({ customerName, profilePhotoUrl }: { customerName?:
     const initials = getInitials(customerName) || getInitials(user?.name);
 
     // Track profile photo: prefer prop, fallback to localStorage, listen for changes
-    const [photoSrc, setPhotoSrc] = React.useState<string | null>(null);
+    const [photoSrc, setPhotoSrc] = React.useState<string | null>(() => {
+        if (typeof window === "undefined") return null;
+        return getStoredPhoto();
+    });
 
     React.useEffect(() => {
-        setPhotoSrc(profilePhotoUrl || getStoredPhoto());
+        if (profilePhotoUrl) {
+            setPhotoSrc(profilePhotoUrl);
+        } else {
+            const stored = getStoredPhoto();
+            if (stored) setPhotoSrc(stored);
+        }
     }, [profilePhotoUrl]);
 
     React.useEffect(() => {
         function handlePhotoChange() {
             setPhotoSrc(getStoredPhoto());
         }
+        // Listen for in-app photo changes
         window.addEventListener("profile-photo-changed", handlePhotoChange);
-        return () => window.removeEventListener("profile-photo-changed", handlePhotoChange);
+        // Re-check localStorage when app returns to foreground (iOS PWA resume)
+        function handleVisibility() {
+            if (document.visibilityState === "visible") {
+                const stored = getStoredPhoto();
+                if (stored) setPhotoSrc(stored);
+            }
+        }
+        document.addEventListener("visibilitychange", handleVisibility);
+        return () => {
+            window.removeEventListener("profile-photo-changed", handlePhotoChange);
+            document.removeEventListener("visibilitychange", handleVisibility);
+        };
     }, []);
 
     return (
@@ -86,11 +106,11 @@ export function MobileHeader({ customerName, profilePhotoUrl }: { customerName?:
                                         className="w-full h-full object-cover"
                                     />
                                 ) : initials ? (
-                                    <span className="text-[14px] font-semibold text-white/90">
+                                    <span className="text-[14px] font-semibold text-white">
                                         {initials}
                                     </span>
                                 ) : (
-                                    <User className="w-[22px] h-[22px] text-white/90" strokeWidth={1.8} />
+                                    <User className="w-[22px] h-[22px] text-white" strokeWidth={1.8} />
                                 )}
                             </Link>
                         </motion.div>
@@ -113,7 +133,7 @@ export function MobileHeader({ customerName, profilePhotoUrl }: { customerName?:
                             transition={{ type: "spring", stiffness: 500, damping: 25 }}
                             aria-label="Notificações"
                         >
-                            <Bell className="w-[20px] h-[20px] text-white/90" strokeWidth={1.8} />
+                            <Bell className="w-[20px] h-[20px] text-white" strokeWidth={1.8} />
                         </motion.button>
                         <Link href="/customer/dashboard" className="flex items-center">
                             <Image

@@ -518,7 +518,7 @@ export default function TransactionsPage() {
         if (meta.isPending) {
             return (
                 <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
-                    <ArrowRightLeft className={`${size} text-white/70`} />
+                    <ArrowRightLeft className={`${size} text-white`} />
                 </div>
             );
         }
@@ -561,11 +561,11 @@ export default function TransactionsPage() {
         if (isPending) {
             return (
                 <div className="text-right">
-                    <span className="text-[14px] font-semibold text-white/50">
+                    <span className="text-[14px] font-semibold text-white">
                         {isIncoming ? "+" : "-"}
                         {formatCurrency(Math.abs(amount))}
                     </span>
-                    <p className="text-[11px] font-medium text-white/40 mt-0.5">
+                    <p className="text-[11px] font-medium text-white mt-0.5">
                         Processando
                     </p>
                 </div>
@@ -580,7 +580,7 @@ export default function TransactionsPage() {
                             +{formatCurrency(amount)}
                         </span>
                         {usdtAmountValue !== null && (
-                            <p className="text-[11px] font-medium text-white/50 mt-0.5">
+                            <p className="text-[11px] font-medium text-white mt-0.5">
                                 -{formatUSD(usdtAmountValue)}
                             </p>
                         )}
@@ -589,11 +589,11 @@ export default function TransactionsPage() {
             }
             return (
                 <div className="text-right">
-                    <span className="text-[14px] font-semibold text-white/70">
+                    <span className="text-[14px] font-semibold text-white">
                         -{formatCurrency(amount)}
                     </span>
                     {usdtAmountValue !== null && (
-                        <p className="text-[11px] font-medium text-white/70 mt-0.5">
+                        <p className="text-[11px] font-medium text-white mt-0.5">
                             +{formatUSD(usdtAmountValue)}
                         </p>
                     )}
@@ -602,7 +602,7 @@ export default function TransactionsPage() {
         }
 
         return (
-            <span className={`text-[14px] font-semibold ${isIncoming ? "text-white" : "text-white/70"}`}>
+            <span className={`text-[14px] font-semibold ${isIncoming ? "text-white" : "text-white"}`}>
                 {isIncoming ? "+" : "-"}
                 {formatCurrency(Math.abs(amount))}
             </span>
@@ -620,7 +620,7 @@ export default function TransactionsPage() {
                         <Loader2 className="h-10 w-10 animate-spin text-[#6F00FF]" />
                     </div>
                 </div>
-                <p className="text-[13px] text-white/60 mt-6">
+                <p className="text-[13px] text-white mt-6">
                     Carregando atividade...
                 </p>
             </div>
@@ -641,7 +641,7 @@ export default function TransactionsPage() {
                 <h1 className="text-[22px] font-bold text-white tracking-tight">
                     Atividade
                 </h1>
-                <p className="text-[13px] text-white/60 mt-0.5">
+                <p className="text-[13px] text-white mt-0.5">
                     Histórico de movimentações
                 </p>
             </motion.div>
@@ -664,7 +664,7 @@ export default function TransactionsPage() {
                                 ${
                                     isActive
                                         ? "bg-[#6F00FF] text-white shadow-lg shadow-[#6F00FF]/25"
-                                        : "bg-white/10 border border-white/15 text-white/60 hover:text-white"
+                                        : "bg-white/10 border border-white/15 text-white hover:text-white"
                                 }
                             `}
                         >
@@ -676,7 +676,7 @@ export default function TransactionsPage() {
 
             {/* ── Count label ────────────────────────── */}
             <motion.div variants={fadeUp} className="pb-2">
-                <p className="text-[11px] font-medium text-white/60 uppercase tracking-wider">
+                <p className="text-[11px] font-medium text-white uppercase tracking-wider">
                     {filtered.length}{" "}
                     {filtered.length === 1 ? "transação" : "transações"}
                     {filter !== "ALL" && " encontradas"}
@@ -699,12 +699,12 @@ export default function TransactionsPage() {
                             className="fintech-glass-card rounded-[20px] p-5 rounded-2xl p-10 flex flex-col items-center justify-center"
                         >
                             <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mb-4">
-                                <Inbox className="w-6 h-6 text-white/40" />
+                                <Inbox className="w-6 h-6 text-white" />
                             </div>
-                            <p className="text-[14px] font-medium text-white/60">
+                            <p className="text-[14px] font-medium text-white">
                                 Nenhuma transação encontrada
                             </p>
-                            <p className="text-[12px] text-white/40 mt-1">
+                            <p className="text-[12px] text-white mt-1">
                                 {filter !== "ALL"
                                     ? "Tente outro filtro"
                                     : "Suas movimentações aparecerão aqui"}
@@ -716,7 +716,7 @@ export default function TransactionsPage() {
                                 <motion.div key={dateLabel} variants={fadeUp}>
                                     {/* Sticky date header */}
                                     <div className="sticky top-0 z-10 py-2">
-                                        <span className="text-[11px] font-semibold text-white/60 uppercase tracking-wider">
+                                        <span className="text-[11px] font-semibold text-white uppercase tracking-wider">
                                             {dateLabel}
                                         </span>
                                     </div>
@@ -754,16 +754,16 @@ export default function TransactionsPage() {
                                                             {meta.displayName}
                                                         </p>
                                                         <div className="flex items-center gap-1.5 mt-0.5">
-                                                            <span className="text-[12px] text-white/60">
+                                                            <span className="text-[12px] text-white">
                                                                 {formatTime(tx.createdAt)}
                                                             </span>
                                                             {meta.isPending && (
-                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-white/10 text-white/60 text-[10px] font-medium">
+                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-white/10 text-white text-[10px] font-medium">
                                                                     Processando
                                                                 </span>
                                                             )}
                                                             {tx.status === "FAILED" && (
-                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-white/10 text-white/60 text-[10px] font-medium">
+                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-white/10 text-white text-[10px] font-medium">
                                                                     Falhou
                                                                 </span>
                                                             )}
@@ -802,7 +802,7 @@ export default function TransactionsPage() {
                             ${page === 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/15"}
                         `}
                     >
-                        <ChevronLeft className="w-4 h-4 text-white/70" />
+                        <ChevronLeft className="w-4 h-4 text-white" />
                     </motion.button>
 
                     {/* Page numbers */}
@@ -810,7 +810,7 @@ export default function TransactionsPage() {
                         p === "dots" ? (
                             <span
                                 key={`dots-${idx}`}
-                                className="w-10 h-10 flex items-center justify-center text-[13px] text-white/60"
+                                className="w-10 h-10 flex items-center justify-center text-[13px] text-white"
                             >
                                 ...
                             </span>
@@ -825,7 +825,7 @@ export default function TransactionsPage() {
                                     ${
                                         page === p
                                             ? "bg-[#6F00FF] text-white shadow-lg shadow-[#6F00FF]/25"
-                                            : "bg-white/10 border border-white/15 text-white/60 hover:text-white hover:bg-white/15"
+                                            : "bg-white/10 border border-white/15 text-white hover:text-white hover:bg-white/15"
                                     }
                                 `}
                             >
@@ -849,7 +849,7 @@ export default function TransactionsPage() {
                             ${page === totalPages ? "opacity-30 cursor-not-allowed" : "hover:bg-white/15"}
                         `}
                     >
-                        <ChevronRight className="w-4 h-4 text-white/70" />
+                        <ChevronRight className="w-4 h-4 text-white" />
                     </motion.button>
                 </motion.div>
             )}
@@ -858,7 +858,7 @@ export default function TransactionsPage() {
             {totalPages > 1 && paginated.length > 0 && (
                 <motion.p
                     variants={fadeUp}
-                    className="text-center text-[11px] text-white/40 pb-4"
+                    className="text-center text-[11px] text-white pb-4"
                 >
                     Página {page} de {totalPages}
                 </motion.p>

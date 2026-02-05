@@ -284,7 +284,7 @@ export default function CustomerKycPage(): React.JSX.Element {
     return (
       <div className="flex h-[80dvh] flex-col items-center justify-center gap-3">
         <Loader2 className="h-8 w-8 animate-spin text-[#6F00FF]" />
-        <p className="text-[13px] text-white/60">Carregando...</p>
+        <p className="text-[13px] text-white">Carregando...</p>
       </div>
     );
   }
@@ -332,7 +332,7 @@ export default function CustomerKycPage(): React.JSX.Element {
       {/* ---- Page header ---- */}
       <motion.div variants={fadeUp}>
         <h1 className="text-[22px] font-bold text-white">Verificação</h1>
-        <p className="mt-0.5 text-[13px] text-white/60">
+        <p className="mt-0.5 text-[13px] text-white">
           Complete etapas e desbloqueie limites maiores
         </p>
       </motion.div>
@@ -348,7 +348,7 @@ export default function CustomerKycPage(): React.JSX.Element {
               <currentLevelData.icon className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-white/60">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-white">
                 Seu nível
               </p>
               <p className="text-[15px] font-bold text-white">
@@ -373,7 +373,7 @@ export default function CustomerKycPage(): React.JSX.Element {
                 className={`text-[11px] font-medium ${
                   i <= currentLevelIndex
                     ? "text-white"
-                    : "text-white/40"
+                    : "text-white"
                 }`}
               >
                 {l.name}
@@ -413,7 +413,7 @@ export default function CustomerKycPage(): React.JSX.Element {
               <p className="text-[14px] font-bold text-white">
                 Solicitação em Análise
               </p>
-              <p className="mt-0.5 text-[12px] leading-relaxed text-white/60">
+              <p className="mt-0.5 text-[12px] leading-relaxed text-white">
                 Sua solicitação de upgrade está sendo analisada. Resposta em até
                 24h úteis.
               </p>
@@ -432,7 +432,7 @@ export default function CustomerKycPage(): React.JSX.Element {
           >
             <div className="flex items-start gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10">
-                <XCircle className="h-[18px] w-[18px] text-white/70" />
+                <XCircle className="h-[18px] w-[18px] text-white" />
               </div>
               <div className="min-w-0">
                 <p className="text-[14px] font-bold text-white">
@@ -440,7 +440,7 @@ export default function CustomerKycPage(): React.JSX.Element {
                   {levels.find((l) => l.level === latestRejected.targetLevel)
                     ?.name || latestRejected.targetLevel}
                 </p>
-                <p className="mt-0.5 text-[12px] text-white/60">
+                <p className="mt-0.5 text-[12px] text-white">
                   Você pode enviar uma nova solicitação com os documentos
                   corretos.
                 </p>
@@ -448,10 +448,10 @@ export default function CustomerKycPage(): React.JSX.Element {
             </div>
             {latestRejected.adminNotes && (
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-white/60">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-white">
                   Motivo
                 </p>
-                <p className="mt-1 text-[13px] leading-relaxed text-white/80">
+                <p className="mt-1 text-[13px] leading-relaxed text-white">
                   {latestRejected.adminNotes}
                 </p>
               </div>
@@ -498,7 +498,7 @@ export default function CustomerKycPage(): React.JSX.Element {
                   {isCompleted ? (
                     <CheckCircle2 className="h-5 w-5 text-white" />
                   ) : isLocked ? (
-                    <Lock className="h-4 w-4 text-white/40" />
+                    <Lock className="h-4 w-4 text-white" />
                   ) : (
                     <LevelIcon className="h-5 w-5 text-white" />
                   )}
@@ -507,7 +507,7 @@ export default function CustomerKycPage(): React.JSX.Element {
                   <p className="text-[15px] font-bold text-white">
                     {level.name}
                   </p>
-                  <p className="text-[11px] text-white/60">
+                  <p className="text-[11px] text-white">
                     {level.subtitle}
                   </p>
                 </div>
@@ -520,12 +520,12 @@ export default function CustomerKycPage(): React.JSX.Element {
                 </span>
               )}
               {isCompleted && (
-                <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-white/80">
+                <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-white">
                   Concluído
                 </span>
               )}
               {isLocked && (
-                <span className="rounded-full bg-muted-foreground/8 px-2.5 py-0.5 text-[11px] font-semibold text-white/40">
+                <span className="rounded-full bg-muted-foreground/8 px-2.5 py-0.5 text-[11px] font-semibold text-white">
                   Bloqueado
                 </span>
               )}
@@ -536,22 +536,22 @@ export default function CustomerKycPage(): React.JSX.Element {
               <span className="text-[22px] font-bold text-white">
                 {level.limit}
               </span>
-              <span className="text-[12px] text-white/60">/mês</span>
+              <span className="text-[12px] text-white">/mês</span>
             </div>
 
             {/* Requirements */}
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-white/60">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-white">
                 Requisitos
               </p>
               <ul className="space-y-1.5">
                 {level.requirements.map((req, i) => (
                   <li
                     key={i}
-                    className="flex items-center gap-2 text-[13px] text-white/80"
+                    className="flex items-center gap-2 text-[13px] text-white"
                   >
                     {isCompleted || isCurrent ? (
-                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-white/70" />
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-white" />
                     ) : (
                       <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/30" />
                     )}
@@ -566,12 +566,12 @@ export default function CustomerKycPage(): React.JSX.Element {
               <div className="pt-1">
                 {hasPendingForThis ? (
                   <div className="flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3">
-                    <Clock className="h-4 w-4 text-white/70" />
+                    <Clock className="h-4 w-4 text-white" />
                     <div>
                       <p className="text-[13px] font-semibold text-white">
                         Em análise
                       </p>
-                      <p className="text-[11px] text-white/60">
+                      <p className="text-[11px] text-white">
                         Resposta em até 24h úteis
                       </p>
                     </div>
@@ -605,7 +605,7 @@ export default function CustomerKycPage(): React.JSX.Element {
           <p className="text-[15px] font-bold text-white">
             Nível Máximo Atingido
           </p>
-          <p className="mt-1 max-w-[260px] text-[13px] leading-relaxed text-white/60">
+          <p className="mt-1 max-w-[260px] text-[13px] leading-relaxed text-white">
             Você tem acesso ilimitado. Não há restrições em suas transações.
           </p>
         </motion.div>

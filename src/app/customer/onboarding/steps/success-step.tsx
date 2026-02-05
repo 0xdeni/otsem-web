@@ -16,7 +16,7 @@ export function SuccessStep() {
                 <h2 className="text-xl font-bold text-white">
                     Sua conta esta pronta!
                 </h2>
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-white">
                     Voce completou todas as etapas de verificacao.
                     <br />
                     Agora pode acessar todas as funcionalidades.

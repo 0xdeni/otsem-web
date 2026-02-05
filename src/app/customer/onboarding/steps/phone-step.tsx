@@ -84,7 +84,7 @@ export function PhoneStep({ customer, onComplete }: PhoneStepProps) {
                 <h2 className="text-xl font-bold text-white">
                     Verifique seu telefone
                 </h2>
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-white">
                     Enviaremos um codigo SMS para confirmar seu numero.
                 </p>
             </div>
@@ -157,7 +157,7 @@ export function PhoneStep({ customer, onComplete }: PhoneStepProps) {
                                 type="button"
                                 onClick={sendCode}
                                 disabled={countdown > 0 || sending}
-                                className="text-sm text-white/60 hover:text-white disabled:opacity-50 transition"
+                                className="text-sm text-white hover:text-white disabled:opacity-50 transition"
                             >
                                 {countdown > 0
                                     ? `Reenviar em ${countdown}s`

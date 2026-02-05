@@ -198,7 +198,7 @@ function TransactionRow({ tx, onTap }: { tx: Transaction; onTap?: () => void }) 
     }
 
     const iconConfig = isPending
-        ? { bg: "bg-white/10", color: "text-white/70", Icon: ArrowRightLeft }
+        ? { bg: "bg-white/10", color: "text-white", Icon: ArrowRightLeft }
         : isConversionTx
           ? { bg: "bg-white/10", color: "text-white", Icon: ArrowRightLeft }
           : isIncoming
@@ -217,18 +217,18 @@ function TransactionRow({ tx, onTap }: { tx: Transaction; onTap?: () => void }) 
 
             <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium text-white truncate">{displayName}</p>
-                <p className="text-[11px] text-white/80">{formatDate(tx.createdAt)}</p>
+                <p className="text-[11px] text-white">{formatDate(tx.createdAt)}</p>
             </div>
 
             <div className="text-right">
                 {isConversionTx ? (
                     <>
-                        <p className={`text-[13px] font-semibold ${isSellConversion ? "text-white" : "text-white/70"}`}>
+                        <p className={`text-[13px] font-semibold ${isSellConversion ? "text-white" : "text-white"}`}>
                             {isSellConversion ? "+" : "-"}
                             {formatCurrency(amount)}
                         </p>
                         {usdtAmountValue !== null && (
-                            <p className={`text-[10px] font-medium ${isSellConversion ? "text-white/50" : "text-white/70"}`}>
+                            <p className={`text-[10px] font-medium ${isSellConversion ? "text-white" : "text-white"}`}>
                                 {isSellConversion ? "-" : "+"}
                                 {formatUSD(usdtAmountValue)}
                             </p>
@@ -236,7 +236,7 @@ function TransactionRow({ tx, onTap }: { tx: Transaction; onTap?: () => void }) 
                     </>
                 ) : (
                     <p className={`text-[13px] font-semibold ${
-                        isPending ? "text-white/50" : isIncoming ? "text-white" : "text-white/70"
+                        isPending ? "text-white" : isIncoming ? "text-white" : "text-white"
                     }`}>
                         {isIncoming ? "+" : "-"}
                         {formatCurrency(Math.abs(amount))}
@@ -489,9 +489,9 @@ export default function Dashboard() {
                         aria-label={balanceHidden ? "Mostrar saldo" : "Ocultar saldo"}
                     >
                         {balanceHidden ? (
-                            <EyeOff className="w-4 h-4 text-white/80" />
+                            <EyeOff className="w-4 h-4 text-white" />
                         ) : (
-                            <Eye className="w-4 h-4 text-white/80" />
+                            <Eye className="w-4 h-4 text-white" />
                         )}
                     </motion.button>
                 </div>
@@ -571,7 +571,7 @@ export default function Dashboard() {
                         <h3 className="text-[18px] font-bold text-[#FFFFFF]">Atividade recente</h3>
                         <Link
                             href="/customer/transactions"
-                            className="flex items-center gap-0.5 text-[12px] font-medium text-[#8B5CF6] active:opacity-70"
+                            className="flex items-center gap-0.5 text-[12px] font-medium text-white active:opacity-80"
                         >
                             Ver tudo
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -594,7 +594,7 @@ export default function Dashboard() {
                     ) : (
                         <div className="flex flex-col items-center py-8">
                             <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center mb-2">
-                                <ArrowDownLeft className="w-4.5 h-4.5 text-white/80" />
+                                <ArrowDownLeft className="w-4.5 h-4.5 text-white" />
                             </div>
                             <p className="text-[13px] text-white">Nenhuma transação ainda</p>
                         </div>
