@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import httpClient from "@/lib/http";
 import { setTokens, clearTokens, getAccessToken } from "@/lib/token";
+import { toErrorMessage } from "@/lib/error-utils";
 
 interface User {
     id: string;
@@ -221,22 +222,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return newUser;
         } catch (error) {
             console.error("Erro no login:", error);
-
-            // Se for erro de rede já tratado pelo interceptor, propaga a mensagem
-            if (error && typeof error === "object" && "message" in (error as any)) {
-                const msg = (error as any).message;
-                if (typeof msg === "string" && msg.includes("conectar ao servidor")) {
-                    throw new Error(msg);
-                }
-            }
-
             clearTokens();
-
-            if (error instanceof Error) {
-                throw error;
-            }
-
-            throw new Error("Erro ao fazer login");
+            throw new Error(toErrorMessage(error, "Erro ao fazer login"));
         }
     }
 
