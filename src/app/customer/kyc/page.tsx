@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/auth-context";
 import http from "@/lib/http";
 import { toast } from "sonner";
 
-import { LimitsCard } from "@/components/kyc/limits-card";
 import {
   Loader2,
   CheckCircle2,
@@ -206,6 +205,7 @@ export default function CustomerKycPage(): React.JSX.Element {
   const [upgradeRequests, setUpgradeRequests] = React.useState<
     UpgradeRequest[]
   >([]);
+  const [limitsData, setLimitsData] = React.useState<LimitsResponse | null>(null);
 
   /* ---- data fetching (preserved) ---- */
   React.useEffect(() => {
@@ -233,6 +233,7 @@ export default function CustomerKycPage(): React.JSX.Element {
         if (limitsRes?.data) {
           const level = limitsRes.data.kycLevel || "LEVEL_1";
           setKycLevel(level);
+          setLimitsData(limitsRes.data);
           if (limitsRes.data.customerType) {
             setCustomerType(limitsRes.data.customerType);
           }
@@ -337,9 +338,9 @@ export default function CustomerKycPage(): React.JSX.Element {
         </p>
       </motion.div>
 
-      {/* ---- Current level badge + progress ---- */}
-      <motion.div variants={fadeUp} className="fintech-glass-card rounded-[20px] p-5 space-y-5">
-        {/* top row */}
+      {/* ---- Combined level + limits card ---- */}
+      <motion.div variants={fadeUp} className="fintech-glass-card rounded-[20px] p-5 space-y-4">
+        {/* Level header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -348,39 +349,31 @@ export default function CustomerKycPage(): React.JSX.Element {
               <currentLevelData.icon className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-white">
-                Seu nível
-              </p>
               <p className="text-[15px] font-bold text-white">
-                {currentLevelData.name}
+                {currentLevelData.name} — {currentLevelData.subtitle}
+              </p>
+              <p className="text-[12px] text-white">
+                Limite: {currentLevelData.limit}/mês
               </p>
             </div>
           </div>
-
-          <span
-            className={`rounded-full px-3 py-1 text-[11px] font-semibold ${currentLevelData.badge}`}
-          >
-            {currentLevelData.limit}/mês
-          </span>
         </div>
 
-        {/* animated progress bar */}
+        {/* Level progress */}
         <div>
           <div className="mb-2 flex justify-between">
             {levels.map((l, i) => (
               <span
                 key={l.level}
                 className={`text-[11px] font-medium ${
-                  i <= currentLevelIndex
-                    ? "text-white"
-                    : "text-white"
+                  i <= currentLevelIndex ? "text-white" : "text-white/50"
                 }`}
               >
                 {l.name}
               </span>
             ))}
           </div>
-          <div className="relative h-[6px] w-full overflow-hidden rounded-full bg-muted-foreground/10">
+          <div className="relative h-[6px] w-full overflow-hidden rounded-full bg-white/10">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full bg-[#6F00FF]"
               initial={{ width: "0%" }}
@@ -389,11 +382,48 @@ export default function CustomerKycPage(): React.JSX.Element {
             />
           </div>
         </div>
-      </motion.div>
 
-      {/* ---- Limits overview ---- */}
-      <motion.div variants={fadeUp}>
-        <LimitsCard showUpgradeLink={false} />
+        {/* Usage stats */}
+        {limitsData && (
+          <>
+            <div className="h-px bg-white/10" />
+            <div>
+              {kycLevel === "LEVEL_3" ? (
+                <p className="text-[14px] font-bold text-white">Uso ilimitado</p>
+              ) : (
+                <>
+                  <div className="flex items-end justify-between mb-2">
+                    <div>
+                      <p className="text-[11px] text-white/70">Utilizado</p>
+                      <p className="text-[18px] font-bold text-white">
+                        {(limitsData.usedThisMonth ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[11px] text-white/70">Disponível</p>
+                      <p className="text-[15px] font-semibold text-white">
+                        {(limitsData.remainingLimit ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="relative h-[6px] w-full overflow-hidden rounded-full bg-white/10">
+                    <motion.div
+                      className="absolute inset-y-0 left-0 rounded-full bg-[#8B2FFF]"
+                      initial={{ width: "0%" }}
+                      animate={{
+                        width: `${limitsData.monthlyLimit > 0 ? Math.min((limitsData.usedThisMonth / limitsData.monthlyLimit) * 100, 100) : 0}%`,
+                      }}
+                      transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-white/70 mt-1.5">
+                    Renova em {Math.max(0, Math.ceil((new Date(limitsData.resetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} dia{Math.ceil((new Date(limitsData.resetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) !== 1 ? "s" : ""}
+                  </p>
+                </>
+              )}
+            </div>
+          </>
+        )}
       </motion.div>
 
       {/* ---- Status alerts (pending / rejected) ---- */}
@@ -580,7 +610,7 @@ export default function CustomerKycPage(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => openUpgradeModal(level)}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#6F00FF] px-4 py-3 text-[14px] font-bold text-white shadow-lg shadow-[#6F00FF]/20 active:scale-95 transition-transform"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-yellow-500 hover:bg-yellow-400 px-4 py-3 text-[14px] font-bold text-black shadow-lg shadow-yellow-500/20 active:scale-95 transition-transform"
                   >
                     <TrendingUp className="h-4 w-4" />
                     Solicitar Upgrade

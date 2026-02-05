@@ -331,18 +331,6 @@ export function WithdrawModal() {
                                 />
                             </div>
 
-                            <div className="flex flex-wrap gap-2 justify-center">
-                                {QUICK_AMOUNTS.map((value) => (
-                                    <button
-                                        key={value}
-                                        onClick={() => handleQuickAmount(value)}
-                                        className="px-4 py-2 text-sm font-medium rounded-full border border-[#6F00FF]/30 bg-[#6F00FF]/10 text-[#6F00FF] dark:text-[#A78BFA] hover:bg-[#6F00FF]/20 hover:border-[#6F00FF]/50 transition-colors"
-                                    >
-                                        R$ {value}
-                                    </button>
-                                ))}
-                            </div>
-
                             {error && (
                                 <div className="flex items-center gap-2 text-white/70 text-sm bg-white/10 rounded-lg px-3 py-2">
                                     <AlertCircle className="w-4 h-4 shrink-0" />

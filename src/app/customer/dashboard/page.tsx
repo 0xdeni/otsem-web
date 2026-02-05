@@ -6,7 +6,7 @@ import {
     ArrowDownLeft,
     ArrowUpRight,
     ArrowRightLeft,
-    TrendingUp,
+    DollarSign,
     ChevronRight,
     Eye,
     EyeOff,
@@ -557,7 +557,7 @@ export default function Dashboard() {
                     onClick={() => setShowConvertModal(true)}
                 />
                 <QuickAction
-                    icon={TrendingUp}
+                    icon={DollarSign}
                     label="Vender"
                     onClick={() => openModal("sellUsdt")}
                 />
