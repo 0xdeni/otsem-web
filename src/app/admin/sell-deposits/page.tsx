@@ -33,6 +33,7 @@ type SellDeposit = {
     customer: {
         id: string;
         name: string;
+        username?: string | null;
         email: string;
     };
     usdtAmount: number;
@@ -318,7 +319,47 @@ export default function SellDepositsPage() {
                             <p>Nenhuma venda encontrada</p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
+                        <>
+                        {/* Mobile card view */}
+                        <div className="md:hidden space-y-3">
+                            {deposits.map((deposit) => (
+                                <div
+                                    key={deposit.id}
+                                    className="rounded-lg border p-4 space-y-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                    onClick={() => setSelectedDeposit(deposit)}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-medium">{deposit.customer?.name || "-"}</p>
+                                            {deposit.customer?.username && (
+                                                <p className="text-sm font-medium text-[#6F00FF]">@{deposit.customer.username}</p>
+                                            )}
+                                            <p className="text-xs text-muted-foreground">{deposit.customer?.email || "-"}</p>
+                                        </div>
+                                        <Badge className={getStatusColor(deposit.status)}>{getStatusLabel(deposit.status)}</Badge>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">USDT</p>
+                                            <p className="font-medium">{formatUSDT(deposit.usdtAmount ?? 0)}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">BRL</p>
+                                            <p className="font-medium text-green-600">{formatCurrency(deposit.brlAmount ?? 0)}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <span>{formatDate(deposit.createdAt)}</span>
+                                        <Badge variant="outline" className={deposit.network === 'SOLANA' ? 'border-[#6F00FF] text-[#6F00FF]' : 'border-red-500 text-red-600'}>
+                                            {deposit.network || '-'}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop table view */}
+                        <div className="hidden md:block overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -340,6 +381,9 @@ export default function SellDepositsPage() {
                                             <TableCell>
                                                 <div>
                                                     <p className="font-medium">{deposit.customer?.name || "-"}</p>
+                                                    {deposit.customer?.username && (
+                                                        <p className="text-xs font-medium text-[#6F00FF]">@{deposit.customer.username}</p>
+                                                    )}
                                                     <p className="text-xs text-muted-foreground">{deposit.customer?.email || "-"}</p>
                                                 </div>
                                             </TableCell>
@@ -373,6 +417,7 @@ export default function SellDepositsPage() {
                                 </TableBody>
                             </Table>
                         </div>
+                        </>
                     )}
                 </CardContent>
             </Card>
@@ -391,6 +436,9 @@ export default function SellDepositsPage() {
                                 <div className="space-y-1">
                                     <p className="text-sm text-muted-foreground">Cliente</p>
                                     <p className="font-medium">{selectedDeposit.customer?.name || "-"}</p>
+                                    {selectedDeposit.customer?.username && (
+                                        <p className="text-sm font-medium text-[#6F00FF]">@{selectedDeposit.customer.username}</p>
+                                    )}
                                     <p className="text-xs text-muted-foreground">{selectedDeposit.customer?.email || "-"}</p>
                                 </div>
                                 <div className="space-y-1">

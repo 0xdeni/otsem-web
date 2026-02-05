@@ -347,6 +347,64 @@ export default function AdminAffiliatesPage() {
               </p>
             </div>
           ) : (
+            <>
+            {/* Mobile card view */}
+            <div className="md:hidden space-y-3">
+              {affiliates.map((affiliate) => (
+                <div key={affiliate.id} className="rounded-lg border p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{affiliate.name}</p>
+                      <p className="text-sm text-muted-foreground">{affiliate.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-2">
+                      {affiliate.isActive ? (
+                        <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Ativo</Badge>
+                      ) : (
+                        <Badge variant="secondary">Inativo</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="font-mono">{affiliate.code}</Badge>
+                    <span className="text-sm text-muted-foreground">{formatPercent(affiliate.spreadRate)}</span>
+                    <span className="text-sm text-muted-foreground">{affiliate.totalClients ?? 0} clientes</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Comissão BRL</p>
+                      <p className="font-medium">{formatCurrency(affiliate.totalCommission)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Pendente</p>
+                      <p className={`font-medium ${(affiliate.pendingCommission ?? 0) > 0 ? 'text-amber-500' : ''}`}>
+                        {formatCurrency(affiliate.pendingCommission)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1 border-t">
+                    <Button variant="ghost" size="sm" asChild className="flex-1">
+                      <Link href={`/admin/affiliates/${affiliate.id}`}>
+                        <Eye className="h-4 w-4 mr-1" />
+                        Detalhes
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleToggleActive(affiliate)}
+                      disabled={updating === affiliate.id}
+                      className="flex-1"
+                    >
+                      {affiliate.isActive ? "Desativar" : "Ativar"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table view */}
+            <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -476,6 +534,8 @@ export default function AdminAffiliatesPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
+            </>
           )}
         </CardContent>
       </Card>

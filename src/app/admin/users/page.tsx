@@ -22,6 +22,7 @@ import { SendEmailModal } from "@/components/modals/send-email-modal";
 type User = {
     id: string;
     name: string;
+    username?: string | null;
     email: string;
     cpfCnpj: string;
     phone: string;
@@ -248,7 +249,7 @@ export default function AdminUsersPage() {
                         <div className="relative flex-1 max-w-md">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
-                                placeholder="Buscar por nome, email ou CPF/CNPJ..."
+                                placeholder="Buscar por nome, @username, email ou CPF/CNPJ..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="pl-9"
@@ -329,7 +330,37 @@ export default function AdminUsersPage() {
                                     </div>
                                 </div>
                             )}
-                            <div className="overflow-x-auto">
+                            {/* Mobile card view */}
+                            <div className="md:hidden space-y-3">
+                                {users.map((user) => {
+                                    const kycInfo = kycStatusConfig[user.kycStatus] || kycStatusConfig.NOT_STARTED;
+                                    const statusInfo = accountStatusConfig[user.accountStatus] || accountStatusConfig.ACTIVE;
+                                    return (
+                                        <Link key={user.id} href={`/admin/users/${user.id}`} className="block">
+                                            <div className="rounded-lg border p-4 space-y-3 hover:bg-muted/50 transition-colors">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="font-medium truncate">{user.name || "—"}</p>
+                                                        {user.username && (
+                                                            <p className="text-sm font-medium text-[#6F00FF]">@{user.username}</p>
+                                                        )}
+                                                        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                                                    </div>
+                                                    <p className="font-semibold tabular-nums text-right ml-3">{formatBRL(user.balanceBRL)}</p>
+                                                </div>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <Badge variant={kycInfo.variant} className="text-xs">{kycInfo.label}</Badge>
+                                                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${statusInfo.className}`}>{statusInfo.label}</span>
+                                                    <span className="text-xs text-muted-foreground ml-auto">{formatDate(user.createdAt)}</span>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Desktop table view */}
+                            <div className="hidden md:block overflow-x-auto">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -366,6 +397,9 @@ export default function AdminUsersPage() {
                                                     <TableCell>
                                                         <div>
                                                             <p className="font-medium">{user.name || "—"}</p>
+                                                            {user.username && (
+                                                                <p className="text-sm font-medium text-[#6F00FF]">@{user.username}</p>
+                                                            )}
                                                             <p className="text-sm text-muted-foreground">{user.email}</p>
                                                         </div>
                                                     </TableCell>

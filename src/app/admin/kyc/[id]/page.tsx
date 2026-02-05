@@ -42,6 +42,7 @@ type KycCustomer = {
     type: "PF" | "PJ";
     accountStatus: KycStatus;
     name?: string;
+    username?: string | null;
     socialName?: string;
     cpf?: string;
     cnpj?: string;
@@ -275,6 +276,13 @@ export default function AdminKycDetailPage(): React.JSX.Element {
                             label="Nome"
                             value={data.name || data.socialName || "—"}
                         />
+                        {data.username && (
+                            <InfoRow
+                                icon={<User className="size-4 text-[#6F00FF]" />}
+                                label="Username"
+                                value={`@${data.username}`}
+                            />
+                        )}
                         <InfoRow
                             icon={<Mail className="size-4 text-[#000000]/60" />}
                             label="Email"

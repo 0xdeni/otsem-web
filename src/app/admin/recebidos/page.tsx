@@ -23,6 +23,7 @@ type Payment = {
 type Customer = {
     id: string;
     name: string;
+    username?: string | null;
     email?: string;
 };
 
@@ -167,7 +168,8 @@ export default function PaymentsRecebidosPage() {
     function getCustomerName(id?: string | null) {
         if (!id) return "-";
         const customer = customers.find(c => c.id === id);
-        return customer ? customer.name : id;
+        if (!customer) return id;
+        return customer.username ? `${customer.name} (@${customer.username})` : customer.name;
     }
 
     function getTotalValue(payments: Payment[]) {
@@ -278,7 +280,38 @@ export default function PaymentsRecebidosPage() {
                             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                         </div>
                     ) : (
-                        <div className="overflow-x-auto w-full">
+                        <>
+                        {/* Mobile card view */}
+                        <div className="md:hidden space-y-3">
+                            {payments.length > 0 ? (
+                                payments.map((p) => (
+                                    <div key={p.id} className="rounded-lg border p-4 space-y-2">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <p className="font-medium">{getCustomerName(p.customerId)}</p>
+                                                <p className="text-xs text-muted-foreground">{formatDate(p.paymentDate)}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-semibold">{formatCurrency(p.paymentValue)}</p>
+                                                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusColor(p.status)}`}>
+                                                    {getStatusLabel(p.status)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {p.receiverPixKey && (
+                                            <p className="text-xs font-mono text-muted-foreground truncate">PIX: {p.receiverPixKey}</p>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center text-muted-foreground py-8">
+                                    Nenhum pagamento encontrado.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Desktop table view */}
+                        <div className="hidden md:block overflow-x-auto w-full">
                             <Table className="w-full">
                                 <TableHeader>
                                     <TableRow>
@@ -337,6 +370,7 @@ export default function PaymentsRecebidosPage() {
                                 </TableBody>
                             </Table>
                         </div>
+                        </>
                     )}
                 </CardContent>
             </Card>

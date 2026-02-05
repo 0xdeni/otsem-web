@@ -9,10 +9,6 @@ import {
   LayoutDashboard,
   Users,
   Banknote,
-  Settings,
-  Webhook,
-  Bug,
-  Flag,
   GalleryVerticalEnd,
   Wallet,
   UserPlus,
@@ -73,11 +69,7 @@ function useNav(): Item[] {
       title: t("system"),
       url: "/admin",
       items: [
-        { title: t("settings"), url: "/admin/settings", icon: Settings },
         { title: t("bankSettings"), url: "/admin/settings/bank", icon: Building2 },
-        { title: t("webhooks"), url: "/admin/webhooks", icon: Webhook },
-        { title: t("featureFlags"), url: "/admin/flags", icon: Flag },
-        { title: t("logs"), url: "/admin/logs", icon: Bug },
       ],
     },
   ];

@@ -19,6 +19,7 @@ type AdminCustomerItem = {
     type: "PF" | "PJ";
     name: string | null;
     legalName: string | null;
+    username?: string | null;
     cpf: string | null;
     cnpj: string | null;
     email: string;
@@ -123,7 +124,7 @@ export default function AdminCustomersPage(): React.JSX.Element {
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
                 <div>
-                    {/* eslint-disable-next-line */}
+                    { }
                     <h1 className="text-2xl font-semibold bg-linear-to-r from-indigo-600 to-[#6F00FF] bg-clip-text text-transparent">
                         Clientes
                     </h1>
@@ -152,7 +153,7 @@ export default function AdminCustomersPage(): React.JSX.Element {
                         <div className="grid gap-1 flex-1 max-w-md">
                             <Label>Buscar</Label>
                             <Input
-                                placeholder="nome, doc, e-mail, telefone…"
+                                placeholder="nome, @username, doc, e-mail, telefone…"
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                     debouncedSearch(e.target.value)
                                 }
@@ -201,7 +202,14 @@ export default function AdminCustomersPage(): React.JSX.Element {
                                             onClick={() => window.location.href = `/admin/kyc/${i.id}`}
                                         >
                                             <TableCell className="font-medium">{i.type}</TableCell>
-                                            <TableCell>{getDisplayName(i)}</TableCell>
+                                            <TableCell>
+                                                <div>
+                                                    <span>{getDisplayName(i)}</span>
+                                                    {i.username && (
+                                                        <p className="text-xs font-medium text-[#6F00FF]">@{i.username}</p>
+                                                    )}
+                                                </div>
+                                            </TableCell>
                                             <TableCell className="font-mono text-xs">
                                                 {getTaxNumber(i)}
                                             </TableCell>
