@@ -16,6 +16,7 @@ import {
   ArrowUpCircle,
   Building2,
   Receipt,
+  Scale,
 } from "lucide-react";
 
 import {
@@ -55,6 +56,7 @@ function useNav(): Item[] {
         { title: t("buyUsdt"), url: "/admin/conversions", icon: ArrowRightLeft },
         { title: t("sellUsdt"), url: "/admin/sell-deposits", icon: ArrowRightLeft },
         { title: t("boletoPayments"), url: "/admin/boleto-payments", icon: Receipt },
+        { title: t("balanceAdjustment"), url: "/admin/balance-adjustment", icon: Scale },
       ],
     },
     {

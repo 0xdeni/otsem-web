@@ -37,6 +37,7 @@
     "kycUpgrades": "Upgrades KYC",
     "system": "Sistema",
     "settings": "Configurações",
+    "balanceAdjustment": "Ajuste de Saldo",
     "bankSettings": "Config. Bancária",
     "webhooks": "Webhooks",
     "featureFlags": "Feature Flags",

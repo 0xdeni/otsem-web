@@ -37,6 +37,7 @@
     "kycUpgrades": "Обновления KYC",
     "system": "Система",
     "settings": "Настройки",
+    "balanceAdjustment": "Корректировка баланса",
     "bankSettings": "Настройки банка",
     "webhooks": "Вебхуки",
     "featureFlags": "Feature Flags",
