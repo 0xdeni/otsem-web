@@ -72,6 +72,7 @@ otsem-web/
 - **Toasts**: `sonner` via `<Toaster />` in root layout
 - **Crypto**: `@solana/web3.js` + `@solana/spl-token` (Solana), `tronweb` (Tron)
 - **File upload**: `@uppy/*` (S3 upload for KYC documents)
+- **Trading**: OKX spot trading via `/okx/spot/*` API endpoints (proxied through `/api/*` catch-all rewrite)
 
 ## Routes
 
@@ -102,6 +103,7 @@ otsem-web/
 | `/customer/affiliates` | Referral program |
 | `/customer/boleto` | Boleto payment processing |
 | `/customer/mercado` | Market/trading interface (crypto token prices) |
+| `/customer/pro` | PRO spot trading (OKX integration, order book, charts) |
 | `/customer/onboarding` | Onboarding flow (redirected to if `onboardingCompleted === false`) |
 | `/customer/logout` | Logout |
 
@@ -154,6 +156,24 @@ There is no Next.js API route or middleware. All backend calls are proxied via *
 
 Default API base: `https://api.otsembank.com` (overridden by `NEXT_PUBLIC_API_URL` or `NEXT_PUBLIC_API_BASE_URL` env var).
 
+### OKX Spot Trading API (via `/api/*` catch-all)
+
+The PRO trading page uses these endpoints through the catch-all rewrite:
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/okx/spot/ticker` | GET | Real-time ticker data (price, 24h stats) |
+| `/okx/spot/orderbook` | GET | Order book depth (5 levels) |
+| `/okx/spot/trades` | GET | Recent market trades (limit=20) |
+| `/okx/spot/candles` | GET | OHLCV candlestick data |
+| `/okx/spot/balances` | GET | PRO account crypto balances |
+| `/okx/spot/transfers` | GET | Transfer history (paginated) |
+| `/okx/spot/orders` | GET | Order history (paginated, filterable) |
+| `/okx/spot/order` | POST | Place limit/market order |
+| `/okx/spot/cancel-order` | POST | Cancel open/partial order |
+| `/okx/spot/transfer-to-pro` | POST | Transfer USDT from wallet to PRO |
+| `/okx/spot/transfer-to-wallet` | POST | Transfer USDT from PRO to wallet |
+
 The HTTP client (`src/lib/http.ts`) adds `Authorization: Bearer {token}` to all requests unless `X-Anonymous` header is set. On 401 response, tokens are cleared and the user is redirected to `/login`.
 
 ## Environment Variables
@@ -181,6 +201,38 @@ Modal keys: `pix`, `convertBrlUsdt`, `convertUsdtBrl`, `sellUsdt`, `sendUsdt`, `
 Methods: `openModal()`, `closeModal()`, `toggleModal()`, `closeAll()`, `triggerRefresh()`, `triggerDepositBoost()`
 
 The `depositBoostUntil` field enables a 2-minute polling boost after a deposit to detect incoming PIX payments faster.
+
+## Performance Patterns
+
+### Visibility-Aware Polling
+
+All polling hooks pause when the browser tab is hidden and resume when visible, using the `document.visibilitychange` event. This conserves battery and bandwidth on mobile devices. Applied to:
+
+- **Dashboard** — Account/transaction polling (60s interval, or faster during deposit boost)
+- **Exchange Widget** — USDT/BRL rate polling (30s interval)
+- **`useUsdtRate` hook** — USDT rate polling (30s interval)
+- **PRO Trading** — Ticker (2s), order book (2s), trades (2.5s), candles (20s), balances (7s), transfers/orders (12s)
+
+### Lazy Modal Loading
+
+All customer transaction modals are dynamically imported via `next/dynamic` with `{ ssr: false }` in the customer layout. This keeps heavy modal code (QR generation, polling, API calls) out of the initial bundle:
+
+- `DepositModal`, `WithdrawModal`, `SellUsdtModal`, `SendUsdtModal`, `UsernameTransferModal`, `BoletoPaymentModal`
+
+The QRCode library (`qrcode`) is also lazily imported inside the deposit modal only when a QR code needs to be generated.
+
+### JWT Fast-Path Auth Hydration
+
+Auth hydration uses a two-phase approach (`src/contexts/auth-context.tsx`):
+
+1. **Fast path (synchronous)**: Decode JWT locally, validate expiry, set user state immediately — unblocks UI rendering
+2. **Background validation (async)**: Call `/auth/me` API to validate token server-side, update user data if needed
+
+This eliminates the loading spinner on page reload while still ensuring token validity.
+
+### Landing Page Section Skeletons
+
+Below-the-fold landing page sections use `next/dynamic` with shimmer skeleton placeholders, improving perceived load time.
 
 ## Key Conventions
 
@@ -339,7 +391,7 @@ Default theme is `light` (set in `ThemeProvider` in `src/app/layout.tsx`). The P
 | `src/lib/viacep.ts` | ViaCEP API client for Brazilian address lookup |
 | `src/lib/error-utils.ts` | Error handling and formatting utilities |
 | `src/lib/push-notifications.ts` | Web Push notification setup (VAPID) |
-| `src/lib/useUsdtRate.ts` | Hook for USDT/BRL exchange rate (polls `/public/quote` via OKX every 15s) |
+| `src/lib/useUsdtRate.ts` | Hook for USDT/BRL exchange rate (polls `/public/quote` via OKX every 30s, visibility-aware) |
 | `src/lib/kyc/cep.ts` | KYC-specific CEP/ZIP handling |
 | `src/lib/kyc/types.ts` | KYC type definitions (accreditation, document types) |
 
@@ -467,8 +519,10 @@ type PartyDetails = { name: string; maskedTaxNumber: string; pixKey?: string; ba
 | `src/components/app-sidebar.tsx` | Admin sidebar navigation |
 | `src/components/auth/Protected.tsx` | Route protection wrapper |
 | `src/components/auth/RoleGuard.tsx` | Admin/Customer role enforcement |
+| `src/app/customer/pro/page.tsx` | PRO spot trading (OKX order book, charts, orders) |
 | `src/components/ui/exchange-widget.tsx` | BRL/USDT exchange rate widget |
 | `src/components/ui/exchange-widget-mobile.tsx` | Mobile-optimized exchange widget |
+| `src/components/ui/toggle-group.tsx` | Radix toggle group (segmented control, used in PRO trading) |
 | `src/components/ui/input-otp.tsx` | OTP input component (wraps `input-otp`) |
 | `src/components/connection-status.tsx` | Backend connection lost/restored toast notifications |
 | `public/manifest.json` | PWA manifest (standalone, shortcuts, icons) |
@@ -522,7 +576,7 @@ The pre-commit hook also runs `scripts/verify-lockfile-sync.sh` to ensure `packa
 | `react-hook-form` | ^7.63.0 | Form state management |
 | `@hookform/resolvers` | ^5.2.2 | RHF schema resolvers (Zod integration) |
 | `zod` | ^4.1.11 | Schema validation |
-| `@radix-ui/*` | various | Accessible UI primitives |
+| `@radix-ui/*` | various | Accessible UI primitives (includes `react-toggle-group` for segmented controls) |
 | `lucide-react` | ^0.542.0 | Icon library |
 | `sonner` | ^2.0.7 | Toast notifications |
 | `@solana/web3.js` | ^1.98.4 | Solana blockchain |
