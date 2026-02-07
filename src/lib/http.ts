@@ -20,6 +20,13 @@ const httpClient: AxiosInstance = axios.create({
     },
 });
 
+// Read CSRF token from cookie (set by backend)
+function getCsrfToken(): string | null {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+    return match ? decodeURIComponent(match[1]) : null;
+}
+
 // Interceptor para adicionar o token em todas as requisições
 httpClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
@@ -33,6 +40,15 @@ httpClient.interceptors.request.use(
 
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        // Attach CSRF token for state-changing requests
+        const method = (config.method || '').toUpperCase();
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+            const csrfToken = getCsrfToken();
+            if (csrfToken && config.headers) {
+                config.headers['X-XSRF-TOKEN'] = csrfToken;
+            }
         }
 
         return config;
@@ -61,7 +77,7 @@ httpClient.interceptors.response.use(
 
         // Trata erro de rede (quando a API está offline ou o URL está errado)
         if (!error.response && error.request) {
-            console.error('Erro de rede: Sem resposta do servidor', error.config?.url);
+            console.error('Network error: no response from server');
             error.message = 'Não foi possível conectar ao servidor. Verifique sua conexão ou tente novamente mais tarde.';
         }
 
@@ -71,10 +87,16 @@ httpClient.interceptors.response.use(
 
 export default httpClient;
 
-// Método helper para requisições autenticadas
+// Helper to set X-Anonymous header when anonymous flag is true
 function withAnonymous(config?: CustomAxiosConfig): AxiosRequestConfig {
     if (!config) return {};
     const { anonymous, ...rest } = config;
+    if (anonymous) {
+        return {
+            ...rest,
+            headers: { ...rest.headers, 'X-Anonymous': 'true' },
+        };
+    }
     return rest;
 }
 

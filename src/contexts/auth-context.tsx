@@ -125,6 +125,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })();
     }, []);
 
+    // Periodically check token expiration (every 60 seconds)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const token = getAccessToken();
+            if (!token) return;
+            const payload = decodeJwt(token);
+            if (!payload) {
+                clearTokens();
+                setUser(null);
+                return;
+            }
+            const now = Math.floor(Date.now() / 1000);
+            if (payload.exp < now) {
+                clearTokens();
+                setUser(null);
+                router.push("/login");
+            }
+        }, 60_000);
+        return () => clearInterval(interval);
+    }, [router]);
+
     async function login(email: string, password: string): Promise<User | TwoFactorRequired> {
         try {
             const loginResponse = await httpClient.post<LoginResponse>(
@@ -265,7 +286,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    function logout() {
+    async function logout() {
+        // Invalidate session server-side before clearing local state
+        try {
+            await httpClient.post("/auth/logout");
+        } catch {
+            // Proceed with local logout even if server call fails
+        }
         clearTokens();
         setUser(null);
         router.push("/login");

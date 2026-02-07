@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useAuth } from "@/contexts/auth-context";
 import { Protected } from "@/components/auth/Protected";
+import { RoleGuard } from "@/components/auth/RoleGuard";
 import http from "@/lib/http";
 import type { CustomerResponse } from "@/types/customer";
 
@@ -129,6 +130,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
     return (
         <Protected>
+        <RoleGuard roles={["CUSTOMER"]} redirectTo="/login">
             {/* Global modals — code-split via dynamic() to reduce initial bundle */}
             <DepositModal />
             <WithdrawModal />
@@ -192,6 +194,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 <BottomNav />
                 <PwaInstallPrompt />
             </div>
+        </RoleGuard>
         </Protected>
     );
 }

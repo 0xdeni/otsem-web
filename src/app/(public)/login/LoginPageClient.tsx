@@ -32,7 +32,16 @@ const loginResolver = zodResolver(loginSchema) as unknown as Resolver<LoginForm>
 function safeNext(nextParam: string | null | undefined, fallback = '/customer/dashboard'): string {
     if (!nextParam) return fallback;
     try {
-        return nextParam.startsWith('/') ? nextParam : fallback;
+        // Block protocol-relative URLs (e.g. //attacker.com) and only allow
+        // paths starting with /customer/ or /admin/ to prevent open redirect
+        if (
+            nextParam.startsWith('/') &&
+            !nextParam.startsWith('//') &&
+            (nextParam.startsWith('/customer/') || nextParam.startsWith('/admin/'))
+        ) {
+            return nextParam;
+        }
+        return fallback;
     } catch {
         return fallback;
     }

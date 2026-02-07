@@ -51,6 +51,7 @@ export default function WalletPage() {
     const [loadingWallets, setLoadingWallets] = useState(true);
     const [creating, setCreating] = useState(false);
     const [walletKeys, setWalletKeys] = useState<WalletKeys | null>(null);
+    const [showSecretKey, setShowSecretKey] = useState(false);
     const [editWallet, setEditWallet] = useState<WalletType | null>(null);
     const [editLabel, setEditLabel] = useState("");
     const [deleteWallet, setDeleteWallet] = useState<WalletType | null>(null);
@@ -487,7 +488,7 @@ export default function WalletPage() {
             </BottomSheet>
 
             {/* ── Keys Modal ── */}
-            <BottomSheet open={!!walletKeys} onOpenChange={() => setWalletKeys(null)}>
+            <BottomSheet open={!!walletKeys} onOpenChange={() => { setWalletKeys(null); setShowSecretKey(false); }}>
                 <BottomSheetContent>
                     <BottomSheetHeader>
                         <BottomSheetTitle className="text-foreground text-lg">Carteira Criada!</BottomSheetTitle>
@@ -510,14 +511,24 @@ export default function WalletPage() {
                         </div>
                         <div>
                             <Label className="text-foreground text-[12px]">Chave Privada</Label>
-                            <div className="flex gap-2 mt-1">
-                                <Input readOnly value={walletKeys?.secretKey || ""} className="border-border bg-muted/50 text-foreground font-mono text-[12px]" />
-                                <Button variant="ghost" size="icon" onClick={() => onCopy(walletKeys?.secretKey)} className="shrink-0">
-                                    <Copy className="w-4 h-4" />
+                            {!showSecretKey ? (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowSecretKey(true)}
+                                    className="w-full mt-1 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-[12px]"
+                                >
+                                    Clique para revelar a chave privada
                                 </Button>
-                            </div>
+                            ) : (
+                                <div className="flex gap-2 mt-1">
+                                    <Input readOnly value={walletKeys?.secretKey || ""} className="border-border bg-muted/50 text-foreground font-mono text-[12px]" />
+                                    <Button variant="ghost" size="icon" onClick={() => onCopy(walletKeys?.secretKey)} className="shrink-0">
+                                        <Copy className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
-                        <Button onClick={() => setWalletKeys(null)} className="w-full bg-[#6F00FF] hover:bg-[#5800CC] text-white font-semibold rounded-2xl h-12">
+                        <Button onClick={() => { setWalletKeys(null); setShowSecretKey(false); }} className="w-full bg-[#6F00FF] hover:bg-[#5800CC] text-white font-semibold rounded-2xl h-12">
                             Já salvei minha chave privada
                         </Button>
                     </div>
