@@ -204,8 +204,16 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Selecione um arquivo de imagem");
+    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Formato inválido. Use JPG, PNG ou WebP.");
+      return;
+    }
+
+    // Block SVG (can contain embedded scripts)
+    const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    if (ext === '.svg' || ext === '.svgz') {
+      toast.error("Arquivos SVG não são permitidos");
       return;
     }
 
@@ -251,7 +259,7 @@ export default function SettingsPage() {
 
   // ── Switch language ────────────────────────────
   function switchLocale(code: string) {
-    document.cookie = `NEXT_LOCALE=${code};path=/;max-age=31536000;SameSite=Lax`;
+    document.cookie = `NEXT_LOCALE=${code};path=/;max-age=31536000;SameSite=Lax;Secure`;
     setCurrentLocale(code);
     router.refresh();
   }

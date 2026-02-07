@@ -24,7 +24,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     const router = useRouter();
 
     function switchLocale(next: string) {
-        document.cookie = `NEXT_LOCALE=${next};path=/;max-age=31536000;SameSite=Lax`;
+        document.cookie = `NEXT_LOCALE=${next};path=/;max-age=31536000;SameSite=Lax;Secure`;
         router.refresh();
     }
 

@@ -55,13 +55,15 @@ export async function verifyToken(token: string, secret: string): Promise<boolea
 }
 
 /**
- * Generate backup codes (8-digit codes)
+ * Generate backup codes (8-digit codes) using cryptographically secure RNG
  */
 export function generateBackupCodes(count: number = 10): string[] {
   const codes: string[] = [];
+  const array = new Uint32Array(count);
+  crypto.getRandomValues(array);
   for (let i = 0; i < count; i++) {
-    // Generate 8-digit code
-    const code = Math.floor(10000000 + Math.random() * 90000000).toString();
+    // Map to 8-digit range [10000000, 99999999]
+    const code = (10000000 + (array[i] % 90000000)).toString();
     codes.push(code);
   }
   return codes;

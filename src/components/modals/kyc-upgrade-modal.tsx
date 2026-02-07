@@ -45,18 +45,36 @@ export function KycUpgradeModal({
         }
     }
 
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png'];
+
     function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
-        const newFiles = Array.from(files).map(file => ({
-            file,
-            name: file.name,
-            size: file.size,
-        }));
+        const validFiles: SelectedFile[] = [];
+        for (const file of Array.from(files)) {
+            const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+            if (!ALLOWED_EXTENSIONS.includes(ext)) {
+                toast.error(`Tipo não permitido: ${file.name}. Use PDF, JPG ou PNG.`);
+                continue;
+            }
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                toast.error(`Tipo de arquivo inválido: ${file.name}`);
+                continue;
+            }
+            if (file.size > MAX_FILE_SIZE) {
+                toast.error(`Arquivo muito grande: ${file.name}. Máximo 10MB.`);
+                continue;
+            }
+            validFiles.push({ file, name: file.name, size: file.size });
+        }
 
-        setSelectedFiles(prev => [...prev, ...newFiles]);
-        
+        if (validFiles.length > 0) {
+            setSelectedFiles(prev => [...prev, ...validFiles]);
+        }
+
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }

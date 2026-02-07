@@ -44,6 +44,7 @@ export default function SendUsdtModal() {
     const [toAddress, setToAddress] = useState("");
     const [amount, setAmount] = useState("");
     const [txResult, setTxResult] = useState<{ txId: string; network: string } | null>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -52,6 +53,7 @@ export default function SendUsdtModal() {
             setToAddress("");
             setAmount("");
             setTxResult(null);
+            setShowConfirm(false);
         }
     }, [isOpen]);
 
@@ -73,31 +75,49 @@ export default function SendUsdtModal() {
 
     const selectedWallet = wallets.find((w) => w.id === selectedWalletId);
 
-    async function handleSend() {
+    function validateAddress(address: string, network?: string): string | null {
+        const trimmed = address.trim();
+        if (!trimmed) return "Endereço é obrigatório";
+        if (network === "TRON") {
+            if (!/^T[a-zA-Z0-9]{33}$/.test(trimmed)) return "Endereço Tron inválido (deve começar com T e ter 34 caracteres)";
+        } else if (network === "SOLANA") {
+            if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) return "Endereço Solana inválido (Base58, 32-44 caracteres)";
+        }
+        return null;
+    }
+
+    function handleReviewSend() {
         if (!selectedWalletId || !toAddress.trim() || !amount.trim()) {
             toast.error("Preencha todos os campos");
             return;
         }
-
+        const addrError = validateAddress(toAddress, selectedWallet?.network);
+        if (addrError) {
+            toast.error(addrError);
+            return;
+        }
         const numAmount = Number(amount);
         if (isNaN(numAmount) || numAmount <= 0) {
             toast.error("Valor inválido");
             return;
         }
-
         if (selectedWallet && numAmount > Number(selectedWallet.balance)) {
             toast.error("Saldo insuficiente");
             return;
         }
+        setShowConfirm(true);
+    }
 
+    async function handleSend() {
         setSending(true);
         try {
             const res = await http.post("/wallet/send-usdt", {
                 walletId: selectedWalletId,
                 toAddress: toAddress.trim(),
-                amount: numAmount,
+                amount: Number(amount),
             });
             setTxResult({ txId: res.data.txId, network: res.data.network });
+            setShowConfirm(false);
             toast.success("USDT enviado com sucesso!");
         } catch (err: unknown) {
             toast.error(getErrorMessage(err, "Erro ao enviar USDT"));
@@ -245,32 +265,36 @@ export default function SendUsdtModal() {
                             </p>
                         </div>
 
-                        <div className="flex gap-3 pt-2">
-                            <Button
-                                variant="ghost"
-                                onClick={handleClose}
-                                className="flex-1 bg-muted border border-border text-foreground hover:bg-accent"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                onClick={handleSend}
-                                disabled={sending || !selectedWalletId || !toAddress.trim() || !amount.trim()}
-                                className="flex-1 bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#5800CC] hover:to-[#6F00FF] text-white font-semibold"
-                            >
-                                {sending ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Enviando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Send className="w-4 h-4 mr-2" />
-                                        Enviar USDT
-                                    </>
-                                )}
-                            </Button>
-                        </div>
+                        {showConfirm ? (
+                            <div className="space-y-3">
+                                <div className="p-4 bg-white/5 border border-amber-500/30 rounded-xl">
+                                    <p className="text-amber-400 text-sm font-semibold mb-2">Confirmar envio</p>
+                                    <div className="space-y-1.5 text-sm">
+                                        <p className="text-white"><span className="text-muted-foreground">Valor:</span> {amount} USDT</p>
+                                        <p className="text-white"><span className="text-muted-foreground">Rede:</span> {selectedWallet?.network === "TRON" ? "Tron (TRC20)" : "Solana (SPL)"}</p>
+                                        <p className="text-white break-all"><span className="text-muted-foreground">Para:</span> {toAddress}</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Button variant="ghost" onClick={() => setShowConfirm(false)} className="flex-1 bg-muted border border-border text-foreground hover:bg-accent">
+                                        Voltar
+                                    </Button>
+                                    <Button onClick={handleSend} disabled={sending} className="flex-1 bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#5800CC] hover:to-[#6F00FF] text-white font-semibold">
+                                        {sending ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Enviando...</>) : (<><Send className="w-4 h-4 mr-2" />Confirmar Envio</>)}
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex gap-3 pt-2">
+                                <Button variant="ghost" onClick={handleClose} className="flex-1 bg-muted border border-border text-foreground hover:bg-accent">
+                                    Cancelar
+                                </Button>
+                                <Button onClick={handleReviewSend} disabled={!selectedWalletId || !toAddress.trim() || !amount.trim()} className="flex-1 bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#5800CC] hover:to-[#6F00FF] text-white font-semibold">
+                                    <Send className="w-4 h-4 mr-2" />
+                                    Revisar Envio
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
             </BottomSheetContent>

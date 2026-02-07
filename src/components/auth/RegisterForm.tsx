@@ -339,13 +339,6 @@ function RegisterPageInner(): React.JSX.Element {
 
             setTokens(res.data.access_token, "");
 
-            document.cookie = [
-                `access_token=${encodeURIComponent(res.data.access_token)}`,
-                "Path=/",
-                "Max-Age=604800",
-                "SameSite=Lax",
-            ].join("; ");
-
             // Set username via separate endpoint (backend doesn't accept it during registration)
             if (v.username) {
                 try {
