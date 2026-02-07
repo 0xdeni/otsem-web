@@ -4,7 +4,7 @@ import * as React from "react";
 import { isAxiosError } from "axios";
 import { BottomSheet, BottomSheetContent, BottomSheetHeader, BottomSheetTitle, BottomSheetDescription } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, TrendingDown, Wallet, Key, Check, Shield } from "lucide-react";
+import { Loader2, ArrowRight, TrendingDown, Wallet, Check } from "lucide-react";
 import { toast } from "sonner";
 import http from "@/lib/http";
 import { useUsdtRate } from "@/lib/useUsdtRate";
@@ -27,31 +27,11 @@ type WalletItem = {
     okxWhitelisted?: boolean;
 };
 
-type TxDataResponse = {
-    network: Network;
-    fromAddress: string;
-    toAddress: string;
-    usdtAmount: number;
-    usdtAmountRaw: number;
-    contractAddress?: string;
-    tokenMint?: string;
-    tokenProgram?: string;
-    decimals: number;
-    fromAta?: string;
-    toAta?: string;
-    toAtaExists?: boolean;
-    associatedTokenProgram?: string;
-    quote: {
-        brlToReceive: number;
-        exchangeRate: number;
-        spreadPercent: number;
-    };
-};
-
-type SubmitResponse = {
+type CustodialSellResponse = {
     conversionId: string;
     status: string;
     message: string;
+    txHash?: string;
 };
 
 type ConversionStatus = "PENDING" | "USDT_RECEIVED" | "USDT_SOLD" | "COMPLETED" | "FAILED";
@@ -82,17 +62,14 @@ const QUICK_AMOUNTS = [10, 50, 100, 500];
 
 export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) {
     const { sellRate: usdtSellRate, loading: rateLoading } = useUsdtRate();
-    const [step, setStep] = React.useState<"wallet" | "amount" | "sign" | "processing" | "success">("wallet");
+    const [step, setStep] = React.useState<"wallet" | "amount" | "processing" | "success">("wallet");
     const [amount, setAmount] = React.useState("");
     const [network, setNetwork] = React.useState<Network>("SOLANA");
     const [loading, setLoading] = React.useState(false);
     const [wallets, setWallets] = React.useState<WalletItem[]>([]);
     const [selectedWallet, setSelectedWallet] = React.useState<WalletItem | null>(null);
-    const [privateKey, setPrivateKey] = React.useState("");
-    const [txData, setTxData] = React.useState<TxDataResponse | null>(null);
     const [txHash, setTxHash] = React.useState<string | null>(null);
     const [walletsLoading, setWalletsLoading] = React.useState(false);
-    const [signingStatus, setSigningStatus] = React.useState<string>("");
     const [_conversionId, setConversionId] = React.useState<string | null>(null);
     const [conversionStatus, setConversionStatus] = React.useState<ConversionStatus>("PENDING");
     const [conversionDetail, setConversionDetail] = React.useState<ConversionDetail | null>(null);
@@ -122,6 +99,7 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
             const detail = res.data;
             setConversionDetail(detail);
             setConversionStatus(detail.status);
+            if (detail.txHash) setTxHash(detail.txHash);
             
             if (detail.status === "COMPLETED") {
                 if (pollingRef.current) {
@@ -194,190 +172,40 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
         setStep("amount");
     }
 
-    async function handleContinueToSign() {
+    async function handleSellCustodial() {
         if (numAmount < minAmount) {
             toast.error(`Valor mínimo: ${formatUSDT(minAmount)}`);
             return;
         }
-        setLoading(true);
-        try {
-            // Usa endpoint gasless que envia SOL/TRX automaticamente para taxas de gas
-            const res = await http.get<TxDataResponse>("/wallet/gasless-sell-tx-data", {
-                params: { 
-                    walletId: selectedWallet?.id,
-                    usdtAmount: numAmount, 
-                    network 
-                }
-            });
-            setTxData(res.data);
-            setStep("sign");
-        } catch (err) {
-            console.error("Erro ao buscar dados da transação:", err);
-            if (isAxiosError(err) && err.response?.data?.message) {
-                toast.error(err.response.data.message);
-            } else {
-                toast.error("Erro ao preparar transação. Tente novamente.");
-            }
-            setStep("amount");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function signAndSubmitTron(pk: string, data: TxDataResponse): Promise<string> {
-        setSigningStatus("Inicializando TronWeb...");
-        const TronWebModule = await import("tronweb");
-        const TronWeb = TronWebModule.TronWeb || TronWebModule.default;
-        
-        const cleanPk = pk.startsWith("0x") ? pk.slice(2) : pk;
-        const tronWeb = new TronWeb({
-            fullHost: "https://api.trongrid.io",
-            privateKey: cleanPk,
-        });
-
-        setSigningStatus("Construindo transação TRC20...");
-        const contract = await tronWeb.contract().at(data.contractAddress!);
-        
-        setSigningStatus("Assinando e enviando...");
-        const tx = await contract.methods
-            .transfer(data.toAddress, data.usdtAmountRaw)
-            .send();
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = tx as any;
-        return typeof result === "string" ? result : result.txid || result.transaction?.txID || "";
-    }
-
-    async function signAndSubmitSolana(pk: string, data: TxDataResponse): Promise<string> {
-        setSigningStatus("Inicializando Solana...");
-        const { 
-            Connection, 
-            Keypair, 
-            PublicKey, 
-            Transaction 
-        } = await import("@solana/web3.js");
-        const { 
-            createTransferInstruction,
-            createAssociatedTokenAccountInstruction,
-            ASSOCIATED_TOKEN_PROGRAM_ID,
-            TOKEN_PROGRAM_ID
-        } = await import("@solana/spl-token");
-
-        const connection = new Connection("https://solana-mainnet.g.alchemy.com/v2/VorawLbwMvjW5ukY0rnl9", "confirmed");
-        
-        let secretKey: Uint8Array;
-        const trimmedPk = pk.trim();
-        
-        if (trimmedPk.includes(",") || trimmedPk.startsWith("[")) {
-            secretKey = new Uint8Array(JSON.parse(trimmedPk));
-        } else if (/^[0-9a-fA-F]+$/.test(trimmedPk) && trimmedPk.length >= 64) {
-            const bytes = [];
-            for (let i = 0; i < trimmedPk.length; i += 2) {
-                bytes.push(parseInt(trimmedPk.substring(i, i + 2), 16));
-            }
-            secretKey = new Uint8Array(bytes);
-        } else {
-            const bs58 = (await import("bs58")).default;
-            secretKey = bs58.decode(trimmedPk);
-        }
-        const keypair = Keypair.fromSecretKey(secretKey);
-
-        setSigningStatus("Preparando contas de token...");
-        const USDT_MINT = new PublicKey(data.tokenMint!);
-        const fromPubkey = new PublicKey(data.fromAddress);
-        const toPubkey = new PublicKey(data.toAddress);
-
-        const fromAta = new PublicKey(data.fromAta!);
-        const toAta = new PublicKey(data.toAta!);
-
-        setSigningStatus("Construindo transação SPL...");
-        const transaction = new Transaction();
-
-        if (data.toAtaExists === false) {
-            setSigningStatus("Criando conta de token destino...");
-            transaction.add(
-                createAssociatedTokenAccountInstruction(
-                    keypair.publicKey,
-                    toAta,
-                    toPubkey,
-                    USDT_MINT,
-                    TOKEN_PROGRAM_ID,
-                    ASSOCIATED_TOKEN_PROGRAM_ID
-                )
-            );
-        }
-
-        transaction.add(
-            createTransferInstruction(
-                fromAta,
-                toAta,
-                fromPubkey,
-                BigInt(data.usdtAmountRaw)
-            )
-        );
-
-        const { blockhash } = await connection.getLatestBlockhash();
-        transaction.recentBlockhash = blockhash;
-        transaction.feePayer = keypair.publicKey;
-
-        setSigningStatus("Assinando e enviando...");
-        transaction.sign(keypair);
-        const signature = await connection.sendRawTransaction(transaction.serialize(), {
-            skipPreflight: false,
-            preflightCommitment: "confirmed",
-        });
-        
-        return signature;
-    }
-
-    async function handleSignAndSubmit() {
-        if (!txData || !privateKey.trim() || !selectedWallet) {
-            toast.error("Dados incompletos");
-            return;
-        }
-        
-        const tokenAddress = txData.network === "TRON" ? txData.contractAddress : txData.tokenMint;
-        if (!tokenAddress || !txData.fromAddress || !txData.toAddress) {
-            toast.error("Dados da transação inválidos. Volte e tente novamente.");
-            setStep("amount");
+        if (!selectedWallet) {
+            toast.error("Selecione uma carteira");
             return;
         }
 
         setLoading(true);
         try {
-            let hash: string;
-            
-            if (network === "TRON") {
-                hash = await signAndSubmitTron(privateKey.trim(), txData);
-            } else {
-                hash = await signAndSubmitSolana(privateKey.trim(), txData);
-            }
-
-            setSigningStatus("Registrando venda...");
-            const res = await http.post<SubmitResponse>("/wallet/submit-signed-sell", {
+            const res = await http.post<CustodialSellResponse>("/wallet/sell-usdt-custodial", {
                 walletId: selectedWallet.id,
                 usdtAmount: numAmount,
                 network,
-                txHash: hash,
             });
 
-            setTxHash(hash);
+            if (res.data.txHash) setTxHash(res.data.txHash);
             setConversionId(res.data.conversionId);
             setConversionStatus("PENDING");
             setStep("processing");
-            toast.success("Transação enviada! Acompanhe o progresso.");
+            toast.success("Venda iniciada! Acompanhe o progresso.");
             startPolling(res.data.conversionId);
         } catch (err: unknown) {
-            console.error("Erro na transação:", err);
-            const message = isAxiosError(err) 
-                ? err.response?.data?.message 
-                : err instanceof Error 
-                    ? err.message 
-                    : "Erro ao processar transação";
+            console.error("Erro ao vender USDT:", err);
+            const message = isAxiosError(err)
+                ? err.response?.data?.message
+                : err instanceof Error
+                    ? err.message
+                    : "Erro ao processar venda";
             toast.error(message);
         } finally {
             setLoading(false);
-            setSigningStatus("");
         }
     }
 
@@ -390,12 +218,9 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
         setTimeout(() => {
             setStep("wallet");
             setAmount("");
-            setTxData(null);
             setSelectedWallet(null);
             setTxHash(null);
-            setPrivateKey("");
             setNetwork("SOLANA");
-            setSigningStatus("");
             setConversionId(null);
             setConversionStatus("PENDING");
             setConversionDetail(null);
@@ -405,9 +230,6 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
     function handleBack() {
         if (step === "amount") {
             setStep("wallet");
-        } else if (step === "sign") {
-            setStep("amount");
-            setPrivateKey("");
         }
     }
 
@@ -420,14 +242,12 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
                     <BottomSheetTitle className="text-foreground text-xl text-center">
                         {step === "wallet" && "Vender USDT"}
                         {step === "amount" && "Valor da Venda"}
-                        {step === "sign" && "Assinar Transação"}
                         {step === "processing" && "Processando Venda"}
                         {step === "success" && "Venda Concluída!"}
                     </BottomSheetTitle>
                     <BottomSheetDescription className="text-muted-foreground text-center text-sm">
                         {step === "wallet" && "Escolha a rede e a carteira de origem"}
                         {step === "amount" && "Informe quanto USDT deseja vender"}
-                        {step === "sign" && "Revise e assine a transação"}
                         {step === "processing" && "Acompanhe o progresso da sua venda"}
                         {step === "success" && "Sua venda foi processada com sucesso"}
                     </BottomSheetDescription>
@@ -598,134 +418,23 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
                             </div>
 
                             <Button
-                                onClick={handleContinueToSign}
+                                onClick={handleSellCustodial}
                                 disabled={numAmount < minAmount || loading}
                                 className="w-full bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#5800CC] hover:to-[#6F00FF] text-white font-semibold rounded-xl py-6 disabled:opacity-50"
                             >
                                 {loading ? (
                                     <>
                                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                        Preparando...
+                                        Processando venda...
                                     </>
                                 ) : (
-                                    "Continuar"
+                                    "Vender USDT"
                                 )}
                             </Button>
 
                             <p className="text-muted-foreground text-xs text-center">
                                 Mínimo: {formatUSDT(minAmount)}
                             </p>
-                        </div>
-                    )}
-
-                    {step === "sign" && txData && (
-                        <div className="w-full space-y-5">
-                            <button
-                                onClick={handleBack}
-                                className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1"
-                            >
-                                ← Voltar
-                            </button>
-
-                            <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2">
-                                <Shield className="w-5 h-5 text-white flex-shrink-0" />
-                                <p className="text-white text-xs">
-                                    Sua chave privada é processada localmente e nunca é enviada ao servidor
-                                </p>
-                            </div>
-
-                            <div className="bg-muted border border-border rounded-xl p-5 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl">
-                                            💵
-                                        </div>
-                                        <div>
-                                            <p className="text-muted-foreground text-xs">Você envia</p>
-                                            <p className="text-foreground font-bold">{formatUSDT(txData.usdtAmount)}</p>
-                                        </div>
-                                    </div>
-                                    <ArrowRight className="w-5 h-5 text-white/70" />
-                                    <div className="flex items-center gap-3">
-                                        <div>
-                                            <p className="text-muted-foreground text-xs text-right">Você recebe</p>
-                                            <p className="text-white font-bold">
-                                                {formatBRL(txData.quote.brlToReceive)}
-                                            </p>
-                                        </div>
-                                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xl">
-                                            🇧🇷
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="border-t border-border pt-4 space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Cotação</span>
-                                        <span className="text-foreground">
-                                            1 USDT = {formatBRL(txData.quote.exchangeRate)}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Rede</span>
-                                        <span className={network === "SOLANA" ? "text-[#6F00FF]" : "text-[#6F00FF]"}>
-                                            {network}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">De</span>
-                                        <span className="text-foreground text-xs font-mono">
-                                            {txData.fromAddress ? `${txData.fromAddress.slice(0, 6)}...${txData.fromAddress.slice(-4)}` : "-"}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Para (OKX)</span>
-                                        <span className="text-foreground text-xs font-mono">
-                                            {txData.toAddress ? `${txData.toAddress.slice(0, 6)}...${txData.toAddress.slice(-4)}` : "-"}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                    <Key className="w-4 h-4 text-white/60" />
-                                    <p className="text-muted-foreground text-sm">Chave Privada:</p>
-                                </div>
-                                <input
-                                    type="password"
-                                    value={privateKey}
-                                    onChange={(e) => setPrivateKey(e.target.value)}
-                                    placeholder="Cole sua chave privada aqui..."
-                                    className="w-full px-4 text-sm bg-muted border border-border text-foreground h-12 rounded-xl focus:border-[#6F00FF]/50 focus:ring-2 focus:ring-[#6F00FF]/20 focus:outline-none placeholder:text-muted-foreground/50"
-                                    disabled={loading}
-                                />
-                            </div>
-
-                            {signingStatus && (
-                                <div className="bg-muted border border-border rounded-xl p-3 flex items-center gap-3">
-                                    <Loader2 className="w-4 h-4 text-white/70 animate-spin flex-shrink-0" />
-                                    <p className="text-muted-foreground text-sm">{signingStatus}</p>
-                                </div>
-                            )}
-
-                            <Button
-                                onClick={handleSignAndSubmit}
-                                disabled={!privateKey.trim() || loading}
-                                className="w-full bg-linear-to-r from-[#6F00FF] to-[#6F00FF] hover:from-[#5800CC] hover:to-[#6F00FF] text-white font-semibold rounded-xl py-6 disabled:opacity-50"
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                        {signingStatus || "Processando..."}
-                                    </>
-                                ) : (
-                                    <>
-                                        <Key className="w-4 h-4 mr-2" />
-                                        Assinar e Enviar
-                                    </>
-                                )}
-                            </Button>
                         </div>
                     )}
 
@@ -796,7 +505,7 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Valor em BRL</span>
                                     <span className="text-white font-medium">
-                                        {formatBRL(conversionDetail?.brlAmount || txData?.quote.brlToReceive || 0)}
+                                        {formatBRL(conversionDetail?.brlAmount || estimatedBrl)}
                                     </span>
                                 </div>
                                 {txHash && (
@@ -858,7 +567,7 @@ export function SellUsdtModal({ open, onClose, onSuccess }: SellUsdtModalProps) 
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Valor em BRL</span>
                                     <span className="text-white font-medium">
-                                        {formatBRL(conversionDetail?.brlAmount || txData?.quote.brlToReceive || 0)}
+                                        {formatBRL(conversionDetail?.brlAmount || estimatedBrl)}
                                     </span>
                                 </div>
                                 {txHash && (
