@@ -146,12 +146,12 @@ export default function SendUsdtModal() {
         <BottomSheet open={isOpen} onOpenChange={handleClose}>
             <BottomSheetContent>
                 <BottomSheetHeader>
-                    <BottomSheetTitle className="text-foreground text-xl flex items-center gap-2">
+                    <BottomSheetTitle className="text-white text-xl flex items-center gap-2">
                         <Send className="w-5 h-5 text-[#6F00FF]" />
                         Enviar cripto
                     </BottomSheetTitle>
-                    <BottomSheetDescription className="text-muted-foreground">
-                        Envie cripto de uma carteira custodial para qualquer endereço
+                    <BottomSheetDescription className="text-white/60">
+                        Envie USDT de uma carteira custodial para qualquer endereço
                     </BottomSheetDescription>
                 </BottomSheetHeader>
 
@@ -161,17 +161,17 @@ export default function SendUsdtModal() {
                             <p className="text-white font-semibold text-lg mb-1">
                                 Transação enviada!
                             </p>
-                            <p className="text-muted-foreground text-sm">
-                                {amount} {txResult.currency} enviados para
+                            <p className="text-white/60 text-sm">
+                                {amount} USDT enviados para
                             </p>
-                            <code className="text-muted-foreground text-xs font-mono break-all">
+                            <code className="text-white/60 text-xs font-mono break-all">
                                 {toAddress}
                             </code>
                         </div>
 
                         <Button
                             variant="outline"
-                            className="w-full border-border text-foreground hover:bg-accent"
+                            className="w-full border-white/10 bg-white/5 text-white hover:bg-white/10"
                             onClick={() => window.open(getExplorerTxUrl(txResult.txId, txResult.network), "_blank")}
                         >
                             <ExternalLink className="w-4 h-4 mr-2" />
@@ -197,13 +197,13 @@ export default function SendUsdtModal() {
                     </div>
                 ) : wallets.length === 0 ? (
                     <div className="text-center py-6">
-                        <p className="text-muted-foreground text-sm">
+                        <p className="text-white/60 text-sm">
                             Nenhuma carteira custodial com saldo disponível.
                         </p>
                         <Button
                             variant="ghost"
                             onClick={handleClose}
-                            className="mt-4 text-muted-foreground hover:text-foreground"
+                            className="mt-4 text-white/60 hover:text-white"
                         >
                             Fechar
                         </Button>
@@ -211,11 +211,11 @@ export default function SendUsdtModal() {
                 ) : (
                     <div className="space-y-4">
                         <div>
-                            <Label className="text-muted-foreground mb-2 block">Carteira de Origem</Label>
+                            <Label className="text-white/60 mb-2 block">Carteira de Origem</Label>
                             <select
                                 value={selectedWalletId}
                                 onChange={(e) => setSelectedWalletId(e.target.value)}
-                                className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2.5 text-sm"
+                                className="w-full rounded-lg border border-white/10 bg-white/5 text-white px-3 py-2.5 text-sm"
                             >
                                 <option value="">Selecione uma carteira</option>
                                 {wallets.map((w) => (
@@ -227,7 +227,7 @@ export default function SendUsdtModal() {
                         </div>
 
                         <div>
-                            <Label className="text-muted-foreground mb-1 block">Endereço de Destino</Label>
+                            <Label className="text-white/60 mb-1 block">Endereço de Destino</Label>
                             <Input
                                 value={toAddress}
                                 onChange={(e) => setToAddress(e.target.value)}
@@ -242,26 +242,18 @@ export default function SendUsdtModal() {
                                                     ? "Ex: bc1..."
                                                     : "Selecione uma carteira primeiro"
                                 }
-                                className="border-border bg-background text-foreground font-mono text-sm"
+                                className="border-white/10 bg-white/5 text-white font-mono text-sm"
                             />
                             {selectedWallet && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Rede: {selectedWallet.network === "TRON"
-                                        ? "Tron"
-                                        : selectedWallet.network === "ETHEREUM"
-                                            ? "Ethereum"
-                                            : selectedWallet.network === "BITCOIN"
-                                                ? "Bitcoin"
-                                                : "Solana"}
+                                <p className="text-xs text-white/60 mt-1">
+                                    Rede: {selectedWallet.network === "TRON" ? "Tron (TRC20)" : "Solana (SPL)"}
                                 </p>
                             )}
                         </div>
 
                         <div>
                             <div className="flex items-center justify-between mb-1">
-                                <Label className="text-muted-foreground">
-                                    Valor ({selectedWallet?.currency || "—"})
-                                </Label>
+                                <Label className="text-white/60">Valor (USDT)</Label>
                                 {selectedWallet && (
                                     <button
                                         type="button"
@@ -279,7 +271,7 @@ export default function SendUsdtModal() {
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="border-border bg-background text-foreground text-sm"
+                                className="border-white/10 bg-white/5 text-white text-sm"
                             />
                         </div>
 
@@ -295,25 +287,13 @@ export default function SendUsdtModal() {
                                 <div className="p-4 bg-white/5 border border-white/20 rounded-xl">
                                     <p className="text-white text-sm font-semibold mb-2">Confirmar envio</p>
                                     <div className="space-y-1.5 text-sm">
-                                        <p className="text-white">
-                                            <span className="text-muted-foreground">Valor:</span>{" "}
-                                            {amount} {selectedWallet?.currency || "USDT"}
-                                        </p>
-                                        <p className="text-white">
-                                            <span className="text-muted-foreground">Rede:</span>{" "}
-                                            {selectedWallet?.network || "-"}
-                                        </p>
-                                        <p className="text-white break-all">
-                                            <span className="text-muted-foreground">Para:</span> {toAddress}
-                                        </p>
+                                        <p className="text-white"><span className="text-white/60">Valor:</span> {amount} USDT</p>
+                                        <p className="text-white"><span className="text-white/60">Rede:</span> {selectedWallet?.network === "TRON" ? "Tron (TRC20)" : "Solana (SPL)"}</p>
+                                        <p className="text-white break-all"><span className="text-white/60">Para:</span> {toAddress}</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() => setShowConfirm(false)}
-                                        className="flex-1 bg-muted border border-border text-foreground hover:bg-accent"
-                                    >
+                                    <Button variant="ghost" onClick={() => setShowConfirm(false)} className="flex-1 bg-white/5 border border-white/10 text-white hover:bg-white/10">
                                         Voltar
                                     </Button>
                                     <Button
@@ -337,11 +317,7 @@ export default function SendUsdtModal() {
                             </div>
                         ) : (
                             <div className="flex gap-3 pt-2">
-                                <Button
-                                    variant="ghost"
-                                    onClick={handleClose}
-                                    className="flex-1 bg-muted border border-border text-foreground hover:bg-accent"
-                                >
+                                <Button variant="ghost" onClick={handleClose} className="flex-1 bg-white/5 border border-white/10 text-white hover:bg-white/10">
                                     Cancelar
                                 </Button>
                                 <Button

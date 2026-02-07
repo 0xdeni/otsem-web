@@ -1204,46 +1204,7 @@ export default function ProTradingPage() {
                     </BottomSheetHeader>
                     <div className="px-5 pb-6 space-y-3">
                         <div className="space-y-1">
-                            <Label className="text-[12px] text-foreground/70">Ativo</Label>
-                            <Select value={transferAsset} onValueChange={(value) => setTransferAsset(value as (typeof ASSETS)[number])}>
-                                <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {ASSETS.map((asset) => (
-                                        <SelectItem key={asset} value={asset}>
-                                            {asset}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-1">
-                            <Label className="text-[12px] text-foreground/70">Carteira</Label>
-                            <Select
-                                value={selectedWalletId}
-                                onValueChange={setSelectedWalletId}
-                                disabled={transferWalletOptions.length === 0}
-                            >
-                                <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                                    <SelectValue placeholder={transferWalletOptions.length ? "Selecione" : "Nenhuma carteira disponível"} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {transferWalletOptions.map((wallet) => (
-                                        <SelectItem key={wallet.id} value={wallet.id}>
-                                            {wallet.network} · {Number(wallet.balance || 0).toFixed(4)} {wallet.currency}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {transferWalletOptions.length === 0 && (
-                                <p className="text-[11px] text-white/50">
-                                    Crie ou importe uma carteira {transferAsset} para continuar.
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label className="text-[12px] text-foreground/70">Valor em {transferAsset}</Label>
+                            <Label className="text-[12px] text-white/70">Valor em USDT</Label>
                             <Input
                                 value={transferAmount}
                                 onChange={(e) => setTransferAmount(e.target.value)}
