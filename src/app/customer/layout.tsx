@@ -42,10 +42,7 @@ const UsernameTransferModal = dynamic(
     () => import("@/components/modals/username-transfer-modal").then(m => ({ default: m.UsernameTransferModal })),
     { ssr: false }
 );
-const BoletoPaymentModal = dynamic(
-    () => import("@/components/modals/boleto-payment-modal").then(m => ({ default: m.BoletoPaymentModal })),
-    { ssr: false }
-);
+
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
@@ -143,11 +140,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             <SellUsdtModal
                 open={open.sellUsdt}
                 onClose={() => closeModal("sellUsdt")}
-                onSuccess={triggerRefresh}
-            />
-            <BoletoPaymentModal
-                open={open.payBoleto}
-                onClose={() => closeModal("payBoleto")}
                 onSuccess={triggerRefresh}
             />
 

@@ -14,7 +14,6 @@ import {
     Loader2,
     UserRoundSearch,
     TrendingUp,
-    Receipt,
     Sparkles,
 } from "lucide-react";
 import http from "@/lib/http";
@@ -623,12 +622,6 @@ export default function Dashboard() {
                     colorKey="deposit"
                     label="Receber"
                     onClick={() => openModal("receiveUsdt")}
-                />
-                <QuickAction
-                    icon={Receipt}
-                    colorKey="boleto"
-                    label="Pagar"
-                    onClick={() => openModal("payBoleto")}
                 />
             </motion.div>
 
