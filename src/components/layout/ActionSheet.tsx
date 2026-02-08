@@ -5,6 +5,7 @@ import {
     ArrowDownLeft,
     ArrowUpRight,
     ArrowRightLeft,
+    Download,
     Send,
     DollarSign,
     UserRoundSearch,
@@ -65,6 +66,13 @@ const actions: ActionItem[] = [
         colorKey: "send",
     },
     {
+        id: "receiveUsdt",
+        label: "Receber cripto",
+        sublabel: "Mostrar endereço e QR Code",
+        icon: Download,
+        colorKey: "deposit",
+    },
+    {
         id: "payBoleto",
         label: "Pagar Boleto",
         sublabel: "Pague boletos com crypto",
@@ -92,6 +100,7 @@ export function ActionSheet({
             else if (id === "sellUsdt") openModal("sellUsdt");
             else if (id === "usernameTransfer") openModal("usernameTransfer");
             else if (id === "sendUsdt") openModal("sendUsdt");
+            else if (id === "receiveUsdt") openModal("receiveUsdt");
             else if (id === "payBoleto") openModal("payBoleto");
         }, 150);
     }

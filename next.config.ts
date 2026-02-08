@@ -21,6 +21,7 @@ if (fs.existsSync(envPath)) {
 
 const nextConfig: NextConfig = {
     output: 'standalone',
+    outputFileTracingRoot: path.resolve(process.cwd()),
     allowedDevOrigins: [
       '*.replit.dev',
       '*.replit.app',
@@ -35,7 +36,7 @@ const nextConfig: NextConfig = {
       ).trim().replace(/\/+$/, "");
 
       if (!base || base === "https://api.otsembank.com") {
-        console.log("[next.config.js] Usando base API default: " + base);
+        console.warn("[next.config.js] Usando base API default: " + base);
       }
 
     return [

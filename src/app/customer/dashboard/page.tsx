@@ -6,6 +6,7 @@ import {
     ArrowDownLeft,
     ArrowUpRight,
     ArrowRightLeft,
+    Download,
     DollarSign,
     ChevronRight,
     Eye,
@@ -587,7 +588,7 @@ export default function Dashboard() {
             </motion.div>
 
             {/* ── Quick Actions (outlined circles) ── */}
-            <motion.div variants={fadeUp} className="flex justify-center gap-6 mt-4">
+            <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-6 mt-4">
                 <QuickAction
                     icon={ArrowDownLeft}
                     label="Depositar"
@@ -607,6 +608,11 @@ export default function Dashboard() {
                     icon={DollarSign}
                     label="Vender"
                     onClick={() => openModal("sellUsdt")}
+                />
+                <QuickAction
+                    icon={Download}
+                    label="Receber"
+                    onClick={() => openModal("receiveUsdt")}
                 />
                 <QuickAction
                     icon={Receipt}

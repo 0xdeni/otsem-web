@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -34,6 +34,10 @@ const SendUsdtModal = dynamic(
     () => import("@/components/modals/send-usdt-modal"),
     { ssr: false }
 );
+const ReceiveUsdtModal = dynamic(
+    () => import("@/components/modals/ReceiveUsdtModal"),
+    { ssr: false }
+);
 const UsernameTransferModal = dynamic(
     () => import("@/components/modals/username-transfer-modal").then(m => ({ default: m.UsernameTransferModal })),
     { ssr: false }
@@ -45,7 +49,6 @@ const BoletoPaymentModal = dynamic(
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
-    const router = useRouter();
     const pathname = usePathname();
     const { open, closeModal, triggerRefresh } = useUiModals();
     const [loading, setLoading] = React.useState(true);
@@ -135,6 +138,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             <DepositModal />
             <WithdrawModal />
             <SendUsdtModal />
+            <ReceiveUsdtModal />
             <UsernameTransferModal />
             <SellUsdtModal
                 open={open.sellUsdt}

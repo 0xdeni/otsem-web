@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, ChevronDown, TrendingDown, TrendingUp } from "lucide-react";
@@ -91,6 +91,19 @@ function toNumber(value: string) {
         return Number(cleaned.replace(/\./g, "").replace(",", ".")) || 0;
     }
     return Number(cleaned) || 0;
+}
+
+type HttpErrorWithMessage = {
+    response?: {
+        data?: {
+            message?: string;
+        };
+    };
+};
+
+function getErrorDescription(error: unknown, fallback: string) {
+    const maybeError = error as HttpErrorWithMessage;
+    return maybeError.response?.data?.message || fallback;
 }
 
 type SpotTicker = {
@@ -258,8 +271,6 @@ export default function ProTradingPage() {
             });
     }, [wallets, transferAsset]);
 
-    const selectedWallet = transferWalletOptions.find((wallet) => wallet.id === selectedWalletId) || null;
-
     useEffect(() => {
         setPriceInput(formatNumber(pair.price, pair.priceDecimals));
         setAmountInput("");
@@ -269,7 +280,7 @@ export default function ProTradingPage() {
         setCandles([]);
     }, [pair]);
 
-    const refreshBalances = async () => {
+    const refreshBalances = useCallback(async () => {
         try {
             const [spotRes, walletRes] = await Promise.all([
                 http.get<SpotBalance[]>("/okx/spot/balances"),
@@ -283,9 +294,9 @@ export default function ProTradingPage() {
             setSpotBalances([]);
             setWallets([]);
         }
-    };
+    }, []);
 
-    const refreshHistory = async () => {
+    const refreshHistory = useCallback(async () => {
         try {
             const [transferRes, orderRes] = await Promise.all([
                 http.get<Paginated<SpotTransferItem>>("/okx/spot/transfers", {
@@ -314,7 +325,7 @@ export default function ProTradingPage() {
             setOrderHasNext(false);
             setOrderHasPrev(false);
         }
-    };
+    }, [transferPage, orderFilterPair, orderFilterStatus, orderPage]);
 
     useEffect(() => {
         let active = true;
@@ -328,8 +339,7 @@ export default function ProTradingPage() {
             active = false;
             clearInterval(interval);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [refreshBalances]);
 
     useEffect(() => {
         let active = true;
@@ -343,8 +353,7 @@ export default function ProTradingPage() {
             active = false;
             clearInterval(interval);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [transferPage, orderPage, orderFilterPair, orderFilterStatus]);
+    }, [refreshHistory]);
 
     useEffect(() => {
         let active = true;
@@ -540,9 +549,9 @@ export default function ProTradingPage() {
                 description: ordId ? `ID: ${ordId}` : `Par: ${selectedPair}`,
             });
             setAmountInput("");
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error("Não foi possível enviar a ordem", {
-                description: error?.response?.data?.message || "Tente novamente em instantes",
+                description: getErrorDescription(error, "Tente novamente em instantes"),
             });
         } finally {
             setPlacingOrder(false);
@@ -588,9 +597,9 @@ export default function ProTradingPage() {
             await http.post("/okx/spot/cancel-order", { orderId });
             await Promise.all([refreshHistory(), refreshBalances()]);
             toast.success("Ordem cancelada");
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error("Não foi possível cancelar", {
-                description: error?.response?.data?.message || "Tente novamente",
+                description: getErrorDescription(error, "Tente novamente"),
             });
         } finally {
             setCancelingOrderId(null);
@@ -626,9 +635,9 @@ export default function ProTradingPage() {
             await Promise.all([refreshBalances(), refreshHistory()]);
             toast.success("Transferência concluída");
             setTransferOpen(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error("Não foi possível transferir", {
-                description: error?.response?.data?.message || "Tente novamente em instantes",
+                description: getErrorDescription(error, "Tente novamente em instantes"),
             });
         } finally {
             setTransferLoading(false);
@@ -1204,7 +1213,46 @@ export default function ProTradingPage() {
                     </BottomSheetHeader>
                     <div className="px-5 pb-6 space-y-3">
                         <div className="space-y-1">
-                            <Label className="text-[12px] text-white/70">Valor em USDT</Label>
+                            <Label className="text-[12px] text-foreground/70">Ativo</Label>
+                            <Select value={transferAsset} onValueChange={(value) => setTransferAsset(value as (typeof ASSETS)[number])}>
+                                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {ASSETS.map((asset) => (
+                                        <SelectItem key={asset} value={asset}>
+                                            {asset}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-[12px] text-foreground/70">Carteira</Label>
+                            <Select
+                                value={selectedWalletId}
+                                onValueChange={setSelectedWalletId}
+                                disabled={transferWalletOptions.length === 0}
+                            >
+                                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                                    <SelectValue placeholder={transferWalletOptions.length ? "Selecione" : "Nenhuma carteira disponível"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {transferWalletOptions.map((wallet) => (
+                                        <SelectItem key={wallet.id} value={wallet.id}>
+                                            {wallet.network} · {Number(wallet.balance || 0).toFixed(4)} {wallet.currency}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {transferWalletOptions.length === 0 && (
+                                <p className="text-[11px] text-white/50">
+                                    Crie ou importe uma carteira {transferAsset} para continuar.
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-[12px] text-foreground/70">Valor em {transferAsset}</Label>
                             <Input
                                 value={transferAmount}
                                 onChange={(e) => setTransferAmount(e.target.value)}
