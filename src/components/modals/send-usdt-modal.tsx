@@ -76,6 +76,14 @@ export default function SendUsdtModal() {
 
     const selectedWallet = wallets.find((w) => w.id === selectedWalletId);
 
+    function getNetworkLabel(network?: string) {
+        if (network === "TRON") return "Tron (TRC20)";
+        if (network === "SOLANA") return "Solana (SPL)";
+        if (network === "ETHEREUM") return "Ethereum (ERC20)";
+        if (network === "BITCOIN") return "Bitcoin";
+        return network || "Rede";
+    }
+
     function validateAddress(address: string, network?: string): string | null {
         const trimmed = address.trim();
         if (!trimmed) return "Endereço é obrigatório";
@@ -83,6 +91,13 @@ export default function SendUsdtModal() {
             if (!/^T[a-zA-Z0-9]{33}$/.test(trimmed)) return "Endereço Tron inválido (deve começar com T e ter 34 caracteres)";
         } else if (network === "SOLANA") {
             if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) return "Endereço Solana inválido (Base58, 32-44 caracteres)";
+        } else if (network === "ETHEREUM") {
+            if (!/^0x[a-fA-F0-9]{40}$/.test(trimmed)) return "Endereço Ethereum inválido (deve começar com 0x e ter 42 caracteres)";
+        } else if (network === "BITCOIN") {
+            const normalized = trimmed.toLowerCase();
+            const isBech32 = /^bc1[ac-hj-np-z02-9]{11,71}$/.test(normalized);
+            const isLegacy = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(trimmed);
+            if (!isBech32 && !isLegacy) return "Endereço Bitcoin inválido (bc1, 1 ou 3)";
         }
         return null;
     }
@@ -151,7 +166,7 @@ export default function SendUsdtModal() {
                         Enviar cripto
                     </BottomSheetTitle>
                     <BottomSheetDescription className="text-white/60">
-                        Envie USDT de uma carteira custodial para qualquer endereço
+                        Envie cripto de uma carteira custodial para qualquer endereço
                     </BottomSheetDescription>
                 </BottomSheetHeader>
 
@@ -162,7 +177,7 @@ export default function SendUsdtModal() {
                                 Transação enviada!
                             </p>
                             <p className="text-white/60 text-sm">
-                                {amount} USDT enviados para
+                                {amount} {txResult.currency} enviados para
                             </p>
                             <code className="text-white/60 text-xs font-mono break-all">
                                 {toAddress}
@@ -246,14 +261,14 @@ export default function SendUsdtModal() {
                             />
                             {selectedWallet && (
                                 <p className="text-xs text-white/60 mt-1">
-                                    Rede: {selectedWallet.network === "TRON" ? "Tron (TRC20)" : "Solana (SPL)"}
+                                    Rede: {getNetworkLabel(selectedWallet.network)}
                                 </p>
                             )}
                         </div>
 
                         <div>
                             <div className="flex items-center justify-between mb-1">
-                                <Label className="text-white/60">Valor (USDT)</Label>
+                                <Label className="text-white/60">Valor ({selectedWallet?.currency || "USDT"})</Label>
                                 {selectedWallet && (
                                     <button
                                         type="button"
@@ -287,8 +302,8 @@ export default function SendUsdtModal() {
                                 <div className="p-4 bg-white/5 border border-white/20 rounded-xl">
                                     <p className="text-white text-sm font-semibold mb-2">Confirmar envio</p>
                                     <div className="space-y-1.5 text-sm">
-                                        <p className="text-white"><span className="text-white/60">Valor:</span> {amount} USDT</p>
-                                        <p className="text-white"><span className="text-white/60">Rede:</span> {selectedWallet?.network === "TRON" ? "Tron (TRC20)" : "Solana (SPL)"}</p>
+                                        <p className="text-white"><span className="text-white/60">Valor:</span> {amount} {selectedWallet?.currency || "USDT"}</p>
+                                        <p className="text-white"><span className="text-white/60">Rede:</span> {getNetworkLabel(selectedWallet?.network)}</p>
                                         <p className="text-white break-all"><span className="text-white/60">Para:</span> {toAddress}</p>
                                     </div>
                                 </div>

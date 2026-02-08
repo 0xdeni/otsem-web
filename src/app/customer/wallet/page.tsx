@@ -7,7 +7,7 @@ import http from "@/lib/http";
 import { toast } from "sonner";
 import {
     Copy, Shield, Wallet, RefreshCw, Plus, ExternalLink, Loader2,
-    Star, Trash2, MoreVertical, Check, Send,
+    Star, Trash2, MoreVertical, Check, Send, Download,
 } from "lucide-react";
 import { useUiModals } from "@/stores/ui-modals";
 import { Button } from "@/components/ui/button";
@@ -350,6 +350,9 @@ export default function WalletPage() {
                                                 </button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="bg-black/60 backdrop-blur-xl border-white/15 min-w-[180px]">
+                                                <DropdownMenuItem onClick={() => openModal("receiveUsdt")} className="text-white hover:text-white cursor-pointer">
+                                                    <Download className="w-4 h-4 mr-2" /> Receber {wallet.currency}
+                                                </DropdownMenuItem>
                                                 {Number(wallet.balance) > 0 && (
                                                     <DropdownMenuItem onClick={() => openModal("sendUsdt")} className="text-white hover:text-white cursor-pointer">
                                                         <Send className="w-4 h-4 mr-2" /> Enviar {wallet.currency}
